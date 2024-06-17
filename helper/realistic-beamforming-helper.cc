@@ -59,7 +59,7 @@ RealisticBeamformingHelper::AddBeamformingTask(const Ptr<NrGnbNetDevice>& gNbDev
         m_spectrumPhyPairToAlgorithm[std::make_pair(gnbSpectrumPhy, ueSpectrumPhy)] =
             beamformingAlgorithm;
         // connect trace of the corresponding gNB PHY to the RealisticBeamformingAlgorithm
-        // funcition
+        // function
         gnbSpectrumPhy->AddSrsSinrReportCallback(
             MakeCallback(&RealisticBeamformingAlgorithm::NotifySrsSinrReport,
                          beamformingAlgorithm));
