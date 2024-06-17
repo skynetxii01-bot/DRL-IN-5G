@@ -180,6 +180,7 @@ cpp_examples = [
     ("cttc-nr-traffic-ngmn-mixed", "True", "True"),
     ("cttc-nr-traffic-3gpp-xr", "True", "True"),
     ("traffic-generator-example", "True", "True"),
+    ("cttc-nr-initial-my-sched", "True", "True"),
 ]
 
 # A list of Python examples to run in order to ensure that they remain

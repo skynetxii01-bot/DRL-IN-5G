@@ -26,6 +26,7 @@ set(base_examples
     cttc-nr-simple-qos-sched
     cttc-nr-multi-flow-qos-sched
     cttc-nr-mimo-demo
+    cttc-nr-initial-my-sched
 )
 foreach(
   example
