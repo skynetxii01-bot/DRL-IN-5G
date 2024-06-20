@@ -71,7 +71,8 @@ main(int argc, char* argv[])
 
     bool enableOfdma = false;
 
-    uint8_t priorityTrafficScenario = 1; // default is medium-load
+    uint8_t priorityTrafficScenario = 1; // default is saturation
+    uint8_t numTrafficProfile = 2;       // default is 2
 
     uint16_t mcsTable = 2;
 
@@ -93,6 +94,12 @@ main(int argc, char* argv[])
                  "The traffic scenario for the case of priority. Can be 0: saturation"
                  "or 1: medium-load",
                  priorityTrafficScenario);
+    cmd.AddValue(
+        "numTrafficProfile",
+        "Specifies the flow profile based on the number of traffic types. Possible values are:"
+        " 2: Two types of traffic (5QI 80, 87),"
+        " 3: Three types of traffic (5QI 1, 80, 87).",
+        numTrafficProfile);
     cmd.AddValue("simTime", "Simulation time", simTime);
     cmd.AddValue("numerology", "The numerology to be used", numerology);
     cmd.AddValue("centralFrequency", "The system frequency to be used", centralFrequency);
@@ -182,19 +189,23 @@ main(int argc, char* argv[])
     NodeContainer ueLowLatContainer;
     NodeContainer ueMoTracContainer;
 
-    for (uint32_t j = 0; j < gridScenario.GetUserTerminals().GetN(); ++j)
+    if (numTrafficProfile == 2)
     {
-        Ptr<Node> ue = gridScenario.GetUserTerminals().Get(j);
-        j % 3 == 0   ? ueLowLatContainer.Add(ue)
-        : j % 3 == 1 ? ueVoiceContainer.Add(ue)
-                     : ueMoTracContainer.Add(ue);
+        for (uint32_t j = 0; j < gridScenario.GetUserTerminals().GetN(); ++j)
+        {
+            Ptr<Node> ue = gridScenario.GetUserTerminals().Get(j);
+            j % 2 == 0 ? ueLowLatContainer.Add(ue) : ueMoTracContainer.Add(ue);
+        }
     }
-
-    if (priorityTrafficScenario == 1)
+    else if (numTrafficProfile == 3)
     {
-        lambdaCV = 1000 / ueVoiceContainer.GetN();
-        lambdaLL = 1000 / ueLowLatContainer.GetN();
-        lambdaMT = 1000 / ueMoTracContainer.GetN();
+        for (uint32_t j = 0; j < gridScenario.GetUserTerminals().GetN(); ++j)
+        {
+            Ptr<Node> ue = gridScenario.GetUserTerminals().Get(j);
+            j % 3 == 0   ? ueVoiceContainer.Add(ue)
+            : j % 3 == 1 ? ueLowLatContainer.Add(ue)
+                         : ueMoTracContainer.Add(ue);
+        }
     }
 
     // setup the nr simulation
@@ -287,14 +298,21 @@ main(int argc, char* argv[])
     uint32_t bwpIdForMoTrac = 0;
 
     // gNb routing between Bearer and bandwidh part
-    nrHelper->SetGnbBwpManagerAlgorithmAttribute("GBR_CONV_VOICE", UintegerValue(bwpIdForVoice));
+    if (numTrafficProfile == 3)
+    {
+        nrHelper->SetGnbBwpManagerAlgorithmAttribute("GBR_CONV_VOICE",
+                                                     UintegerValue(bwpIdForVoice));
+    }
     nrHelper->SetGnbBwpManagerAlgorithmAttribute("NGBR_LOW_LAT_EMBB",
                                                  UintegerValue(bwpIdForLowLat));
     nrHelper->SetGnbBwpManagerAlgorithmAttribute("DGBR_INTER_SERV_87",
                                                  UintegerValue(bwpIdForMoTrac));
 
     // Ue routing between Bearer and bandwidth part
-    nrHelper->SetUeBwpManagerAlgorithmAttribute("GBR_CONV_VOICE", UintegerValue(bwpIdForVoice));
+    if (numTrafficProfile == 3)
+    {
+        nrHelper->SetUeBwpManagerAlgorithmAttribute("GBR_CONV_VOICE", UintegerValue(bwpIdForVoice));
+    }
     nrHelper->SetUeBwpManagerAlgorithmAttribute("NGBR_LOW_LAT_EMBB", UintegerValue(bwpIdForLowLat));
     nrHelper->SetUeBwpManagerAlgorithmAttribute("DGBR_INTER_SERV_87",
                                                 UintegerValue(bwpIdForMoTrac));
@@ -305,14 +323,27 @@ main(int argc, char* argv[])
      */
     NetDeviceContainer enbNetDev =
         nrHelper->InstallGnbDevice(gridScenario.GetBaseStations(), allBwps);
-    NetDeviceContainer ueVoiceNetDev = nrHelper->InstallUeDevice(ueVoiceContainer, allBwps);
+    NetDeviceContainer ueVoiceNetDev;
+    if (numTrafficProfile == 3)
+    {
+        ueVoiceNetDev = nrHelper->InstallUeDevice(ueVoiceContainer, allBwps);
+    }
     NetDeviceContainer ueLowLatNetDev = nrHelper->InstallUeDevice(ueLowLatContainer, allBwps);
     NetDeviceContainer ueMoTracNetDev = nrHelper->InstallUeDevice(ueMoTracContainer, allBwps);
 
     randomStream += nrHelper->AssignStreams(enbNetDev, randomStream);
-    randomStream += nrHelper->AssignStreams(ueVoiceNetDev, randomStream);
-    randomStream += nrHelper->AssignStreams(ueLowLatNetDev, randomStream);
-    randomStream += nrHelper->AssignStreams(ueMoTracNetDev, randomStream);
+    for (uint32_t i = 0; i < ueVoiceContainer.GetN(); i++)
+    {
+        randomStream += nrHelper->AssignStreams(ueVoiceNetDev.Get(i), randomStream);
+    }
+    for (uint32_t i = 0; i < ueLowLatContainer.GetN(); i++)
+    {
+        randomStream += nrHelper->AssignStreams(ueLowLatNetDev.Get(i), randomStream);
+    }
+    for (uint32_t i = 0; i < ueMoTracContainer.GetN(); i++)
+    {
+        randomStream += nrHelper->AssignStreams(ueMoTracNetDev.Get(i), randomStream);
+    }
 
     nrHelper->GetGnbPhy(enbNetDev.Get(0), 0)->SetAttribute("Numerology", UintegerValue(numerology));
     nrHelper->GetGnbPhy(enbNetDev.Get(0), 0)->SetAttribute("TxPower", DoubleValue(10 * log10(x)));
@@ -363,7 +394,11 @@ main(int argc, char* argv[])
     Ipv4InterfaceContainer ueVoiceIpIface;
     Ipv4InterfaceContainer ueLowLatIpIface;
     Ipv4InterfaceContainer ueMoTracIpIface;
-    ueVoiceIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ueVoiceNetDev));
+
+    if (numTrafficProfile == 3)
+    {
+        ueVoiceIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ueVoiceNetDev));
+    }
     ueLowLatIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ueLowLatNetDev));
     ueMoTracIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ueMoTracNetDev));
 
@@ -376,91 +411,51 @@ main(int argc, char* argv[])
     }
 
     // attach UEs to the closest gNB
-    nrHelper->AttachToClosestEnb(ueVoiceNetDev, enbNetDev);
+    if (numTrafficProfile == 3)
+    {
+        nrHelper->AttachToClosestEnb(ueVoiceNetDev, enbNetDev);
+    }
     nrHelper->AttachToClosestEnb(ueLowLatNetDev, enbNetDev);
     nrHelper->AttachToClosestEnb(ueMoTracNetDev, enbNetDev);
 
     /*
-     * Traffic part. Install three kind of traffic: low-latency ,voice,
-     * and interactive service each identified by a particular source port.
+     * Traffic Configuration: Install three types of traffic—low-latency, voice,
+     * and interactive service—each identified by a specific source port.
+     * Configure attributes for the different generators, using user-provided
+     * parameters to generate CBR traffic.
      */
-    uint16_t dlPortVoice = 1234;
-    uint16_t dlPortLowLat = 1235;
-    uint16_t dlPortMoTrac = 1236;
+
+    uint16_t dlPort = 1234;
 
     ApplicationContainer serverApps;
-
-    // The sink will always listen to the specified ports
-    UdpServerHelper dlPacketSinkVoice(dlPortVoice);
-    UdpServerHelper dlPacketSinkLowLat(dlPortLowLat);
-    UdpServerHelper dlPacketSinkMoTrac(dlPortMoTrac);
-
-    // The server, that is the application which is listening, is installed in the UE
-    serverApps.Add(dlPacketSinkVoice.Install(ueVoiceContainer));
-    serverApps.Add(dlPacketSinkLowLat.Install(ueLowLatContainer));
-    serverApps.Add(dlPacketSinkMoTrac.Install(ueMoTracContainer));
-
-    /*
-     * Configure attributes for the different generators, using user-provided
-     * parameters for generating a CBR traffic
-     */
-
-    // Voice configuration and object creation:
-    UdpClientHelper dlClientVoice;
-    dlClientVoice.SetAttribute("RemotePort", UintegerValue(dlPortVoice));
-    dlClientVoice.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
-    dlClientVoice.SetAttribute("PacketSize", UintegerValue(udpPacketSizeCV));
-    dlClientVoice.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaCV)));
-
-    // The bearer that will carry voice traffic
-    EpsBearer voiceBearer(EpsBearer::GBR_CONV_VOICE);
-
-    // The filter for the voice traffic
-    Ptr<EpcTft> voiceTft = Create<EpcTft>();
-    EpcTft::PacketFilter dlpfVoice;
-    dlpfVoice.localPortStart = dlPortVoice;
-    dlpfVoice.localPortEnd = dlPortVoice;
-    voiceTft->Add(dlpfVoice);
-
-    // Low-Latency configuration and object creation:
-    UdpClientHelper dlClientLowLat;
-    dlClientLowLat.SetAttribute("RemotePort", UintegerValue(dlPortLowLat));
-    dlClientLowLat.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
-    dlClientLowLat.SetAttribute("PacketSize", UintegerValue(udpPacketSizeLL));
-    dlClientLowLat.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaLL)));
-
-    // The bearer that will carry low latency traffic
-    EpsBearer lowLatBearer(EpsBearer::NGBR_LOW_LAT_EMBB);
-
-    // The filter for the low-latency traffic
-    Ptr<EpcTft> lowLatTft = Create<EpcTft>();
-    EpcTft::PacketFilter dlpfLowLat;
-    dlpfLowLat.localPortStart = dlPortLowLat;
-    dlpfLowLat.localPortEnd = dlPortLowLat;
-    lowLatTft->Add(dlpfLowLat);
-
-    // Motion Tracking Data configuration and object creation:
-    UdpClientHelper dlClientMoTrac;
-    dlClientMoTrac.SetAttribute("RemotePort", UintegerValue(dlPortMoTrac));
-    dlClientMoTrac.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
-    dlClientMoTrac.SetAttribute("PacketSize", UintegerValue(udpPacketSizeMT));
-    dlClientMoTrac.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaMT)));
-
-    // The bearer that will carry motion tracking data traffic
-    EpsBearer MoTracBearer(EpsBearer::DGBR_INTER_SERV_87);
-
-    // The filter for the motion tracking data traffic
-    Ptr<EpcTft> MoTracTft = Create<EpcTft>();
-    EpcTft::PacketFilter dlpfMoTrac;
-    dlpfMoTrac.localPortStart = dlPortMoTrac;
-    dlpfMoTrac.localPortEnd = dlPortMoTrac;
-    MoTracTft->Add(dlpfMoTrac);
-
-    //  Install the applications
     ApplicationContainer clientApps;
+
+    Ptr<EpcTft> voiceTft = Create<EpcTft>();
+    Ptr<EpcTft> lowLatTft = Create<EpcTft>();
+    Ptr<EpcTft> MoTracTft = Create<EpcTft>();
 
     for (uint32_t i = 0; i < ueVoiceContainer.GetN(); ++i)
     {
+        // The server, that is the application which is listening, is installed in the UE
+        // The sink will always listen to the specified ports
+        UdpServerHelper dlPacketSinkVoice(dlPort);
+        serverApps.Add(dlPacketSinkVoice.Install(ueVoiceContainer.Get(i)));
+
+        // Voice configuration and object creation:
+        UdpClientHelper dlClientVoice;
+        dlClientVoice.SetAttribute("RemotePort", UintegerValue(dlPort));
+        dlClientVoice.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
+        dlClientVoice.SetAttribute("PacketSize", UintegerValue(udpPacketSizeCV));
+        dlClientVoice.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaCV)));
+
+        // The filter for the voice traffic
+        EpcTft::PacketFilter dlpfVoice;
+        dlpfVoice.localPortStart = dlPort;
+        dlpfVoice.localPortEnd = dlPort;
+        voiceTft->Add(dlpfVoice);
+        dlPort++;
+
+        //  Install the applications
         Ptr<NetDevice> ueDevice = ueVoiceNetDev.Get(i);
         Address ueAddress = ueVoiceIpIface.GetAddress(i);
 
@@ -469,12 +464,33 @@ main(int argc, char* argv[])
         dlClientVoice.SetAttribute("RemoteAddress", AddressValue(ueAddress));
         clientApps.Add(dlClientVoice.Install(remoteHost));
 
+        // The bearer that will carry voice traffic
+        EpsBearer voiceBearer(EpsBearer::GBR_CONV_VOICE);
         // Activate a dedicated bearer for the traffic type
         nrHelper->ActivateDedicatedEpsBearer(ueDevice, voiceBearer, voiceTft);
     }
-
     for (uint32_t i = 0; i < ueLowLatContainer.GetN(); ++i)
     {
+        // The server, that is the application which is listening, is installed in the UE
+        // The sink will always listen to the specified ports
+        UdpServerHelper dlPacketSinkLowLat(dlPort);
+        serverApps.Add(dlPacketSinkLowLat.Install(ueLowLatContainer.Get(i)));
+
+        // Low Latency configuration and object creation:
+        UdpClientHelper dlClientLowLat;
+        dlClientLowLat.SetAttribute("RemotePort", UintegerValue(dlPort));
+        dlClientLowLat.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
+        dlClientLowLat.SetAttribute("PacketSize", UintegerValue(udpPacketSizeLL));
+        dlClientLowLat.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaLL)));
+
+        // The filter for the low-latency traffic
+        EpcTft::PacketFilter dlpfLowLat;
+        dlpfLowLat.localPortStart = dlPort;
+        dlpfLowLat.localPortEnd = dlPort;
+        lowLatTft->Add(dlpfLowLat);
+        dlPort++;
+
+        // Install the applications
         Ptr<NetDevice> ueDevice = ueLowLatNetDev.Get(i);
         Address ueAddress = ueLowLatIpIface.GetAddress(i);
 
@@ -484,11 +500,30 @@ main(int argc, char* argv[])
         clientApps.Add(dlClientLowLat.Install(remoteHost));
 
         // Activate a dedicated bearer for the traffic type
+        // The bearer that will carry voice traffic
+        EpsBearer lowLatBearer(EpsBearer::NGBR_LOW_LAT_EMBB);
         nrHelper->ActivateDedicatedEpsBearer(ueDevice, lowLatBearer, lowLatTft);
     }
-
     for (uint32_t i = 0; i < ueMoTracContainer.GetN(); ++i)
     {
+        // The server, that is the application which is listening, is installed in the UE
+        // The sink will always listen to the specified ports
+        UdpServerHelper dlPacketSinkMoTrac(dlPort);
+        serverApps.Add(dlPacketSinkMoTrac.Install(ueMoTracContainer.Get(i)));
+        // Motion Tracking Data configuration and object creation:
+        UdpClientHelper dlClientMoTrac;
+        dlClientMoTrac.SetAttribute("RemotePort", UintegerValue(dlPort));
+        dlClientMoTrac.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
+        dlClientMoTrac.SetAttribute("PacketSize", UintegerValue(udpPacketSizeMT));
+        dlClientMoTrac.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaMT)));
+        // The filter for the motion tracking data traffic
+        EpcTft::PacketFilter dlpfMoTrac;
+        dlpfMoTrac.localPortStart = dlPort;
+        dlpfMoTrac.localPortEnd = dlPort;
+        MoTracTft->Add(dlpfMoTrac);
+        dlPort++;
+
+        // Install the applications
         Ptr<NetDevice> ueDevice = ueMoTracNetDev.Get(i);
         Address ueAddress = ueMoTracIpIface.GetAddress(i);
 
@@ -498,6 +533,8 @@ main(int argc, char* argv[])
         clientApps.Add(dlClientMoTrac.Install(remoteHost));
 
         // Activate a dedicated bearer for the traffic type
+        // The bearer that will carry voice traffic
+        EpsBearer MoTracBearer(EpsBearer::DGBR_INTER_SERV_87);
         nrHelper->ActivateDedicatedEpsBearer(ueDevice, MoTracBearer, MoTracTft);
     }
 
