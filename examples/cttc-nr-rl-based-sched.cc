@@ -6,8 +6,8 @@
 
 /**
  * \ingroup examples
- * \file cttc-nr-initial-my-sched.cc
- * \brief A initial example for RL based scheduler (nr-mac-scheduler-ofdma/tdma-qos)
+ * \file cttc-nr-rl-based-sched.cc
+ * \brief A example for RL based scheduler (nr-mac-scheduler-ofdma/tdma-ai)
  *
  * This example describes how to setup a simulation using the QoS scheduler and
  * the 3GPP channel model from TR 38.900. This example consists of a simple
@@ -22,7 +22,7 @@
  * with different resource types on-screen, as well as writing them on a file.
  *
  * \code{.unparsed}
-$ ./ns3 run "cttc-nr-initial-my-sched --PrintHelp"
+$ ./ns3 run "cttc-nr-rl-based-sched --PrintHelp"
     \endcode
  *
  */
