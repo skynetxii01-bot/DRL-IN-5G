@@ -43,6 +43,14 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdma
     BeamSymbolMap AssignULRBG(uint32_t symAvail, const ActiveUeMap& activeUl) const override;
 
     /**
+     * \brief Create an UE representation of the type NrMacSchedulerUeInfoQos
+     * \param params parameters
+     * \return NrMacSchedulerUeInfo instance
+     */
+    std::shared_ptr<NrMacSchedulerUeInfo> CreateUeRepresentation(
+        const NrMacCschedSapProvider::CschedUeConfigReqParameters& params) const override;
+    
+    /**
      * \brief Provide the comparison function to order the UE when scheduling DL
      * \return a function that should order two UEs based on their priority: if
      * UE a is less than UE b, it will have an higher priority.
@@ -111,10 +119,25 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdma
     void NotAssignedUlResources(const UePtrAndBufferReq& ue,
                                 const FTResources& notAssigned,
                                 const FTResources& totalAssigned) const override;
+    
+    /**
+     * \brief Get a UE observation
+     * \param ue UE to which a rgb has been assigned
+     */
+    std::vector<std::vector<double>> GetObservation(std::vector<UePtrAndBufferReq>& ueVector) const;
+
+    bool IsGameOver() const;
+    
+    float UpdateReward() const;
+
+    void CallNotifyFn(std::vector<UePtrAndBufferReq>& ueVector) const;
 
   private:
     double m_timeWindow{
         99.0}; //!< Time window to calculate the throughput. Better to make it an attribute.
     TracedValue<uint32_t> m_tracedValueSymPerBeam;
+    Callback<void, std::vector<std::vector<double>>, bool, float, std::string > m_updateCurrentStateCb;
+    Callback<void> m_notifyCb;
+
 };
 } // namespace ns3

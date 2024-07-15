@@ -91,13 +91,9 @@ NrMacSchedulerOfdmaAI::AssignDLRBG(uint32_t symAvail, const ActiveUeMap& activeD
             ueVector.emplace_back(ue);
         }
 
-        for (auto& ue : ueVector)
-        {
-            BeforeDlSched(ue, FTResources(rbgAssignable * beamSym, beamSym));
-        }
-
         while (resources > 0)
         {
+            CallNotifyFn(ueVector);
             GetFirst GetUe;
             std::sort(ueVector.begin(), ueVector.end(), GetUeCompareDlFn());
             auto schedInfoIt = ueVector.begin();
@@ -300,5 +296,44 @@ NrMacSchedulerOfdmaAI::NotAssignedUlResources(
     auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
     uePtr->UpdateUlAIMetric(totAssigned, m_timeWindow, m_ulAmc);
 }
+
+std::vector<std::vector<double>>
+NrMacSchedulerOfdmaAI::GetObservation(std::vector<UePtrAndBufferReq>& ueVector) const
+{
+    NS_LOG_FUNCTION(this);
+    std::vector<std::vector<double>> observation;
+    for (const auto& ue : ueVector)
+    {
+        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
+        observation.push_back(uePtr->GetObservation());
+    }
+    return observation;
+}
+
+bool
+NrMacSchedulerOfdmaAI::IsGameOver() const
+{
+    NS_LOG_FUNCTION(this);
+    return false;
+}
+
+float
+NrMacSchedulerOfdmaAI::UpdateReward() const
+{
+    NS_LOG_FUNCTION(this);
+    float reward = 0.0;
+    return reward;
+}
+
+void
+NrMacSchedulerOfdmaAI::CallNotifyFn(std::vector<UePtrAndBufferReq>& ueVector) const 
+{
+    NS_LOG_FUNCTION(this);
+    NS_ASSERT_MSG(!m_updateCurrentStateCb.IsNull(), "Transfer observation function is not set");
+    NS_ASSERT_MSG(!m_notifyCb.IsNull(), "Notify function is not set");
+    m_updateCurrentStateCb(GetObservation(ueVector), IsGameOver(), UpdateReward(), "");
+    m_notifyCb();
+}
+
 
 } // namespace ns3
