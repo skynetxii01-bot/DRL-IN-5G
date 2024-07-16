@@ -22,17 +22,13 @@ NrMacSchedulerOfdmaAI::GetTypeId()
 {
     static TypeId tid =
         TypeId("ns3::NrMacSchedulerOfdmaAI")
-            .SetParent<NrMacSchedulerOfdma>()
-            .AddTraceSource(
-                "SymPerBeam",
-                "Number of assigned symbol per beam. Gets called every time an assignment is made",
-                MakeTraceSourceAccessor(&NrMacSchedulerOfdmaAI::m_tracedValueSymPerBeam),
-                "ns3::TracedValueCallback::Uint32");
+            .SetParent<NrMacSchedulerOfdmaRR>()
+            .AddConstructor<NrMacSchedulerOfdmaAI>();
     return tid;
 }
 
 NrMacSchedulerOfdmaAI::NrMacSchedulerOfdmaAI()
-    : NrMacSchedulerOfdma()
+    : NrMacSchedulerOfdmaRR()
 {
 }
 
