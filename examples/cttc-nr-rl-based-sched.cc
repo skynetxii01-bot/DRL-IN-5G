@@ -331,19 +331,12 @@ main(int argc, char* argv[])
     NetDeviceContainer ueLowLatNetDev = nrHelper->InstallUeDevice(ueLowLatContainer, allBwps);
     NetDeviceContainer ueMoTracNetDev = nrHelper->InstallUeDevice(ueMoTracContainer, allBwps);
 
+    NetDeviceContainer ueNetDevs(ueVoiceNetDev);
+    ueNetDevs.Add(ueLowLatNetDev);
+    ueNetDevs.Add(ueMoTracNetDev);
+
     randomStream += nrHelper->AssignStreams(enbNetDev, randomStream);
-    for (uint32_t i = 0; i < ueVoiceContainer.GetN(); i++)
-    {
-        randomStream += nrHelper->AssignStreams(ueVoiceNetDev.Get(i), randomStream);
-    }
-    for (uint32_t i = 0; i < ueLowLatContainer.GetN(); i++)
-    {
-        randomStream += nrHelper->AssignStreams(ueLowLatNetDev.Get(i), randomStream);
-    }
-    for (uint32_t i = 0; i < ueMoTracContainer.GetN(); i++)
-    {
-        randomStream += nrHelper->AssignStreams(ueMoTracNetDev.Get(i), randomStream);
-    }
+    randomStream += nrHelper->AssignStreams(ueNetDevs, randomStream);
 
     nrHelper->GetGnbPhy(enbNetDev.Get(0), 0)->SetAttribute("Numerology", UintegerValue(numerology));
     nrHelper->GetGnbPhy(enbNetDev.Get(0), 0)->SetAttribute("TxPower", DoubleValue(10 * log10(x)));
@@ -353,16 +346,7 @@ main(int argc, char* argv[])
     {
         DynamicCast<NrGnbNetDevice>(*it)->UpdateConfig();
     }
-
-    for (auto it = ueVoiceNetDev.Begin(); it != ueVoiceNetDev.End(); ++it)
-    {
-        DynamicCast<NrUeNetDevice>(*it)->UpdateConfig();
-    }
-    for (auto it = ueLowLatNetDev.Begin(); it != ueLowLatNetDev.End(); ++it)
-    {
-        DynamicCast<NrUeNetDevice>(*it)->UpdateConfig();
-    }
-    for (auto it = ueMoTracNetDev.Begin(); it != ueMoTracNetDev.End(); ++it)
+    for (auto it = ueNetDevs.Begin(); it != ueNetDevs.End(); ++it)
     {
         DynamicCast<NrUeNetDevice>(*it)->UpdateConfig();
     }
