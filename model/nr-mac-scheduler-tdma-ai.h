@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "nr-mac-scheduler-tdma.h"
+#include "nr-mac-scheduler-tdma-rr.h"
 
 #include <functional>
 #include <memory>
@@ -18,7 +18,7 @@ namespace ns3
  * \ingroup scheduler
  * \brief The TDMA scheduler with AI implementation
  */
-class NrMacSchedulerTdmaAI : public NrMacSchedulerTdma
+class NrMacSchedulerTdmaAI : public NrMacSchedulerTdmaRR
 {
   public:
     /**
@@ -31,10 +31,14 @@ class NrMacSchedulerTdmaAI : public NrMacSchedulerTdma
      * \brief NrMacSchedulerTdma constructor
      */
     NrMacSchedulerTdmaAI();
+    
     /**
      * \brief NrMacSchedulerTdma deconstructor
      */
-    ~NrMacSchedulerTdmaAI() override;
+    ~NrMacSchedulerTdmaAI() override
+    {
+
+    }
 
   protected:
     BeamSymbolMap AssignDLRBG(uint32_t symAvail, const ActiveUeMap& activeDl) const override;

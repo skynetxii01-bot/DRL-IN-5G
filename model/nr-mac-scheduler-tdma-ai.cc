@@ -22,16 +22,17 @@ NS_OBJECT_ENSURE_REGISTERED(NrMacSchedulerTdmaAI);
 TypeId
 NrMacSchedulerTdmaAI::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::NrMacSchedulerTdmaAI").SetParent<NrMacSchedulerTdma>();
+    static TypeId tid =
+        TypeId("ns3::NrMacSchedulerTdmaAI")
+            .SetParent<NrMacSchedulerTdmaRR>()
+            .AddConstructor<NrMacSchedulerTdmaAI>();
     return tid;
 }
 
 NrMacSchedulerTdmaAI::NrMacSchedulerTdmaAI()
+    : NrMacSchedulerTdmaRR()
 {
-}
-
-NrMacSchedulerTdmaAI::~NrMacSchedulerTdmaAI()
-{
+    NS_LOG_FUNCTION(this);
 }
 
 std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>
