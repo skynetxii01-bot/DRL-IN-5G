@@ -13,6 +13,33 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE("NrMacSchedulerUeInfoAI");
 
+std::vector<std::vector<double>>
+NrMacSchedulerUeInfoAI::GetUeObservation()
+{
+    NS_LOG_FUNCTION(this);
+    std::vector<std::vector<double>> observations;
+    for (const auto& ueLcg : m_dlLCG)
+        {
+            std::vector<uint8_t> ueActiveLCs = ueLcg.second->GetActiveLCIds();
+
+            for (const auto lcId : ueActiveLCs)
+            {
+                std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
+
+                std::vector<double> lcObservation;
+                lcObservation.push_back(m_rnti);
+                lcObservation.push_back(ueLcg.first);
+                lcObservation.push_back(lcId);
+                lcObservation.push_back(LCPtr->m_qci);
+                lcObservation.push_back(LCPtr->m_priority);
+                lcObservation.push_back(LCPtr->m_rlcTransmissionQueueHolDelay);
+
+                observations.push_back(lcObservation);
+            }
+        }
+    return observations;
+}
+
 void
 NrMacSchedulerUeInfoAI::UpdateDlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                                          double timeWindow,

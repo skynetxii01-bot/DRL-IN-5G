@@ -81,6 +81,13 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
         m_avgTputUl = m_lastAvgTputUl;
     }
 
+    /** 
+     * \brief Get the current observation
+     * \param ue the UE
+     * \return a vector of double with the current observation
+    */
+    std::vector<std::vector<double>> GetUeObservation();
+
     /**
      * \brief Update the AI metric for downlink
      * \param totAssigned the resources assigned
