@@ -138,8 +138,7 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaRR
     double m_timeWindow{
         99.0}; //!< Time window to calculate the throughput. Better to make it an attribute.
     TracedValue<uint32_t> m_tracedValueSymPerBeam;
-    Callback<void, std::vector<std::vector<double>>, bool, float, std::string > m_updateCurrentStateCb;
-    Callback<void> m_notifyCb;
+    Callback<void, std::vector< std::vector<double>>, bool, float, std::string, Callback<void, std::unordered_map<uint8_t, Weights>&, std::vector<UePtrAndBufferReq>&> > m_notifyCb;
 
 };
 } // namespace ns3

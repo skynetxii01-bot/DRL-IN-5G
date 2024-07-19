@@ -326,10 +326,8 @@ void
 NrMacSchedulerOfdmaAI::CallNotifyFn(std::vector<UePtrAndBufferReq>& ueVector) const 
 {
     NS_LOG_FUNCTION(this);
-    NS_ASSERT_MSG(!m_updateCurrentStateCb.IsNull(), "Transfer observation function is not set");
     NS_ASSERT_MSG(!m_notifyCb.IsNull(), "Notify function is not set");
-    m_updateCurrentStateCb(GetObservation(ueVector), IsGameOver(), UpdateReward(), "");
-    m_notifyCb();
+    m_notifyCb(GetObservation(ueVector), IsGameOver(), UpdateReward(), "", MakeCallback(&NrMacSchedulerOfdmaAI::UpdateAllUeWeightsDl, this));
 }
 
 void
