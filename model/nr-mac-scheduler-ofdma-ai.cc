@@ -332,5 +332,17 @@ NrMacSchedulerOfdmaAI::CallNotifyFn(std::vector<UePtrAndBufferReq>& ueVector) co
     m_notifyCb();
 }
 
+void
+NrMacSchedulerOfdmaAI::UpdateAllUeWeightsDl(std::unordered_map<uint8_t, Weights>& ueWeights, std::vector<UePtrAndBufferReq>& ueVector)
+{
+    NS_LOG_FUNCTION(this);
+    for (const auto& ue : ueVector)
+    {
+      auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
+      Weights weights = ueWeights.at(uePtr->m_rnti);
+      uePtr->UpdateDlWeights(weights);
+    }
+}
+
 
 } // namespace ns3

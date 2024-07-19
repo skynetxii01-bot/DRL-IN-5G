@@ -132,6 +132,8 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaRR
 
     void CallNotifyFn(std::vector<UePtrAndBufferReq>& ueVector) const;
 
+    void UpdateAllUeWeightsDl(std::unordered_map<uint8_t, Weights>& ueWeights, std::vector<UePtrAndBufferReq>& ueVector);
+
   private:
     double m_timeWindow{
         99.0}; //!< Time window to calculate the throughput. Better to make it an attribute.
