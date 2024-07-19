@@ -41,6 +41,12 @@ NrMacSchedulerUeInfoAI::GetUeObservation()
 }
 
 void
+NrMacSchedulerUeInfoAI::UpdateDlWeights(Weights& weights)
+{
+  m_dlWeights = weights;
+}
+
+void
 NrMacSchedulerUeInfoAI::UpdateDlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                                          double timeWindow,
                                          const Ptr<const NrAmc>& amc)

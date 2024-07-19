@@ -11,6 +11,8 @@
 namespace ns3
 {
 
+  typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double> Weights;
+
 /**
  * \ingroup scheduler
  * \brief UE representation of a scheduler with AI implementation
@@ -87,6 +89,15 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
      * \return a vector of double with the current observation
     */
     std::vector<std::vector<double>> GetUeObservation();
+    
+    /**
+     * \brief Update the weights for downlink
+     * \param weights the weights assigned to the UEs
+     *
+     * Updates m_weights by copying the weights assigned to the UEs.
+     * The weights consists of the unordered_map of the pair <LCG, LC> and the weight.
+     */
+    void UpdateDlWeights(Weights& weights);
 
     /**
      * \brief Update the AI metric for downlink
@@ -296,6 +307,8 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
     double m_lastAvgTputUl{0.0};   //!< Last average throughput in uplink
     double m_potentialTputUl{0.0}; //!< Potential throughput in uplink in one assignable resource
                                    //!< (can be a symbol or a RBG)
+    
+    Weights m_dlWeights{NULL};    //!< Weights assigned to the UEs in downlink
 };
 
 } // namespace ns3
