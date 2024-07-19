@@ -8,6 +8,8 @@
 
 #include "nr-mac-scheduler-ofdma-rr.h"
 
+#include "nr-mac-scheduler-ue-info-ai.h"
+
 #include <ns3/traced-value.h>
 
 namespace ns3
@@ -120,6 +122,12 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaRR
                                 const FTResources& notAssigned,
                                 const FTResources& totalAssigned) const override;
     
+    
+    typedef Callback<void, std::vector< std::vector<double>>, bool, float, std::string, const NrMacSchedulerOfdmaAI*>
+      NotifyCb;
+      
+    void SetNotifyCb(NotifyCb notifyCb);
+    
     /**
      * \brief Get a UE observation
      * \param ue UE to which a rgb has been assigned
@@ -138,7 +146,7 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaRR
     double m_timeWindow{
         99.0}; //!< Time window to calculate the throughput. Better to make it an attribute.
     TracedValue<uint32_t> m_tracedValueSymPerBeam;
-    Callback<void, std::vector< std::vector<double>>, bool, float, std::string, Callback<void, std::unordered_map<uint8_t, Weights>&, std::vector<UePtrAndBufferReq>&> > m_notifyCb;
+    NotifyCb m_notifyCb;
 
 };
 } // namespace ns3

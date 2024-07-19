@@ -6,8 +6,6 @@
 
 #include "nr-mac-scheduler-ofdma-ai.h"
 
-#include "nr-mac-scheduler-ue-info-ai.h"
-
 #include <ns3/log.h>
 
 #include <algorithm>
@@ -237,6 +235,17 @@ NrMacSchedulerOfdmaAI::AssignULRBG(uint32_t symAvail, const ActiveUeMap& activeU
     return symPerBeam;
 }
 
+std::shared_ptr<NrMacSchedulerUeInfo>
+NrMacSchedulerOfdmaAI::CreateUeRepresentation(
+    const NrMacCschedSapProvider::CschedUeConfigReqParameters& params) const
+{
+    NS_LOG_FUNCTION(this);
+    return std::make_shared<NrMacSchedulerUeInfoAI>(
+        params.m_rnti,
+        params.m_beamId,
+        std::bind(&NrMacSchedulerOfdmaAI::GetNumRbPerRbg, this));
+}
+
 std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                    const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
 NrMacSchedulerOfdmaAI::GetUeCompareDlFn() const
@@ -293,6 +302,13 @@ NrMacSchedulerOfdmaAI::NotAssignedUlResources(
     uePtr->UpdateUlAIMetric(totAssigned, m_timeWindow, m_ulAmc);
 }
 
+void
+NrMacSchedulerOfdmaAI::SetNotifyCb(NotifyCb notifyCb)
+{
+    NS_LOG_FUNCTION(this);
+    m_notifyCb = notifyCb;
+}
+
 std::vector<std::vector<double>>
 NrMacSchedulerOfdmaAI::GetObservation(std::vector<UePtrAndBufferReq>& ueVector) const
 {
@@ -326,8 +342,11 @@ void
 NrMacSchedulerOfdmaAI::CallNotifyFn(std::vector<UePtrAndBufferReq>& ueVector) const 
 {
     NS_LOG_FUNCTION(this);
-    NS_ASSERT_MSG(!m_notifyCb.IsNull(), "Notify function is not set");
-    m_notifyCb(GetObservation(ueVector), IsGameOver(), UpdateReward(), "", MakeCallback(&NrMacSchedulerOfdmaAI::UpdateAllUeWeightsDl, this));
+    if(!m_notifyCb.IsNull())
+    {
+        std::string extraInfo = "";
+        m_notifyCb(GetObservation(ueVector), IsGameOver(), UpdateReward(), extraInfo, this);
+    }
 }
 
 void
