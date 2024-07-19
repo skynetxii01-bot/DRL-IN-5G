@@ -10,8 +10,16 @@
 
 namespace ns3
 {
+  struct pair_hash {
+    template <class T1, class T2>
+    std::size_t operator()(const std::pair<T1, T2>& p) const {
+      auto hash1 = std::hash<T1>{}(p.first);
+      auto hash2 = std::hash<T2>{}(p.second);
+      return hash1 ^ (hash2 << 1); // 비트 시프트와 XOR을 사용하여 두 해시 값을 결합
+    }
+  };
 
-  typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double> Weights;
+  typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
 
 /**
  * \ingroup scheduler
@@ -308,7 +316,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
     double m_potentialTputUl{0.0}; //!< Potential throughput in uplink in one assignable resource
                                    //!< (can be a symbol or a RBG)
     
-    Weights m_dlWeights{NULL};    //!< Weights assigned to the UEs in downlink
+    Weights m_dlWeights;           //!< Weights assigned to the UEs in downlink
 };
 
 } // namespace ns3
