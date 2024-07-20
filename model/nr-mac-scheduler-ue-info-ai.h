@@ -20,6 +20,7 @@ namespace ns3
   };
 
   typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
+  typedef std::vector<std::vector<double>> Observation;
 
 /**
  * \ingroup scheduler
@@ -53,6 +54,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
         m_avgTputDl = 0.0;
         m_currTputDl = 0.0;
         m_potentialTputDl = 0.0;
+        m_dlWeights.clear();
         NrMacSchedulerUeInfo::ResetDlSchedInfo();
     }
 
@@ -70,6 +72,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
         m_avgTputUl = 0.0;
         m_currTputUl = 0.0;
         m_potentialTputUl = 0.0;
+        m_ulWeights.clear();
         NrMacSchedulerUeInfo::ResetUlSchedInfo();
     }
 
@@ -92,11 +95,18 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
     }
 
     /** 
-     * \brief Get the current observation
+     * \brief Get the current observation for downlink
      * \param ue the UE
      * \return a vector of double with the current observation
     */
-    std::vector<std::vector<double>> GetUeObservation();
+    Observation GetDlObservation();
+
+    /**
+     * \brief Get the current observation for uplink
+     * \param ue the UE
+     * \return a vector of double with the current observation
+     */
+    Observation GetUlObservation();
     
     /**
      * \brief Update the weights for downlink
@@ -106,6 +116,15 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
      * The weights consists of the unordered_map of the pair <LCG, LC> and the weight.
      */
     void UpdateDlWeights(Weights& weights);
+
+    /**
+     * \brief Update the weights for uplink
+     * \param weights the weights assigned to the UEs
+     *
+     * Updates m_weights by copying the weights assigned to the UEs.
+     * The weights consists of the unordered_map of the pair <LCG, LC> and the weight.
+     */
+    void UpdateUlWeights(Weights& weights);
 
     /**
      * \brief Update the AI metric for downlink
@@ -317,6 +336,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
                                    //!< (can be a symbol or a RBG)
     
     Weights m_dlWeights;           //!< Weights assigned to the UEs in downlink
+    Weights m_ulWeights;           //!< Weights assigned to the UEs in uplink
 };
 
 } // namespace ns3
