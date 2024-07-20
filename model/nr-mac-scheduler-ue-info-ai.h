@@ -208,9 +208,12 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
 
             for (const auto lcId : ueActiveLCs)
             {
-                std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
+                std::pair<uint8_t, uint8_t> lcgLcPair = std::make_pair(ueLcg.first, lcId);
+                auto it = uePtr->m_dlWeights.find(lcgLcPair);
 
-                weight += uePtr->m_dlTbSize / LCPtr->m_priority;
+                NS_ASSERT_MSG(it != uePtr->m_dlWeights.end(), "Weight not found");
+                weight += it->second;
+                
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
             }
         }
@@ -231,73 +234,21 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
     static bool CompareUeWeightsUl(const NrMacSchedulerNs3::UePtrAndBufferReq& lue,
                                    const NrMacSchedulerNs3::UePtrAndBufferReq& rue)
     {
-        auto luePtr = dynamic_cast<NrMacSchedulerUeInfoAI*>(lue.first.get());
-        auto ruePtr = dynamic_cast<NrMacSchedulerUeInfoAI*>(rue.first.get());
-
-        double leftP = CalculateUlMinPriority(lue);
-        double rightP = CalculateUlMinPriority(rue);
-        NS_ABORT_IF(leftP == 0);
-        NS_ABORT_IF(rightP == 0);
-
-        double lAIMetric = luePtr->m_potentialTputUl / leftP;
-        double rAIMetric = ruePtr->m_potentialTputUl / rightP;
+        double lAIMetric = CalculateUlWeight(lue);
+        double rAIMetric = CalculateUlWeight(rue);
 
         return (lAIMetric > rAIMetric);
     }
 
     /**
-     * \brief This function calculates the min Priority for the DL.
-     * \param lue Left UE
-     * \param rue Right UE
-     * \return true if the Priority of lue is less than the Priority of rue
-     *
-     * The ordering is made by considering the minimum Priority among all the
-     * Priorities of all the LCs set for this UE.
-     * A UE that has a Priority = 5 will always be the first (i.e., has a higher
-     * priority) in a AI scheduler.
+     * \brief comparison function object (i.e. an object that satisfies the
+     * requirements of Compare) which returns ​true if the first argument is less
+     * than (i.e. is ordered before) the second.
      */
-    static uint8_t CalculateDlMinPriority(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
+    static double CalculateUlWeight(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
     {
-        uint8_t ueMinPriority = 100;
-
-        for (const auto& ueLcg : ue.first->m_dlLCG)
-        {
-            std::vector<uint8_t> ueActiveLCs = ueLcg.second->GetActiveLCIds();
-
-            for (const auto lcId : ueActiveLCs)
-            {
-                std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
-
-                if (ueMinPriority > LCPtr->m_priority)
-                {
-                    ueMinPriority = LCPtr->m_priority;
-                }
-
-                ue.first->PrintLcInfo(ue.first->m_rnti,
-                                      ueLcg.first,
-                                      lcId,
-                                      LCPtr->m_qci,
-                                      LCPtr->m_priority,
-                                      ueMinPriority);
-            }
-        }
-        return ueMinPriority;
-    }
-
-    /**
-     * \brief This function calculates the min Priority for the UL.
-     * \param lue Left UE
-     * \param rue Right UE
-     * \return true if the Priority of lue is less than the Priority of rue
-     *
-     * The ordering is made by considering the minimum Priority among all the
-     * Priorities of all the LCs set for this UE.
-     * A UE that has a Priority = 5 will always be the first (i.e., has a higher
-     * priority) in a AI scheduler.
-     */
-    static uint8_t CalculateUlMinPriority(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
-    {
-        uint8_t ueMinPriority = 100;
+        double weight = 0;
+        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAI*>(ue.first.get());
 
         for (const auto& ueLcg : ue.first->m_ulLCG)
         {
@@ -305,22 +256,16 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
 
             for (const auto lcId : ueActiveLCs)
             {
-                std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
+                std::pair<uint8_t, uint8_t> lcgLcPair = std::make_pair(ueLcg.first, lcId);
+                auto it = uePtr->m_ulWeights.find(lcgLcPair);
 
-                if (ueMinPriority > LCPtr->m_priority)
-                {
-                    ueMinPriority = LCPtr->m_priority;
-                }
-
-                ue.first->PrintLcInfo(ue.first->m_rnti,
-                                      ueLcg.first,
-                                      lcId,
-                                      LCPtr->m_qci,
-                                      LCPtr->m_priority,
-                                      ueMinPriority);
+                NS_ASSERT_MSG(it != uePtr->m_ulWeights.end(), "Weight not found");
+                weight += it->second;
+                
+                NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
             }
         }
-        return ueMinPriority;
+        return weight;
     }
 
     double m_currTputDl{0.0};      //!< Current slot throughput in downlink
