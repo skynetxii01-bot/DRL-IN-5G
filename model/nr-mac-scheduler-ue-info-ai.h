@@ -54,7 +54,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
         m_avgTputDl = 0.0;
         m_currTputDl = 0.0;
         m_potentialTputDl = 0.0;
-        m_dlWeights.clear();
+        m_weightsDl.clear();
         NrMacSchedulerUeInfo::ResetDlSchedInfo();
     }
 
@@ -72,7 +72,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
         m_avgTputUl = 0.0;
         m_currTputUl = 0.0;
         m_potentialTputUl = 0.0;
-        m_ulWeights.clear();
+        m_weightsUl.clear();
         NrMacSchedulerUeInfo::ResetUlSchedInfo();
     }
 
@@ -209,9 +209,9 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
             for (const auto lcId : ueActiveLCs)
             {
                 std::pair<uint8_t, uint8_t> lcgLcPair = std::make_pair(ueLcg.first, lcId);
-                auto it = uePtr->m_dlWeights.find(lcgLcPair);
+                auto it = uePtr->m_weightsDl.find(lcgLcPair);
 
-                NS_ASSERT_MSG(it != uePtr->m_dlWeights.end(), "Weight not found");
+                NS_ASSERT_MSG(it != uePtr->m_weightsDl.end(), "Weight not found");
                 weight += it->second;
                 
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
@@ -257,9 +257,9 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
             for (const auto lcId : ueActiveLCs)
             {
                 std::pair<uint8_t, uint8_t> lcgLcPair = std::make_pair(ueLcg.first, lcId);
-                auto it = uePtr->m_ulWeights.find(lcgLcPair);
+                auto it = uePtr->m_weightsUl.find(lcgLcPair);
 
-                NS_ASSERT_MSG(it != uePtr->m_ulWeights.end(), "Weight not found");
+                NS_ASSERT_MSG(it != uePtr->m_weightsUl.end(), "Weight not found");
                 weight += it->second;
                 
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
@@ -280,8 +280,8 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
     double m_potentialTputUl{0.0}; //!< Potential throughput in uplink in one assignable resource
                                    //!< (can be a symbol or a RBG)
     
-    Weights m_dlWeights;           //!< Weights assigned to the UEs in downlink
-    Weights m_ulWeights;           //!< Weights assigned to the UEs in uplink
+    Weights m_weightsDl;           //!< Weights assigned to the UEs in downlink
+    Weights m_weightsUl;           //!< Weights assigned to the UEs in uplink
 };
 
 } // namespace ns3

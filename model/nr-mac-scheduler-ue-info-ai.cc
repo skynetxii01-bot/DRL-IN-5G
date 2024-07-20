@@ -70,13 +70,13 @@ NrMacSchedulerUeInfoAI::GetUlObservation()
 void
 NrMacSchedulerUeInfoAI::UpdateDlWeights(Weights& weights)
 {
-  m_dlWeights = weights;
+  m_weightsDl = weights;
 }
 
 void
 NrMacSchedulerUeInfoAI::UpdateUlWeights(Weights& weights)
 {
-  m_ulWeights = weights;
+  m_weightsUl = weights;
 }
 
 void
