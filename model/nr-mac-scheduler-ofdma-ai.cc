@@ -317,7 +317,7 @@ NrMacSchedulerOfdmaAI::GetObservation(std::vector<UePtrAndBufferReq>& ueVector) 
     for (const auto& ue : ueVector)
     {
         auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
-        std::vector<std::vector<double>> ueObservation = uePtr->GetUeObservation();
+        std::vector<std::vector<double>> ueObservation = uePtr->GetDlObservation();
         observations.insert(observations.end(), ueObservation.begin(), ueObservation.end());
     }
     return observations;
