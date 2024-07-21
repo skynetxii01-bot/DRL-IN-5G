@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "nr-mac-scheduler-ue-info-rr.h"
+#include "nr-mac-scheduler-ue-info-qos.h"
 
 namespace ns3
 {
@@ -26,7 +26,7 @@ namespace ns3
  * \ingroup scheduler
  * \brief UE representation of a scheduler with AI implementation
  */
-class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
+class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
 {
   public:
     /**
@@ -35,8 +35,8 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
      * \param beamId BeamId of the UE
      * \param fn A function that tells how many RB per RBG
      */
-    NrMacSchedulerUeInfoAI(uint16_t rnti, BeamId beamId, const GetRbPerRbgFn& fn)
-        : NrMacSchedulerUeInfo(rnti, beamId, fn)
+    NrMacSchedulerUeInfoAI(float alpha, uint16_t rnti, BeamId beamId, const GetRbPerRbgFn& fn)
+        : NrMacSchedulerUeInfoQos(alpha, rnti, beamId, fn)
     {
     }
 
@@ -127,6 +127,18 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
     void UpdateUlWeights(Weights& weights);
 
     /**
+     * \brief Update the reward for downlink
+     * \return the reward for the downlink
+     */
+    float GetDlReward();
+
+    /**
+     * \brief Update the reward for uplink
+     * \return the reward for the uplink
+     */
+    float GetUlReward();
+
+    /**
      * \brief Update the AI metric for downlink
      * \param totAssigned the resources assigned
      * \param timeWindow the time window
@@ -154,21 +166,6 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
                           double timeWindow,
                           const Ptr<const NrAmc>& amc);
 
-    /**
-     * \brief Calculate the Potential throughput for downlink
-     * \param assignableInIteration resources assignable
-     * \param amc a pointer to the AMC
-     */
-    void CalculatePotentialTPutDl(const NrMacSchedulerNs3::FTResources& assignableInIteration,
-                                  const Ptr<const NrAmc>& amc);
-
-    /**
-     * \brief Calculate the Potential throughput for uplink
-     * \param assignableInIteration resources assignable
-     * \param amc a pointer to the AMC
-     */
-    void CalculatePotentialTPutUl(const NrMacSchedulerNs3::FTResources& assignableInIteration,
-                                  const Ptr<const NrAmc>& amc);
 
     /**
      * \brief comparison function object (i.e. an object that satisfies the
@@ -268,18 +265,6 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfo
         return weight;
     }
 
-    double m_currTputDl{0.0};      //!< Current slot throughput in downlink
-    double m_avgTputDl{0.0};       //!< Average throughput in downlink during all the slots
-    double m_lastAvgTputDl{0.0};   //!< Last average throughput in downlink
-    double m_potentialTputDl{0.0}; //!< Potential throughput in downlink in one assignable resource
-                                   //!< (can be a symbol or a RBG)
-
-    double m_currTputUl{0.0};      //!< Current slot throughput in uplink
-    double m_avgTputUl{0.0};       //!< Average throughput in uplink during all the slots
-    double m_lastAvgTputUl{0.0};   //!< Last average throughput in uplink
-    double m_potentialTputUl{0.0}; //!< Potential throughput in uplink in one assignable resource
-                                   //!< (can be a symbol or a RBG)
-    
     Weights m_weightsDl;           //!< Weights assigned to the UEs in downlink
     Weights m_weightsUl;           //!< Weights assigned to the UEs in uplink
 };
