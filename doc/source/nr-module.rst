@@ -1496,6 +1496,18 @@ performs the assignment by taking into account the resource type and the
 ``e_rabGuaranteedBitRate`` of a flow. More details with respect to the algorithm
 considered for the QoS LC Assignment can found in [WNS3-QosSchedulers]_.
 
+.. _RLScheduler:
+
+RL-based Scheduler
+===================
+The 'NR' module includes a reinforcement learning (RL) based schedulers that perform the allocation
+of the available resources (i.e., symbols and Physical Resource Blocks (PRBs)) based on the RL Model.
+For this, the RL-based scheduler communicates with the RL model which is implemented using the ns3-gym 
+module to get the action to be taken for the current state. To get the actions, the RL-based scheduler
+calls the ``OpenGymEnv`` class in the ns3-gym module which is responsible for the communication with the RL model. 
+The ``OpenGymEnv`` class sends pre-formmated data including the current state to the RL model 
+which is defined using python through the ``OpenGymInterface`` class. The RL model then returns the action to be taken
+for the current state. The RL-based scheduler then uses the action to allocate the resources to the UEs.
 
 Timing relations
 ================
@@ -2357,6 +2369,13 @@ the QCI of which can be set as desired.
 
 The complete details of the simulation script are provided in
 https://cttc-lena.gitlab.io/nr/html/cttc-nr-multi-flow-qos-sched_8cc.html.
+
+cttc-nr-rl-based-sched.cc
+=========================
+The program ``examples/cttc-nr-rl-based-sched`` is an example that allows testing
+the performance of the RL-based schedulers (see :ref:`RLScheduler`) that is composed of
+1 gNB and various UEs, to test and validate the correct functionality of the new RL-based
+MAC schedulers.
 
 .. _Validation:
 
