@@ -700,6 +700,9 @@ class NrMacSchedulerNs3 : public NrMacScheduler
     Ptr<NrAmc> m_dlAmc; //!< AMC pointer
     Ptr<NrAmc> m_ulAmc; //!< AMC pointer
 
+    bool m_activeAIDL{false};
+    bool m_activeAIUL{false};
+
   private:
     /**
      * \brief Single UL allocation for calculating CQI and the number of reserved UL symbols in
