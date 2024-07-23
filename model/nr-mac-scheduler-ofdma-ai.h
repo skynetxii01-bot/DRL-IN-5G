@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "nr-mac-scheduler-ofdma-rr.h"
+#include "nr-mac-scheduler-ofdma-qos.h"
 
 #include "nr-mac-scheduler-ue-info-ai.h"
 
@@ -19,7 +19,7 @@ namespace ns3
  * \ingroup scheduler
  * \brief The OFDMA scheduler with AI implementation
  */
-class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaRR
+class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaQos
 {
   public:
     /**
