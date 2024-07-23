@@ -22,13 +22,13 @@ NrMacSchedulerTdmaAI::GetTypeId()
 {
     static TypeId tid =
         TypeId("ns3::NrMacSchedulerTdmaAI")
-            .SetParent<NrMacSchedulerTdmaRR>()
+            .SetParent<NrMacSchedulerTdmaQos>()
             .AddConstructor<NrMacSchedulerTdmaAI>();
     return tid;
 }
 
 NrMacSchedulerTdmaAI::NrMacSchedulerTdmaAI()
-    : NrMacSchedulerTdmaRR()
+    : NrMacSchedulerTdmaQos()
 {
 }
 

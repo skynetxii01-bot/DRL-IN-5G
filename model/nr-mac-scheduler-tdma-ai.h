@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "nr-mac-scheduler-tdma-rr.h"
+#include "nr-mac-scheduler-tdma-qos.h"
 
 #include "nr-mac-scheduler-ue-info-ai.h"
 
@@ -17,7 +17,7 @@ namespace ns3
  * \ingroup scheduler
  * \brief The TDMA scheduler with AI implementation
  */
-class NrMacSchedulerTdmaAI : public NrMacSchedulerTdmaRR
+class NrMacSchedulerTdmaAI : public NrMacSchedulerTdmaQos
 {
   public:
     /**
