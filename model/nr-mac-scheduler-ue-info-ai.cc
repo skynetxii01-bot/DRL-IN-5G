@@ -27,6 +27,7 @@ NrMacSchedulerUeInfoAi::GetDlObservation()
             std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
 
             LcObservation lcObservation = {m_rnti,
+                                           ueLcg.first,
                                            lcId,
                                            LCPtr->m_qci,
                                            LCPtr->m_priority,
@@ -52,6 +53,7 @@ NrMacSchedulerUeInfoAi::GetUlObservation()
             std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
 
             LcObservation lcObservation = {m_rnti,
+                                           ueLcg.first,
                                            lcId,
                                            LCPtr->m_qci,
                                            LCPtr->m_priority,
