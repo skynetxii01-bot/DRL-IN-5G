@@ -13,11 +13,10 @@
 #include "nr-phy.h"
 
 #include "beam-manager.h"
-#include "nr-gnb-net-device.h"
 #include "nr-net-device.h"
 #include "nr-spectrum-phy.h"
-#include "nr-ue-net-device.h"
 
+#include "ns3/pointer.h"
 #include "ns3/uniform-planar-array.h"
 #include <ns3/boolean.h>
 
@@ -153,7 +152,13 @@ NrMemberPhySapProvider::GetRbNum() const
 TypeId
 NrPhy::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::NrPhy").SetParent<Object>();
+    static TypeId tid = TypeId("ns3::NrPhy")
+                            .SetParent<Object>()
+                            .AddAttribute("NrSpectrumPhy",
+                                          "NrSpectrumPhy instance",
+                                          PointerValue(),
+                                          MakePointerAccessor(&NrPhy::m_spectrumPhy),
+                                          MakePointerChecker<NrSpectrumPhy>());
 
     return tid;
 }

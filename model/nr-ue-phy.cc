@@ -21,18 +21,21 @@
 
 #include <ns3/boolean.h>
 #include <ns3/double.h>
+#include <ns3/enum.h>
 #include <ns3/log.h>
 #include <ns3/lte-radio-bearer-tag.h>
 #include <ns3/node.h>
 #include <ns3/pointer.h>
 #include <ns3/simulator.h>
-#include <ns3/uinteger.h>
 
 #include <algorithm>
 #include <cfloat>
 
 namespace ns3
 {
+
+const Time NR_DEFAULT_PMI_INTERVAL_WB{MilliSeconds(10)}; // Wideband PMI update interval
+const Time NR_DEFAULT_PMI_INTERVAL_SB{MilliSeconds(2)};  // Subband PMI update interval
 
 NS_LOG_COMPONENT_DEFINE("NrUePhy");
 NS_OBJECT_ENSURE_REGISTERED(NrUePhy);
@@ -935,18 +938,18 @@ NrUePhy::DlData(const std::shared_ptr<DciInfoElementTdma>& dci)
     m_receptionEnabled = true;
     Time varTtiDuration = GetSymbolPeriod() * dci->m_numSym;
     NS_ASSERT(dci->m_rnti == m_rnti);
-    m_spectrumPhy->AddExpectedTb(dci->m_rnti,
-                                 dci->m_ndi,
-                                 dci->m_tbSize,
-                                 dci->m_mcs,
-                                 dci->m_rank,
-                                 FromRBGBitmaskToRBAssignment(dci->m_rbgBitmask),
-                                 dci->m_harqProcess,
-                                 dci->m_rv,
-                                 true,
-                                 dci->m_symStart,
-                                 dci->m_numSym,
-                                 m_currentSlot);
+    m_spectrumPhy->AddExpectedTb({dci->m_ndi,
+                                  dci->m_tbSize,
+                                  dci->m_mcs,
+                                  dci->m_rank,
+                                  dci->m_rnti,
+                                  FromRBGBitmaskToRBAssignment(dci->m_rbgBitmask),
+                                  dci->m_harqProcess,
+                                  dci->m_rv,
+                                  true,
+                                  dci->m_symStart,
+                                  dci->m_numSym,
+                                  m_currentSlot});
     m_reportDlTbSize(m_netDevice->GetObject<NrUeNetDevice>()->GetImsi(), dci->m_tbSize);
     NS_LOG_INFO("UE" << m_rnti << " RXing DL DATA frame for symbols " << +dci->m_symStart << "-"
                      << +(dci->m_symStart + dci->m_numSym - 1) << " num of rbg assigned: "

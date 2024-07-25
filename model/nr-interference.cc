@@ -7,13 +7,13 @@
 #include "nr-interference.h"
 
 #include "nr-mimo-chunk-processor.h"
+#include "nr-spectrum-signal-parameters.h"
 
 #include <ns3/log.h>
 #include <ns3/lte-chunk-processor.h>
 #include <ns3/simulator.h>
 
 #include <algorithm>
-#include <stdio.h>
 
 NS_LOG_COMPONENT_DEFINE("NrInterference");
 
@@ -251,7 +251,7 @@ NrInterference::GetEnergyDuration(double energyW)
     {
         noiseInterferenceW += i.GetDelta();
         end = i.GetTime();
-        NS_LOG_INFO("Delta: " << i.GetDelta() << "time: " << i.GetDelta());
+        NS_LOG_INFO("Delta: " << i.GetDelta() << "time: " << i.GetTime());
         if (end < now)
         {
             continue;
@@ -308,9 +308,9 @@ NrInterference::AppendEvent(Time startTime, Time endTime, double rxPowerW)
         // We empty the list until the current moment. To do so we
         // first we sum all the energies until the current moment
         // and save it in m_firstPower.
-        for (auto& i : m_niChanges)
+        for (NiChanges::iterator i = m_niChanges.begin(); i != nowIterator; i++)
         {
-            m_firstPower += i.GetDelta();
+            m_firstPower += i->GetDelta();
         }
         // then we remove all the events up to the current moment
         m_niChanges.erase(m_niChanges.begin(), nowIterator);
@@ -495,7 +495,7 @@ NrInterference::ComputeSinr(NrCovMat& outOfCellInterfCov,
     }
     else
     {
-        precMat = ComplexMatrixArray{chanSpct.GetNumRows(), 1, chanSpct.GetNumPages()};
+        precMat = ComplexMatrixArray{chanSpct.GetNumCols(), 1, chanSpct.GetNumPages()};
         for (size_t p = 0; p < chanSpct.GetNumPages(); p++)
         {
             precMat(0, 0, p) = 1.0;

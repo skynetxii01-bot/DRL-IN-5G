@@ -1126,14 +1126,14 @@ linear antenna arrays [TR38901]) and the introduction of antenna ports concept, 
 multiple antenna elements, multiple antenna elements are combined into one antenna port for digital processing (precoding),
 while analog processing (beamforming) is applied for the antenna elements within one antenna port.
 
-The MIMO model adopted in 5G-LENA can combine spatial multiplexing (with up to two streams per user, and 2 antenna ports)
-and beamforming (which applies for each of the streams). Multiple (up to two) streams are encoded in the same TB. PMI, RI and CQI
+The MIMO model adopted in 5G-LENA can combine spatial multiplexing (with up to four streams per user, and 32 antenna ports)
+and beamforming (which applies for each of the streams). Up to four streams are encoded in the same TB. PMI, RI and CQI
 are implemented and included as part of the CSI feedback. It follows the 3GPP codebook-based Type I model for precoding [TS38214]
 and assumes MMSE-IRC receiver. For precoding and rank selection, an exhaustive search is implemented. The number of streams is
 called the rank in the code, which affects the TBS and other performance characteristics. The inter-stream interference is correctly
-computed through matrix processing, and this is why the use of more of 2 streams requires the Eigen library to compute operations
+computed through matrix processing, and this is why the use of more than 2 streams requires the Eigen library to compute operations
 like matrix inverse, SVD, etc. As the SINR and interference computations are correctly modeled, following [Palomar2006]_, and multiple
-streams are fit in one TB, this allows using the SISO error model for MIMO error modeling, by vectorizing the 2D SINR (RBs, rank)
+streams are fit into one TB, this allows using the SISO error model for MIMO error modeling, by vectorizing the 2D SINR (RBs, rank)
 into 1D SINR (RBs x rank).
 
 In the following, we explain the design choices and implementation details to enable MIMO. This includes, 1) adding the "rank"
@@ -1233,15 +1233,17 @@ When a PMI update is requested, the optimal precoding matrices are updated using
 precoding matrices specified in a codebook that is compatible with 3GPP TS 38.214 Type-I. The procedure based on exhaustive search
 loops over all possible subband precoding matrices and computes the SINR that would be achieved by each precoding matrix,
 and selects the precoder resulting in the highest average SINR.
-Finally, the feedback message is created that includes the optimal rank, the corresponding optimal PMI and CQI.
+Finally, the feedback message is created that includes the optimal rank, the corresponding optimal precoding matrix and CQI.
 
 ``NrPmSearch`` is the base class and ``NrPmSearchFull`` is one possible specialization that finds PMI, RI and CQI. One could create
 another specialization of ``NrPmSearch`` that would implement a different algorithm to find PMI and RI values.
 
+The size of the subbands depends on the channel bandwidth, both in numbers of PRBs. It should be set accordingly to 3GPP
+TS 38.214 Table 5.2.1.4-2 via the attribute ``NrPmSearch::SubbandSize``.
+
 MIMO activation
 ###############
-``NrHelper`` is the class
-that is responsible of setting the ``NrPmSearch`` algorithm to ``NrUePhy`` instance, and the configuration of the corresponding parameters,
+``NrHelper`` is the class that is responsible of setting the ``NrPmSearch`` algorithm to ``NrUePhy`` instance, and the configuration of the corresponding parameters,
 such as the type of the search algorithm, the type of the codebook, and the rank limit. ``NrHelper`` also creates ``NrMimoChunkProcessor``
 and adds the necessary callbacks. These callbacks are:
 
@@ -2196,11 +2198,11 @@ if not configured differently, and can be used to plot the topology
 e.g., by running in the command line ``gnuplot hexagonal-topology.gnuplot``.
 
 The complete details of the simulation script are provided in:
-https://cttc-lena.gitlab.io/nr/html/lena-lte-comparison-campaign_8cc.html,
+https://cttc-lena.gitlab.io/nr/html/lena-lte-comparison-campaign_8cc_source.html,
 https://cttc-lena.gitlab.io/nr/html/lena-lte-comparison-user_8cc.html,
-https://cttc-lena.gitlab.io/nr/html/lena-lte-comparison_8cc.html,
-https://cttc-lena.gitlab.io/nr/html/lena-v1-utils_8cc.html,
-https://cttc-lena.gitlab.io/nr/html/lena-v2-utils_8cc.html.
+https://cttc-lena.gitlab.io/nr/html/lena-lte-comparison_8cc_source.html,
+https://cttc-lena.gitlab.io/nr/html/lena-v1-utils_8cc_source.html,
+https://cttc-lena.gitlab.io/nr/html/lena-v2-utils_8cc_source.html.
 
 .. _notchingExample:
 
@@ -2243,7 +2245,7 @@ The output is saved in database (simulation configuration and average SINR).
 The database is created in the root project directory if not configured differently.
 
 The complete details of the simulation script are provided in
-https://cttc-lena.gitlab.io/nr/html/cttc-realistic-beamforming_8cc.html.
+https://cttc-lena.gitlab.io/nr/html/nr-realistic-beamforming-test_8cc_source.html.
 
 cttc-nr-3gpp-calibration
 ========================
@@ -2340,7 +2342,7 @@ cttc-nr-traffic-generator-3gpp-xr.cc
 The program ``cttc-nr-traffic-generator-3gpp-xr`` included in the ``nr`` consists on a simple topology of 1 gNB and various UEs, and is used to show how to configure different 3GPP XR types of traffics or mixed scenario. It can be configured with different 3GPP XR traffic generators (by using XR traffic mixer helper). We provide a number of simulation parameters that can be configured through the command line. For example, we can define the number of VR UEs, the number of AR UEs and the number of CG UEs to be simulated, resulting in a mixed XR traffic scenario.
 
 The complete details of the simulation script are provided in
-https://cttc-lena.gitlab.io/nr/html/cttc-nr-traffic-generator-3gpp-xr_8cc.html.
+https://cttc-lena.gitlab.io/nr/html/traffic-generator-example_8cc_source.html.
 
 cttc-nr-simple-qos-sched.cc
 ===========================
@@ -2506,7 +2508,7 @@ expected. The test scenario consists of one gNB and a single UE attached to the
 gNB. Different positions of the UE are evaluated.
 
 The complete details of the validation script are provided in
-https://cttc-lena.gitlab.io/nr/html/nr-antenna-3gpp-model-conf_8cc.html
+https://cttc-lena.gitlab.io/nr/html/nr-antenna-3gpp-model-conf_8cc_source.html
 
 
 Test for TDD patterns
@@ -2536,7 +2538,7 @@ Test for spectrum phy
 Test case called ``nr-spectrum-phy-test`` sets two times noise figure and validates that such a setting is applied correctly to connected classes of SpectrumPhy, i.e., SpectrumModel, SpectrumValue, SpectrumChannel, etc.
 
 The complete details of the validation script are provided in
-https://cttc-lena.gitlab.io/nr/html/nr-spectrum-phy-test_8h.html
+https://cttc-lena.gitlab.io/nr/html/nr-spectrum-phy-test_8h_source.html
 
 
 Test for frame/subframe/slot number
@@ -2544,7 +2546,7 @@ Test for frame/subframe/slot number
 Test case called ``nr-test-sfnsf`` is a unit-test for the frame/subframe/slot numbering, along with the numerology. The test checks that the normalized slot number equals a monotonically-increased integer, for every numerology.
 
 The complete details of the validation script are provided in
-https://cttc-lena.gitlab.io/nr/html/nr-test-sfnsf_8cc.html
+https://cttc-lena.gitlab.io/nr/html/nr-test-sfnsf_8cc_source.html
 
 
 Test for NR timings
@@ -2552,7 +2554,7 @@ Test for NR timings
 Test case called ``nr-test-timings`` checks the NR timings for different numerologies. The test is run for every numerology, and validates that the slot number of certain events is the same as the one pre-recorded in manually computed tables. We currently check only RAR and DL DCI messages, improvements are more than welcome.
 
 The complete details of the validation script are provided in
-https://cttc-lena.gitlab.io/nr/html/nr-test-timings_8cc.html
+https://cttc-lena.gitlab.io/nr/html/nr-test-timings_8cc_source.html
 
 .. _notchingTest:
 
@@ -2587,7 +2589,7 @@ for the different distances for PUSCH and PUCCH::
     Config::SetDefault ("ns3::NrUePowerControl::PoNominalPucch", IntegerValue (-80));
 
 The complete details of the validation script are provided in
-https://cttc-lena.gitlab.io/nr/html/nr-uplink-power-control-test_8cc.html
+https://cttc-lena.gitlab.io/nr/html/nr-uplink-power-control-test_8cc_source.html
 
 
 Realistic beamforming test
@@ -2606,7 +2608,7 @@ realistic BF algorithm generates almost always the same decision as that of the 
 and so, the same pair of beams are selected for the two communicating devices.
 
 The complete details of the validation script are provided in
-https://cttc-lena.gitlab.io/nr/html/nr-realistic-beamforming-test_8cc.html
+https://cttc-lena.gitlab.io/nr/html/nr-realistic-beamforming-test_8cc_source.html.
 
 
 Test for NGMN traffic models
@@ -2616,7 +2618,7 @@ Test case called ``traffic-generator-test`` validates the NGMN traffic models. I
 TrafficGeneratorTestCase checks that the traffic generator is correctly being configured, connected to the socket, that different transport protocols can be used (TCP or UDP depending on the configuration), and that all the packets that are transmitted are correctly received. TrafficGeneratorNgmnFtpTestCase checks that the probability distributions of the NGMN FTP traffic generator are generated correctly. The test case calls 1000 times the function to generate the file size and the reading time of the NGMN FTP traffic generator, and it checks whether the mean file size value and the mean reading time correspond to those that are defined in the NGMN document. TrafficGeneratorNgmnGamingTestCase checks whether the mean value of the initial packet arrival time, the mean packet arrival time, and the mean packet size for the downlink and uplink NGMN gaming traffic generator have the expected values. TrafficGeneratorNgmnVideoTestCase checks that the probability distributions of the NGMN video traffic generator are generated correctly. The test case calls 1000 times the function to generate the packet size and the packet arrival time of the NGMN video traffic generator, and it checks whether the mean packet size value, and the mean packet arrival time correspond to those that are defined in the NGMN document. TrafficGeneratorNgmnVoipTestCase checks whether the implemented NGMN VoIP traffic generator provides the average source rate equal to the average VoIP source rate as defined in the NGMN document, i.e., the one of RTP AMR 12.2 traffic. For a given parameter specified in the NGMN document, such as encoder frame length, voice activity factor, etc.
 
 The complete details of the validation script are provided in
-https://cttc-lena.gitlab.io/nr/html/traffic-generator-test_8cc.html
+https://cttc-lena.gitlab.io/nr/html/traffic-generator-test_8cc_source.html
 
 
 

@@ -16,14 +16,13 @@
 #include "nr-ch-access-manager.h"
 #include "nr-gnb-net-device.h"
 #include "nr-net-device.h"
-#include "nr-radio-bearer-tag.h"
 #include "nr-ue-net-device.h"
 #include "nr-ue-phy.h"
 
 #include <ns3/boolean.h>
 #include <ns3/double.h>
+#include <ns3/enum.h>
 #include <ns3/log.h>
-#include <ns3/lte-radio-bearer-tag.h>
 #include <ns3/node-list.h>
 #include <ns3/node.h>
 #include <ns3/object-vector.h>
@@ -1309,18 +1308,18 @@ NrGnbPhy::UlData(const std::shared_ptr<DciInfoElementTdma>& dci)
 
     Time varTtiPeriod = GetSymbolPeriod() * dci->m_numSym;
 
-    m_spectrumPhy->AddExpectedTb(dci->m_rnti,
-                                 dci->m_ndi,
-                                 dci->m_tbSize,
-                                 dci->m_mcs,
-                                 dci->m_rank,
-                                 FromRBGBitmaskToRBAssignment(dci->m_rbgBitmask),
-                                 dci->m_harqProcess,
-                                 dci->m_rv,
-                                 false,
-                                 dci->m_symStart,
-                                 dci->m_numSym,
-                                 m_currentSlot);
+    m_spectrumPhy->AddExpectedTb({dci->m_ndi,
+                                  dci->m_tbSize,
+                                  dci->m_mcs,
+                                  dci->m_rank,
+                                  dci->m_rnti,
+                                  FromRBGBitmaskToRBAssignment(dci->m_rbgBitmask),
+                                  dci->m_harqProcess,
+                                  dci->m_rv,
+                                  false,
+                                  dci->m_symStart,
+                                  dci->m_numSym,
+                                  m_currentSlot});
 
     bool found = false;
     for (auto& i : m_deviceMap)
@@ -1818,7 +1817,7 @@ NrGnbPhy::ChannelAccessGranted(const Time& time)
     NS_LOG_INFO("Channel access granted for " << time << ", which corresponds to " << slotGranted
                                               << " slot in which each slot is " << GetSlotPeriod()
                                               << ". We lost " << toNextSlot);
-    NS_ASSERT(!m_channelLostTimer.IsRunning());
+    NS_ASSERT(!m_channelLostTimer.IsPending());
 
     if (slotGranted < 1)
     {

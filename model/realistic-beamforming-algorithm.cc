@@ -10,7 +10,6 @@
 #include "nr-mac-scheduler-ns3.h"
 #include "nr-ue-phy.h"
 
-#include <ns3/angles.h>
 #include <ns3/double.h>
 #include <ns3/lte-ue-rrc.h>
 #include <ns3/mobility-model.h>
@@ -51,8 +50,15 @@ RealisticBeamformingAlgorithm::AssignStreams(int64_t stream)
     return 1;
 }
 
-RealisticBeamformingAlgorithm::~RealisticBeamformingAlgorithm()
+void
+RealisticBeamformingAlgorithm::DoDispose()
 {
+    m_gnbDevice = nullptr;
+    m_ueDevice = nullptr;
+    m_gnbSpectrumPhy = nullptr;
+    m_ueSpectrumPhy = nullptr;
+    m_scheduler = nullptr;
+    m_nrUePhy = nullptr;
 }
 
 TypeId
@@ -360,11 +366,11 @@ RealisticBeamformingAlgorithm::GetBeamformingVectors()
                         << (M_PI * static_cast<double>(gnbSector) /
                                 static_cast<double>(gnbNumRows) -
                             0.5 * M_PI) /
-                               (M_PI)*180
+                               M_PI * 180
                         << " ue sector "
                         << (M_PI * static_cast<double>(ueSector) / static_cast<double>(ueNumRows) -
                             0.5 * M_PI) /
-                               (M_PI)*180);
+                               M_PI * 180);
 
                     if (max < estimatedLongTermMetric)
                     {
@@ -391,10 +397,10 @@ RealisticBeamformingAlgorithm::GetBeamformingVectors()
         << " txTheta " << maxTxTheta << " rxTheta " << maxRxTheta << " tx sector "
         << (M_PI * static_cast<double>(maxTxSector) / static_cast<double>(gnbNumRows) -
             0.5 * M_PI) /
-               (M_PI)*180
+               M_PI * 180
         << " rx sector "
         << (M_PI * static_cast<double>(maxRxSector) / static_cast<double>(ueNumRows) - 0.5 * M_PI) /
-               (M_PI)*180);
+               M_PI * 180);
 
     return bfPair;
 }

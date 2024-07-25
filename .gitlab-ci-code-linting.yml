@@ -94,7 +94,7 @@ clang-tidy-17:
       --disable-precompiled-headers
   script:
     - echo "Trimming compile_commands.json to filter out non-nr code"
-    - ../trim_compile_commands.py ./cmake-cache/compile_commands.json
+    - ../tools/trim_compile_commands.py ./cmake-cache/compile_commands.json
     - echo "Running full clang-tidy for nr"
     - run-clang-tidy-17 -p cmake-cache/ -quiet 1> ../clang-tidy-output.log 2> /dev/null
     # Check job results
@@ -107,3 +107,15 @@ clang-tidy-17:
     when: on_failure
   interruptible: true
   timeout: 3h
+
+# Check commit format and style
+check-commit-message:
+  stage: code-linting
+  image: python:latest
+  before_script:
+    - pip install GitPython
+  script:
+    # Check source code and commit messages
+    - ./tools/check-commit-message/check-commit-message.py
+  timeout: 1h
+  allow_failure: true

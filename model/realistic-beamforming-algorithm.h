@@ -7,7 +7,6 @@
 #ifndef SRC_NR_MODEL_REALISTIC_BEAMFORMING_ALGORITHM_H_
 #define SRC_NR_MODEL_REALISTIC_BEAMFORMING_ALGORITHM_H_
 
-#include "beam-id.h"
 #include "nr-gnb-net-device.h"
 #include "nr-mac-scheduler.h"
 #include "nr-spectrum-phy.h"
@@ -95,10 +94,6 @@ class RealisticBeamformingAlgorithm : public Object
     void Install(const Ptr<NrSpectrumPhy>& gnbSpectrumPhy,
                  const Ptr<NrSpectrumPhy>& ueSpectrumPhy,
                  const Ptr<NrMacScheduler>& scheduler);
-    /**
-     * \brief destructor
-     */
-    ~RealisticBeamformingAlgorithm() override;
     /**
      * \brief Get the type id
      * \return the type id of the class
@@ -246,6 +241,8 @@ class RealisticBeamformingAlgorithm : public Object
      * \brief Removes the "oldest" delayed update info - from the beginning of the queue
      */
     void RemoveUsedDelayedUpdateInfo();
+
+    void DoDispose() override;
 
     // attribute members, configuration variables
     double m_beamSearchAngleStep{30}; //!< The beam angle step that will be used to define the set

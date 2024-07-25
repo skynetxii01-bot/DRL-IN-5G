@@ -8,6 +8,8 @@
 
 namespace ns3
 {
+const BeamId OMNI_BEAM_ID = BeamId(UINT16_MAX, UINT16_MAX);
+const BeamId PREDEFINED_BEAM_ID = BeamId(UINT16_MAX - 1, UINT16_MAX - 1);
 
 std::ostream&
 operator<<(std::ostream& os, const BeamId& item)
@@ -64,8 +66,10 @@ BeamId::GetEmptyBeamId()
  * \return \f$ (((x1 + x2) * (x1 + x2 + 1))/2) + x2; \f$ max value 4294836225
  */
 static constexpr uint32_t
-Cantor(uint16_t x1, uint16_t x2)
+Cantor(uint16_t x1_16, uint16_t x2_16)
 {
+    uint32_t x1 = x1_16;
+    uint32_t x2 = x2_16;
     return (((x1 + x2) * (x1 + x2 + 1)) / 2) + x2;
 }
 

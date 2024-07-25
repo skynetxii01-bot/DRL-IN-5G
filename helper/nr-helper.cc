@@ -17,6 +17,7 @@
 #include <ns3/bwp-manager-algorithm.h>
 #include <ns3/bwp-manager-gnb.h>
 #include <ns3/bwp-manager-ue.h>
+#include <ns3/config.h>
 #include <ns3/epc-enb-application.h>
 #include <ns3/epc-helper.h>
 #include <ns3/epc-ue-nas.h>
@@ -37,6 +38,7 @@
 #include <ns3/nr-ue-mac.h>
 #include <ns3/nr-ue-net-device.h>
 #include <ns3/nr-ue-phy.h>
+#include <ns3/pointer.h>
 #include <ns3/three-gpp-channel-model.h>
 #include <ns3/three-gpp-propagation-loss-model.h>
 #include <ns3/three-gpp-spectrum-propagation-loss-model.h>
@@ -94,6 +96,11 @@ NrHelper::NrHelper()
 NrHelper::~NrHelper()
 {
     NS_LOG_FUNCTION(this);
+    if (m_beamformingHelper)
+    {
+        m_beamformingHelper->Dispose();
+    }
+    m_beamformingHelper = nullptr;
 }
 
 TypeId
@@ -1813,7 +1820,7 @@ NrHelper::EnableDlCtrlPathlossTraces(NetDeviceContainer& ueDevs)
         }
     }
 
-    Config::Connect("/NodeList/*/DeviceList/*/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/"
+    Config::Connect("/NodeList/*/DeviceList/*/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhy/"
                     "DlCtrlPathloss",
                     MakeBoundCallback(&NrPhyRxTrace::ReportDlCtrlPathloss, m_phyStats));
 }
@@ -1840,7 +1847,7 @@ NrHelper::EnableDlDataPathlossTraces(NetDeviceContainer& ueDevs)
         }
     }
 
-    Config::Connect("/NodeList/*/DeviceList/*/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhyList/*/"
+    Config::Connect("/NodeList/*/DeviceList/*/ComponentCarrierMapUe/*/NrUePhy/NrSpectrumPhy/"
                     "DlDataPathloss",
                     MakeBoundCallback(&NrPhyRxTrace::ReportDlDataPathloss, m_phyStats));
 }
@@ -1861,6 +1868,11 @@ NrHelper::SetPmSearchAttribute(const std::string& name, const AttributeValue& va
 void
 NrHelper::SetupGnbAntennas(const NrHelper::AntennaParams& ap)
 {
+    NS_ASSERT_MSG(((ap.nAntCols % ap.nHorizPorts) == 0),
+                  "The number of horizontal ports of gNB must divide number of element columns");
+    NS_ASSERT_MSG(((ap.nAntRows % ap.nVertPorts) == 0),
+                  "The number of vertical ports of gNB must divide number of element rows");
+
     auto antFactory = ObjectFactory{};
     antFactory.SetTypeId(ap.antennaElem);
     SetGnbAntennaAttribute("AntennaElement", PointerValue(antFactory.Create()));
@@ -1876,6 +1888,11 @@ NrHelper::SetupGnbAntennas(const NrHelper::AntennaParams& ap)
 void
 NrHelper::SetupUeAntennas(const NrHelper::AntennaParams& ap)
 {
+    NS_ASSERT_MSG(((ap.nAntCols % ap.nHorizPorts) == 0),
+                  "The number of horizontal ports of UE must divide number of element columns");
+    NS_ASSERT_MSG(((ap.nAntRows % ap.nVertPorts) == 0),
+                  "The number of vertical ports of UE must divide number of element rows");
+
     auto antFactory = ObjectFactory{};
     antFactory.SetTypeId(ap.antennaElem);
     SetUeAntennaAttribute("AntennaElement", PointerValue(antFactory.Create()));
@@ -1896,6 +1913,8 @@ NrHelper::SetupMimoPmi(const NrHelper::MimoPmiParams& mp)
     auto searchTypeId = TypeId::LookupByName(mp.pmSearchMethod);
     SetPmSearchTypeId(searchTypeId);
     SetPmSearchAttribute("RankLimit", UintegerValue(mp.rankLimit));
+    SetPmSearchAttribute("SubbandSize", UintegerValue(mp.subbandSize));
+    SetPmSearchAttribute("DownsamplingTechnique", StringValue(mp.downsamplingTechnique));
     if (searchTypeId == NrPmSearchFull::GetTypeId())
     {
         SetPmSearchAttribute("NrPmSearchFull::CodebookType",
