@@ -700,8 +700,8 @@ class NrMacSchedulerNs3 : public NrMacScheduler
     Ptr<NrAmc> m_dlAmc; //!< AMC pointer
     Ptr<NrAmc> m_ulAmc; //!< AMC pointer
 
-    bool m_activeAIDL{false};
-    bool m_activeAIUL{false};
+    bool m_activeDlAi{false}; //!< Flag for activating AI for downlink
+    bool m_activeUlAi{false}; //!< Flag for activating AI for uplink
 
   private:
     /**
