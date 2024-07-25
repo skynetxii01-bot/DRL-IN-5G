@@ -264,8 +264,8 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
         return weight;
     }
 
-    Weights m_weightsDl; //!< Weights assigned to the UEs in downlink
-    Weights m_weightsUl; //!< Weights assigned to the UEs in uplink
+    Weights m_weightsDl; //!< Weights assigned to each flow for a UE in the downlink
+    Weights m_weightsUl; //!< Weights assigned to each flow for a UE in the uplink
 };
 
 } // namespace ns3
