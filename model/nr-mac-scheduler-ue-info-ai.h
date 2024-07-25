@@ -79,22 +79,6 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     }
 
     /**
-     * \brief Reset the DL avg Th to the last value
-     */
-    void ResetDlMetric() override
-    {
-        NrMacSchedulerUeInfoQos::ResetDlMetric();
-    }
-
-    /**
-     * \brief Reset the UL avg Th to the last value
-     */
-    void ResetUlMetric() override
-    {
-        NrMacSchedulerUeInfoQos::ResetUlMetric();
-    }
-
-    /**
      * \brief Get the current observation for downlink
      * \param ue the UE
      * \return a vector of double with the current observation
