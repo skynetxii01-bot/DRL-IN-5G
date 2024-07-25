@@ -60,12 +60,8 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      */
     void ResetDlSchedInfo() override
     {
-        m_lastAvgTputDl = m_avgTputDl;
-        m_avgTputDl = 0.0;
-        m_currTputDl = 0.0;
-        m_potentialTputDl = 0.0;
         m_weightsDl.clear();
-        NrMacSchedulerUeInfo::ResetDlSchedInfo();
+        NrMacSchedulerUeInfoQos::ResetDlSchedInfo();
     }
 
     /**
@@ -78,12 +74,8 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      */
     void ResetUlSchedInfo() override
     {
-        m_lastAvgTputUl = m_avgTputUl;
-        m_avgTputUl = 0.0;
-        m_currTputUl = 0.0;
-        m_potentialTputUl = 0.0;
         m_weightsUl.clear();
-        NrMacSchedulerUeInfo::ResetUlSchedInfo();
+        NrMacSchedulerUeInfoQos::ResetUlSchedInfo();
     }
 
     /**
@@ -91,8 +83,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      */
     void ResetDlMetric() override
     {
-        NrMacSchedulerUeInfo::ResetDlMetric();
-        m_avgTputDl = m_lastAvgTputDl;
+        NrMacSchedulerUeInfoQos::ResetDlMetric();
     }
 
     /**
@@ -100,8 +91,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      */
     void ResetUlMetric() override
     {
-        NrMacSchedulerUeInfo::ResetUlMetric();
-        m_avgTputUl = m_lastAvgTputUl;
+        NrMacSchedulerUeInfoQos::ResetUlMetric();
     }
 
     /**
