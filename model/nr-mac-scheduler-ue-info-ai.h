@@ -10,17 +10,19 @@
 
 namespace ns3
 {
-  struct pair_hash {
+struct pair_hash
+{
     template <class T1, class T2>
-    std::size_t operator()(const std::pair<T1, T2>& p) const {
-      auto hash1 = std::hash<T1>{}(p.first);
-      auto hash2 = std::hash<T2>{}(p.second);
-      return hash1 ^ (hash2 << 1); // 비트 시프트와 XOR을 사용하여 두 해시 값을 결합
+    std::size_t operator()(const std::pair<T1, T2>& p) const
+    {
+        auto hash1 = std::hash<T1>{}(p.first);
+        auto hash2 = std::hash<T2>{}(p.second);
+        return hash1 ^ (hash2 << 1); // 비트 시프트와 XOR을 사용하여 두 해시 값을 결합
     }
-  };
+};
 
-  typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
-  typedef std::vector<std::vector<double>> Observation;
+typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
+typedef std::vector<std::vector<double>> Observation;
 
 /**
  * \ingroup scheduler
@@ -94,11 +96,11 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
         m_avgTputUl = m_lastAvgTputUl;
     }
 
-    /** 
+    /**
      * \brief Get the current observation for downlink
      * \param ue the UE
      * \return a vector of double with the current observation
-    */
+     */
     Observation GetDlObservation();
 
     /**
@@ -107,7 +109,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * \return a vector of double with the current observation
      */
     Observation GetUlObservation();
-    
+
     /**
      * \brief Update the weights for downlink
      * \param weights the weights assigned to the UEs
@@ -166,7 +168,6 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
                           double timeWindow,
                           const Ptr<const NrAmc>& amc);
 
-
     /**
      * \brief comparison function object (i.e. an object that satisfies the
      * requirements of Compare) which returns ​true if the first argument is less
@@ -210,7 +211,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
 
                 NS_ASSERT_MSG(it != uePtr->m_weightsDl.end(), "Weight not found");
                 weight += it->second;
-                
+
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
             }
         }
@@ -258,15 +259,15 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
 
                 NS_ASSERT_MSG(it != uePtr->m_weightsUl.end(), "Weight not found");
                 weight += it->second;
-                
+
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
             }
         }
         return weight;
     }
 
-    Weights m_weightsDl;           //!< Weights assigned to the UEs in downlink
-    Weights m_weightsUl;           //!< Weights assigned to the UEs in uplink
+    Weights m_weightsDl; //!< Weights assigned to the UEs in downlink
+    Weights m_weightsUl; //!< Weights assigned to the UEs in uplink
 };
 
 } // namespace ns3

@@ -1500,13 +1500,13 @@ considered for the QoS LC Assignment can found in [WNS3-QosSchedulers]_.
 
 RL-based Scheduler
 ===================
-The 'NR' module includes reinforcement learning (RL)-based schedulers that allocate 
-available resources (i.e., symbols and Physical Resource Blocks (PRBs)) based on the RL model. 
-The RL-based scheduler communicates with the RL model, implemented using the ns3-gym module, 
-to determine the actions for the current state. To obtain these actions, the RL-based scheduler 
-calls the ``OpenGymEnv`` class in the ns3-gym module, which handles communication with the RL model. 
-The ``OpenGymEnv`` class sends pre-formatted data, including the current state, to the RL model, defined using Python, 
-through the ``OpenGymInterface`` class. The RL model then returns the appropriate actions for the current state. 
+The 'NR' module includes reinforcement learning (RL)-based schedulers that allocate
+available resources (i.e., symbols and Physical Resource Blocks (PRBs)) based on the RL model.
+The RL-based scheduler communicates with the RL model, implemented using the ns3-gym module,
+to determine the actions for the current state. To obtain these actions, the RL-based scheduler
+calls the ``OpenGymEnv`` class in the ns3-gym module, which handles communication with the RL model.
+The ``OpenGymEnv`` class sends pre-formatted data, including the current state, to the RL model, defined using Python,
+through the ``OpenGymInterface`` class. The RL model then returns the appropriate actions for the current state.
 The RL-based scheduler uses these actions to allocate resources to the UEs.
 
 Timing relations
