@@ -16,7 +16,7 @@ namespace ns3
  * \ingroup scheduler
  * \brief The TDMA scheduler with AI implementation
  */
-class NrMacSchedulerTdmaAI : public NrMacSchedulerTdmaQos
+class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
 {
   public:
     /**
@@ -28,18 +28,18 @@ class NrMacSchedulerTdmaAI : public NrMacSchedulerTdmaQos
     /**
      * \brief NrMacSchedulerTdma constructor
      */
-    NrMacSchedulerTdmaAI();
+    NrMacSchedulerTdmaAi();
 
     /**
      * \brief NrMacSchedulerTdma deconstructor
      */
-    ~NrMacSchedulerTdmaAI() override
+    ~NrMacSchedulerTdmaAi() override
     {
     }
 
   protected:
     /**
-     * \brief Create an UE representation of the type NrMacSchedulerUeInfoAI
+     * \brief Create an UE representation of the type NrMacSchedulerUeInfoAi
      * \param params parameters
      * \return NrMacSchedulerUeInfo instance
      */
@@ -125,9 +125,9 @@ class NrMacSchedulerTdmaAI : public NrMacSchedulerTdmaQos
      * - A boolean value indicating whether the game is over (true) or not (false)
      * - A float value representing the reward
      * - A string value representing extra information
-     * - A pointer to a const NrMacSchedulerOfdmaAI instance
+     * - A pointer to a const NrMacSchedulerOfdmaAi instance
      */
-    typedef Callback<void, Observation, bool, float, std::string, const NrMacSchedulerTdmaAI*>
+    typedef Callback<void, Observation, bool, float, std::string, const NrMacSchedulerTdmaAi*>
         NotifyCb;
     /**
      * \brief Set the notify callback function.

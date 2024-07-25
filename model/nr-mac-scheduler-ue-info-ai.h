@@ -28,16 +28,16 @@ typedef std::vector<std::vector<double>> Observation;
  * \ingroup scheduler
  * \brief UE representation of a scheduler with AI implementation
  */
-class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
+class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
 {
   public:
     /**
-     * \brief NrMacSchedulerUeInfoAI constructor
+     * \brief NrMacSchedulerUeInfoAi constructor
      * \param rnti RNTI of the UE
      * \param beamId BeamId of the UE
      * \param fn A function that tells how many RB per RBG
      */
-    NrMacSchedulerUeInfoAI(float alpha, uint16_t rnti, BeamId beamId, const GetRbPerRbgFn& fn)
+    NrMacSchedulerUeInfoAi(float alpha, uint16_t rnti, BeamId beamId, const GetRbPerRbgFn& fn)
         : NrMacSchedulerUeInfoQos(alpha, rnti, beamId, fn)
     {
     }
@@ -48,7 +48,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * Set the last average throughput to the current average throughput,
      * and zeroes the average throughput as well as the current throughput.
      *
-     * It calls also NrMacSchedulerUeInfoAI::ResetDlSchedInfo.
+     * It calls also NrMacSchedulerUeInfoAi::ResetDlSchedInfo.
      */
     void ResetDlSchedInfo() override
     {
@@ -66,7 +66,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * Set the last average throughput to the current average throughput,
      * and zeroes the average throughput as well as the current throughput.
      *
-     * It also calls NrMacSchedulerUeInfoAI::ResetUlSchedInfo.
+     * It also calls NrMacSchedulerUeInfoAi::ResetUlSchedInfo.
      */
     void ResetUlSchedInfo() override
     {
@@ -150,7 +150,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * the assigned resources (in form of TBS) and the time window.
      * It gets the tbSize by calling NrMacSchedulerUeInfo::UpdateDlMetric.
      */
-    void UpdateDlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
+    void UpdateDlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                           double timeWindow,
                           const Ptr<const NrAmc>& amc);
 
@@ -164,7 +164,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * the assigned resources (in form of TBS) and the time window.
      * It gets the tbSize by calling NrMacSchedulerUeInfo::UpdateUlMetric.
      */
-    void UpdateUlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
+    void UpdateUlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                           double timeWindow,
                           const Ptr<const NrAmc>& amc);
 
@@ -181,13 +181,13 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
     static bool CompareUeWeightsDl(const NrMacSchedulerNs3::UePtrAndBufferReq& lue,
                                    const NrMacSchedulerNs3::UePtrAndBufferReq& rue)
     {
-        double lAIMetric = CalculateDlWeight(lue);
-        double rAIMetric = CalculateDlWeight(rue);
+        double lAiMetric = CalculateDlWeight(lue);
+        double rAiMetric = CalculateDlWeight(rue);
 
-        NS_ASSERT_MSG(lAIMetric > 0, "Weight must be greater than zero");
-        NS_ASSERT_MSG(rAIMetric > 0, "Weight must be greater than zero");
+        NS_ASSERT_MSG(lAiMetric > 0, "Weight must be greater than zero");
+        NS_ASSERT_MSG(rAiMetric > 0, "Weight must be greater than zero");
 
-        return (lAIMetric > rAIMetric);
+        return (lAiMetric > rAiMetric);
     }
 
     /**
@@ -198,7 +198,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
     static double CalculateDlWeight(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
     {
         double weight = 0;
-        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAI*>(ue.first.get());
+        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAi*>(ue.first.get());
 
         for (const auto& ueLcg : ue.first->m_dlLCG)
         {
@@ -232,10 +232,10 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
     static bool CompareUeWeightsUl(const NrMacSchedulerNs3::UePtrAndBufferReq& lue,
                                    const NrMacSchedulerNs3::UePtrAndBufferReq& rue)
     {
-        double lAIMetric = CalculateUlWeight(lue);
-        double rAIMetric = CalculateUlWeight(rue);
+        double lAiMetric = CalculateUlWeight(lue);
+        double rAiMetric = CalculateUlWeight(rue);
 
-        return (lAIMetric > rAIMetric);
+        return (lAiMetric > rAiMetric);
     }
 
     /**
@@ -246,7 +246,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
     static double CalculateUlWeight(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
     {
         double weight = 0;
-        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAI*>(ue.first.get());
+        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAi*>(ue.first.get());
 
         for (const auto& ueLcg : ue.first->m_ulLCG)
         {

@@ -11,10 +11,10 @@
 namespace ns3
 {
 
-NS_LOG_COMPONENT_DEFINE("NrMacSchedulerUeInfoAI");
+NS_LOG_COMPONENT_DEFINE("NrMacSchedulerUeInfoAi");
 
 Observation
-NrMacSchedulerUeInfoAI::GetDlObservation()
+NrMacSchedulerUeInfoAi::GetDlObservation()
 {
     NS_LOG_FUNCTION(this);
     std::vector<std::vector<double>> observations;
@@ -41,7 +41,7 @@ NrMacSchedulerUeInfoAI::GetDlObservation()
 }
 
 Observation
-NrMacSchedulerUeInfoAI::GetUlObservation()
+NrMacSchedulerUeInfoAi::GetUlObservation()
 {
     NS_LOG_FUNCTION(this);
     std::vector<std::vector<double>> observations;
@@ -68,19 +68,19 @@ NrMacSchedulerUeInfoAI::GetUlObservation()
 }
 
 void
-NrMacSchedulerUeInfoAI::UpdateDlWeights(Weights& weights)
+NrMacSchedulerUeInfoAi::UpdateDlWeights(Weights& weights)
 {
     m_weightsDl = weights;
 }
 
 void
-NrMacSchedulerUeInfoAI::UpdateUlWeights(Weights& weights)
+NrMacSchedulerUeInfoAi::UpdateUlWeights(Weights& weights)
 {
     m_weightsUl = weights;
 }
 
 float
-NrMacSchedulerUeInfoAI::GetDlReward()
+NrMacSchedulerUeInfoAi::GetDlReward()
 {
     float reward = 0.0;
     for (const auto& ueLcg : m_dlLCG)
@@ -100,7 +100,7 @@ NrMacSchedulerUeInfoAI::GetDlReward()
 }
 
 float
-NrMacSchedulerUeInfoAI::GetUlReward()
+NrMacSchedulerUeInfoAi::GetUlReward()
 {
     float reward = 0.0;
     for (const auto& ueLcg : m_ulLCG)
@@ -120,7 +120,7 @@ NrMacSchedulerUeInfoAI::GetUlReward()
 }
 
 void
-NrMacSchedulerUeInfoAI::UpdateDlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
+NrMacSchedulerUeInfoAi::UpdateDlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                                          double timeWindow,
                                          const Ptr<const NrAmc>& amc)
 {
@@ -129,7 +129,7 @@ NrMacSchedulerUeInfoAI::UpdateDlAIMetric(const NrMacSchedulerNs3::FTResources& t
 }
 
 void
-NrMacSchedulerUeInfoAI::UpdateUlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
+NrMacSchedulerUeInfoAi::UpdateUlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                                          double timeWindow,
                                          const Ptr<const NrAmc>& amc)
 {

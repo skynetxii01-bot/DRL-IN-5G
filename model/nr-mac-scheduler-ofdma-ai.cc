@@ -12,106 +12,106 @@
 
 namespace ns3
 {
-NS_LOG_COMPONENT_DEFINE("NrMacSchedulerOfdmaAI");
-NS_OBJECT_ENSURE_REGISTERED(NrMacSchedulerOfdmaAI);
+NS_LOG_COMPONENT_DEFINE("NrMacSchedulerOfdmaAi");
+NS_OBJECT_ENSURE_REGISTERED(NrMacSchedulerOfdmaAi);
 
 TypeId
-NrMacSchedulerOfdmaAI::GetTypeId()
+NrMacSchedulerOfdmaAi::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::NrMacSchedulerOfdmaAI")
+    static TypeId tid = TypeId("ns3::NrMacSchedulerOfdmaAi")
                             .SetParent<NrMacSchedulerOfdmaQos>()
-                            .AddConstructor<NrMacSchedulerOfdmaAI>();
+                            .AddConstructor<NrMacSchedulerOfdmaAi>();
     return tid;
 }
 
-NrMacSchedulerOfdmaAI::NrMacSchedulerOfdmaAI()
+NrMacSchedulerOfdmaAi::NrMacSchedulerOfdmaAi()
     : NrMacSchedulerOfdmaQos()
 {
 }
 
 std::shared_ptr<NrMacSchedulerUeInfo>
-NrMacSchedulerOfdmaAI::CreateUeRepresentation(
+NrMacSchedulerOfdmaAi::CreateUeRepresentation(
     const NrMacCschedSapProvider::CschedUeConfigReqParameters& params) const
 {
     NS_LOG_FUNCTION(this);
-    return std::make_shared<NrMacSchedulerUeInfoAI>(
+    return std::make_shared<NrMacSchedulerUeInfoAi>(
         m_alpha,
         params.m_rnti,
         params.m_beamId,
-        std::bind(&NrMacSchedulerOfdmaAI::GetNumRbPerRbg, this));
+        std::bind(&NrMacSchedulerOfdmaAi::GetNumRbPerRbg, this));
 }
 
 std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                    const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
-NrMacSchedulerOfdmaAI::GetUeCompareDlFn() const
+NrMacSchedulerOfdmaAi::GetUeCompareDlFn() const
 {
-    return NrMacSchedulerUeInfoAI::CompareUeWeightsDl;
+    return NrMacSchedulerUeInfoAi::CompareUeWeightsDl;
 }
 
 std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                    const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
-NrMacSchedulerOfdmaAI::GetUeCompareUlFn() const
+NrMacSchedulerOfdmaAi::GetUeCompareUlFn() const
 {
-    return NrMacSchedulerUeInfoAI::CompareUeWeightsUl;
+    return NrMacSchedulerUeInfoAi::CompareUeWeightsUl;
 }
 
 void
-NrMacSchedulerOfdmaAI::AssignedDlResources(const UePtrAndBufferReq& ue,
+NrMacSchedulerOfdmaAi::AssignedDlResources(const UePtrAndBufferReq& ue,
                                            [[maybe_unused]] const FTResources& assigned,
                                            const FTResources& totAssigned) const
 {
     NS_LOG_FUNCTION(this);
-    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
-    uePtr->UpdateDlAIMetric(totAssigned, m_timeWindow, m_dlAmc);
+    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
+    uePtr->UpdateDlAiMetric(totAssigned, m_timeWindow, m_dlAmc);
 }
 
 void
-NrMacSchedulerOfdmaAI::NotAssignedDlResources(
+NrMacSchedulerOfdmaAi::NotAssignedDlResources(
     const NrMacSchedulerNs3::UePtrAndBufferReq& ue,
     [[maybe_unused]] const NrMacSchedulerNs3::FTResources& notAssigned,
     const NrMacSchedulerNs3::FTResources& totAssigned) const
 {
     NS_LOG_FUNCTION(this);
-    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
-    uePtr->UpdateDlAIMetric(totAssigned, m_timeWindow, m_dlAmc);
+    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
+    uePtr->UpdateDlAiMetric(totAssigned, m_timeWindow, m_dlAmc);
 }
 
 void
-NrMacSchedulerOfdmaAI::AssignedUlResources(const UePtrAndBufferReq& ue,
+NrMacSchedulerOfdmaAi::AssignedUlResources(const UePtrAndBufferReq& ue,
                                            [[maybe_unused]] const FTResources& assigned,
                                            const FTResources& totAssigned) const
 {
     NS_LOG_FUNCTION(this);
-    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
-    uePtr->UpdateUlAIMetric(totAssigned, m_timeWindow, m_ulAmc);
+    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
+    uePtr->UpdateUlAiMetric(totAssigned, m_timeWindow, m_ulAmc);
 }
 
 void
-NrMacSchedulerOfdmaAI::NotAssignedUlResources(
+NrMacSchedulerOfdmaAi::NotAssignedUlResources(
     const NrMacSchedulerNs3::UePtrAndBufferReq& ue,
     [[maybe_unused]] const NrMacSchedulerNs3::FTResources& notAssigned,
     const NrMacSchedulerNs3::FTResources& totAssigned) const
 {
     NS_LOG_FUNCTION(this);
-    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
-    uePtr->UpdateUlAIMetric(totAssigned, m_timeWindow, m_ulAmc);
+    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
+    uePtr->UpdateUlAiMetric(totAssigned, m_timeWindow, m_ulAmc);
 }
 
 void
-NrMacSchedulerOfdmaAI::SetNotifyCb(NotifyCb notifyCb)
+NrMacSchedulerOfdmaAi::SetNotifyCb(NotifyCb notifyCb)
 {
     NS_LOG_FUNCTION(this);
     m_notifyCb = notifyCb;
 }
 
 Observation
-NrMacSchedulerOfdmaAI::GetUeObservationsDl(std::vector<UePtrAndBufferReq>& ueVector) const
+NrMacSchedulerOfdmaAi::GetUeObservationsDl(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
     Observation observations;
     for (const auto& ue : ueVector)
     {
-        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
+        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
         Observation ueObservation = uePtr->GetDlObservation();
         observations.insert(observations.end(), ueObservation.begin(), ueObservation.end());
     }
@@ -119,13 +119,13 @@ NrMacSchedulerOfdmaAI::GetUeObservationsDl(std::vector<UePtrAndBufferReq>& ueVec
 }
 
 Observation
-NrMacSchedulerOfdmaAI::GetUeObservationsUl(std::vector<UePtrAndBufferReq>& ueVector) const
+NrMacSchedulerOfdmaAi::GetUeObservationsUl(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
     Observation observations;
     for (const auto& ue : ueVector)
     {
-        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
+        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
         Observation ueObservation = uePtr->GetUlObservation();
         observations.insert(observations.end(), ueObservation.begin(), ueObservation.end());
     }
@@ -133,47 +133,47 @@ NrMacSchedulerOfdmaAI::GetUeObservationsUl(std::vector<UePtrAndBufferReq>& ueVec
 }
 
 bool
-NrMacSchedulerOfdmaAI::GetIsGameOverDl() const
+NrMacSchedulerOfdmaAi::GetIsGameOverDl() const
 {
     NS_LOG_FUNCTION(this);
     return false;
 }
 
 bool
-NrMacSchedulerOfdmaAI::GetIsGameOverUl() const
+NrMacSchedulerOfdmaAi::GetIsGameOverUl() const
 {
     NS_LOG_FUNCTION(this);
     return false;
 }
 
 float
-NrMacSchedulerOfdmaAI::GetUeRewardsDl(std::vector<UePtrAndBufferReq>& ueVector) const
+NrMacSchedulerOfdmaAi::GetUeRewardsDl(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
     float reward = 0.0;
     for (const auto& ue : ueVector)
     {
-        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
+        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
         reward += uePtr->GetDlReward();
     }
     return reward;
 }
 
 float
-NrMacSchedulerOfdmaAI::GetUeRewardsUl(std::vector<UePtrAndBufferReq>& ueVector) const
+NrMacSchedulerOfdmaAi::GetUeRewardsUl(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
     float reward = 0.0;
     for (const auto& ue : ueVector)
     {
-        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
+        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
         reward += uePtr->GetUlReward();
     }
     return reward;
 }
 
 void
-NrMacSchedulerOfdmaAI::CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const
+NrMacSchedulerOfdmaAi::CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
     if (!m_notifyCb.IsNull())
@@ -188,7 +188,7 @@ NrMacSchedulerOfdmaAI::CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) 
 }
 
 void
-NrMacSchedulerOfdmaAI::CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const
+NrMacSchedulerOfdmaAi::CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
     if (!m_notifyCb.IsNull())
@@ -203,26 +203,26 @@ NrMacSchedulerOfdmaAI::CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) 
 }
 
 void
-NrMacSchedulerOfdmaAI::UpdateAllUeWeightsDl(std::unordered_map<uint8_t, Weights>& ueWeights,
+NrMacSchedulerOfdmaAi::UpdateAllUeWeightsDl(std::unordered_map<uint8_t, Weights>& ueWeights,
                                             std::vector<UePtrAndBufferReq>& ueVector)
 {
     NS_LOG_FUNCTION(this);
     for (const auto& ue : ueVector)
     {
-        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
+        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
         Weights weights = ueWeights.at(uePtr->m_rnti);
         uePtr->UpdateDlWeights(weights);
     }
 }
 
 void
-NrMacSchedulerOfdmaAI::UpdateAllUeWeightsUl(std::unordered_map<uint8_t, Weights>& ueWeights,
+NrMacSchedulerOfdmaAi::UpdateAllUeWeightsUl(std::unordered_map<uint8_t, Weights>& ueWeights,
                                             std::vector<UePtrAndBufferReq>& ueVector)
 {
     NS_LOG_FUNCTION(this);
     for (const auto& ue : ueVector)
     {
-        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAI>(ue.first);
+        auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
         Weights weights = ueWeights.at(uePtr->m_rnti);
         uePtr->UpdateUlWeights(weights);
     }

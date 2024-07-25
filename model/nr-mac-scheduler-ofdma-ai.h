@@ -18,7 +18,7 @@ namespace ns3
  * \ingroup scheduler
  * \brief The OFDMA scheduler with AI implementation
  */
-class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaQos
+class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
 {
   public:
     /**
@@ -28,14 +28,14 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaQos
     static TypeId GetTypeId();
 
     /**
-     * \brief NrMacSchedulerOfdmaAI constructor
+     * \brief NrMacSchedulerOfdmaAi constructor
      */
-    NrMacSchedulerOfdmaAI();
+    NrMacSchedulerOfdmaAi();
 
     /**
      * \brief Deconstructor
      */
-    ~NrMacSchedulerOfdmaAI() override
+    ~NrMacSchedulerOfdmaAi() override
     {
     }
 
@@ -127,9 +127,9 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaQos
      * - A boolean value indicating whether the game is over (true) or not (false)
      * - A float value representing the reward
      * - A string value representing extra information
-     * - A pointer to a const NrMacSchedulerOfdmaAI instance
+     * - A pointer to a const NrMacSchedulerOfdmaAi instance
      */
-    typedef Callback<void, Observation, bool, float, std::string, const NrMacSchedulerOfdmaAI*>
+    typedef Callback<void, Observation, bool, float, std::string, const NrMacSchedulerOfdmaAi*>
         NotifyCb;
     /**
      * \brief Set the notify callback function.
