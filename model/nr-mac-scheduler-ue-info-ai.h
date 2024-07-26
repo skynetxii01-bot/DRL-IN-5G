@@ -185,34 +185,6 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     float GetUlReward();
 
     /**
-     * \brief Update the AI metric for downlink
-     * \param totAssigned the resources assigned
-     * \param timeWindow the time window
-     * \param amc a pointer to the AMC
-     *
-     * Updates m_currTputDl and m_avgTputDl by keeping in consideration
-     * the assigned resources (in form of TBS) and the time window.
-     * It gets the tbSize by calling NrMacSchedulerUeInfo::UpdateDlMetric.
-     */
-    void UpdateDlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
-                          double timeWindow,
-                          const Ptr<const NrAmc>& amc);
-
-    /**
-     * \brief Update the AI metric for uplink
-     * \param totAssigned the resources assigned
-     * \param timeWindow the time window
-     * \param amc a pointer to the AMC
-     *
-     * Updates m_currTputUl and m_avgTputUl by keeping in consideration
-     * the assigned resources (in form of TBS) and the time window.
-     * It gets the tbSize by calling NrMacSchedulerUeInfo::UpdateUlMetric.
-     */
-    void UpdateUlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
-                          double timeWindow,
-                          const Ptr<const NrAmc>& amc);
-
-    /**
      * \brief comparison function object (i.e. an object that satisfies the
      * requirements of Compare) which returns ​true if the first argument is less
      * than (i.e. is ordered before) the second.

@@ -117,22 +117,4 @@ NrMacSchedulerUeInfoAi::GetUlReward()
     return reward;
 }
 
-void
-NrMacSchedulerUeInfoAi::UpdateDlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
-                                         double timeWindow,
-                                         const Ptr<const NrAmc>& amc)
-{
-    NS_LOG_FUNCTION(this);
-    NrMacSchedulerUeInfoQos::UpdateDlQosMetric(totAssigned, timeWindow, amc);
-}
-
-void
-NrMacSchedulerUeInfoAi::UpdateUlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
-                                         double timeWindow,
-                                         const Ptr<const NrAmc>& amc)
-{
-    NS_LOG_FUNCTION(this);
-    NrMacSchedulerUeInfoQos::UpdateUlQosMetric(totAssigned, timeWindow, amc);
-}
-
 } // namespace ns3
