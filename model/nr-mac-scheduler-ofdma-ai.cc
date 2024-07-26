@@ -45,14 +45,22 @@ std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                    const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
 NrMacSchedulerOfdmaAi::GetUeCompareDlFn() const
 {
-    return NrMacSchedulerUeInfoAi::CompareUeWeightsDl;
+    if (m_activeDlAi)
+    {
+        return NrMacSchedulerUeInfoAi::CompareUeWeightsDl;
+    }
+    return NrMacSchedulerUeInfoQos::CompareUeWeightsDl;
 }
 
 std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                    const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
 NrMacSchedulerOfdmaAi::GetUeCompareUlFn() const
 {
-    return NrMacSchedulerUeInfoAi::CompareUeWeightsUl;
+    if (m_activeUlAi)
+    {
+        return NrMacSchedulerUeInfoAi::CompareUeWeightsUl;
+    }
+    return NrMacSchedulerUeInfoQos::CompareUeWeightsUl;
 }
 
 void
