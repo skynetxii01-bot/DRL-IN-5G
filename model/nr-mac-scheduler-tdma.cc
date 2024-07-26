@@ -138,6 +138,10 @@ NrMacSchedulerTdma::AssignRBGTDMA(
 
     while (resources > 0)
     {
+        if (m_activeDlAi || m_activeUlAi)
+        {
+            callNotifyFn(ueVector);
+        }
         GetFirst GetUe;
 
         auto schedInfoIt = ueVector.begin();
