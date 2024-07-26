@@ -20,6 +20,8 @@
  *
  * The example will print the end-to-end result of three different QoS flows
  * with different resource types on-screen, as well as writing them on a file.
+ * 
+ * \todo Apply the configuration of the RL based scheduler
  *
  * \code{.unparsed}
 $ ./ns3 run "cttc-nr-rl-based-sched --PrintHelp"
@@ -42,7 +44,7 @@ $ ./ns3 run "cttc-nr-rl-based-sched --PrintHelp"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("CttcNrInitialMySched");
+NS_LOG_COMPONENT_DEFINE("CttcNrRlBasedSched");
 
 int
 main(int argc, char* argv[])
