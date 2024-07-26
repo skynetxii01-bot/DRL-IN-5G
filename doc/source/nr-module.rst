@@ -1502,17 +1502,17 @@ considered for the QoS LC Assignment can found in [WNS3-QosSchedulers]_.
 
 RL-based Scheduler
 ===================
-The 'NR' module includes reinforcement learning (RL)-based schedulers that allocate 
-available resources (i.e., symbols and Physical Resource Blocks (PRBs)) based on the RL model. 
-The RL-based scheduler communicates with the RL model, implemented using the ns3-gym module, 
-to determine the actions for the current state. To obtain these actions, the RL-based scheduler 
-calls the ``OpenGymEnv`` class in the ns3-gym module, which handles communication with the RL model. 
-The ``OpenGymEnv`` class sends pre-formatted data, including the current state, to the RL model, 
-defined using Python, through the ``OpenGymInterface`` class. 
-The RL model then returns the appropriate actions for the current state. 
+The 'NR' module includes reinforcement learning (RL)-based schedulers that allocate
+available resources (i.e., symbols and Physical Resource Blocks (PRBs)) based on the RL model.
+The RL-based scheduler communicates with the RL model, implemented using the ns3-gym module,
+to determine the actions for the current state. To obtain these actions, the RL-based scheduler
+calls the ``OpenGymEnv`` class in the ns3-gym module, which handles communication with the RL model.
+The ``OpenGymEnv`` class sends pre-formatted data, including the current state, to the RL model,
+defined using Python, through the ``OpenGymInterface`` class.
+The RL model then returns the appropriate actions for the current state.
 The RL-based scheduler uses these actions to allocate resources to the UEs.
 
-The RL-based scheduler sends data to the RL model per symbol, and the RL model returns the actions for each symbol. 
+The RL-based scheduler sends data to the RL model per symbol, and the RL model returns the actions for each symbol.
 The data format is predefined and can include the following information:
 
 * observation
@@ -1522,13 +1522,13 @@ The data format is predefined and can include the following information:
 
 The type of each field is also predefined.
 
-For each symbol, the RL-based scheduler collects the observations for all UEs and calculates the reward 
-as a result of the previous actions. Then, the RL-based scheduler sends the data to the RL model and receives 
-the actions for the current state. The actions are the weights for all active LC flows of all active UEs. 
-After receiving the actions, the RL-based scheduler sorts the UEs by the sum of the weights of their active LC flows. 
+For each symbol, the RL-based scheduler collects the observations for all UEs and calculates the reward
+as a result of the previous actions. Then, the RL-based scheduler sends the data to the RL model and receives
+the actions for the current state. The actions are the weights for all active LC flows of all active UEs.
+After receiving the actions, the RL-based scheduler sorts the UEs by the sum of the weights of their active LC flows.
 The scheduler then allocates resources to the UE with the highest sum of weights, and the process is repeated for each symbol.
 
-The observation for a UE includes the observation for each active flow of the UE. 
+The observation for a UE includes the observation for each active flow of the UE.
 The observation for each flow is represented as ``LcObservation`` structures, which contain the following fields:
 
 * ``rnti``
@@ -1540,8 +1540,8 @@ The observation for each flow is represented as ``LcObservation`` structures, wh
 
 This structure represents the observation of the LC.
 
-The goal of the RL-based scheduler is to allocate resources in a way that minimizes the total delay of the UEs 
-considering the priority of the LCs. Additionally, the RL-based scheduler can be used to allocate resources in a way 
+The goal of the RL-based scheduler is to allocate resources in a way that minimizes the total delay of the UEs
+considering the priority of the LCs. Additionally, the RL-based scheduler can be used to allocate resources in a way
 that maximizes the throughput of the UEs. To achieve this, the reward of a UE is calculated as:
 
 .. math::
