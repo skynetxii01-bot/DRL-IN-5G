@@ -208,6 +208,26 @@ class NrMacSchedulerTdma : public NrMacSchedulerNs3
     virtual void BeforeUlSched(const UePtrAndBufferReq& ue,
                                const FTResources& assignableInIteration) const = 0;
 
+    /**
+     * \brief Call the notify callback function in the OpenGymEnv class
+     * in the ns3-gym module for downlink
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
+     * requests
+     */
+    virtual void CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const
+    {
+    }
+
+    /**
+     * \brief Call the notify callback function in the OpenGymEnv class
+     * in the ns3-gym module for uplink
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
+     * requests
+     */
+    virtual void CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const
+    {
+    }
+
   private:
     /**
      * \brief Retrieve the UE vector from an ActiveUeMap
