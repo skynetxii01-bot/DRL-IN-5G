@@ -56,48 +56,6 @@ NrMacSchedulerOfdmaAi::GetUeCompareUlFn() const
 }
 
 void
-NrMacSchedulerOfdmaAi::AssignedDlResources(const UePtrAndBufferReq& ue,
-                                           [[maybe_unused]] const FTResources& assigned,
-                                           const FTResources& totAssigned) const
-{
-    NS_LOG_FUNCTION(this);
-    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
-    uePtr->UpdateDlAiMetric(totAssigned, m_timeWindow, m_dlAmc);
-}
-
-void
-NrMacSchedulerOfdmaAi::NotAssignedDlResources(
-    const NrMacSchedulerNs3::UePtrAndBufferReq& ue,
-    [[maybe_unused]] const NrMacSchedulerNs3::FTResources& notAssigned,
-    const NrMacSchedulerNs3::FTResources& totAssigned) const
-{
-    NS_LOG_FUNCTION(this);
-    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
-    uePtr->UpdateDlAiMetric(totAssigned, m_timeWindow, m_dlAmc);
-}
-
-void
-NrMacSchedulerOfdmaAi::AssignedUlResources(const UePtrAndBufferReq& ue,
-                                           [[maybe_unused]] const FTResources& assigned,
-                                           const FTResources& totAssigned) const
-{
-    NS_LOG_FUNCTION(this);
-    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
-    uePtr->UpdateUlAiMetric(totAssigned, m_timeWindow, m_ulAmc);
-}
-
-void
-NrMacSchedulerOfdmaAi::NotAssignedUlResources(
-    const NrMacSchedulerNs3::UePtrAndBufferReq& ue,
-    [[maybe_unused]] const NrMacSchedulerNs3::FTResources& notAssigned,
-    const NrMacSchedulerNs3::FTResources& totAssigned) const
-{
-    NS_LOG_FUNCTION(this);
-    auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
-    uePtr->UpdateUlAiMetric(totAssigned, m_timeWindow, m_ulAmc);
-}
-
-void
 NrMacSchedulerOfdmaAi::SetNotifyCb(NotifyCb notifyCb)
 {
     NS_LOG_FUNCTION(this);
