@@ -65,16 +65,18 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
         const NrMacCschedSapProvider::CschedUeConfigReqParameters& params) const override;
 
     /**
-     * \brief Return the comparison function to sort DL UE according to the scheduler policy
-     * \return a pointer to NrMacSchedulerUeInfoAi::CompareUeWeightsDl
+     * \brief Return the comparison function to sort DL UEs according to the scheduler policy
+     * \return A pointer to NrMacSchedulerUeInfoAi::CompareUeWeightsDl if the AI model is activated,
+     * otherwise, a pointer to NrMacSchedulerUeInfoQos::CompareUeWeightsDl
      */
     std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                        const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
     GetUeCompareDlFn() const override;
 
     /**
-     * \brief Return the comparison function to sort UL UE according to the scheduler policy
-     * \return a pointer to NrMacSchedulerUeInfoAi::CompareUeWeightsUl
+     * \brief Return the comparison function to sort UL UEs according to the scheduler policy
+     * \return A pointer to NrMacSchedulerUeInfoAi::CompareUeWeightsUl if the AI model is activated,
+     * otherwise, a pointer to NrMacSchedulerUeInfoQos::CompareUeWeightsUl
      */
     std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                        const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
