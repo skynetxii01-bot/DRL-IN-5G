@@ -10,6 +10,13 @@
 
 namespace ns3
 {
+/**
+ * \struct pair_hash
+ * \brief A hash function for std::pair
+ *
+ * A hash function for std::pair that combines the hash values of the two elements of the pair.
+ * Combine two hash values using bit shift and XOR
+ */
 struct pair_hash
 {
     template <class T1, class T2>
@@ -17,22 +24,57 @@ struct pair_hash
     {
         auto hash1 = std::hash<T1>{}(p.first);
         auto hash2 = std::hash<T2>{}(p.second);
-        return hash1 ^ (hash2 << 1); // 비트 시프트와 XOR을 사용하여 두 해시 값을 결합
+        return hash1 ^ (hash2 << 1);
     }
 };
 
+/**
+ * \struct Weights
+ * \brief A hash map for weights
+ *
+ * A hash map for weights that maps a pair of uint8_t to a double.
+ * The pair represents the LCG and the LC ID, and the double represents the weight of the LC.
+ */
 typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
-typedef std::vector<std::vector<double>> Observation;
+
+/**
+ * \struct LcObservation
+ * \brief A struct for an observation of a flow
+ *
+ * A struct for an observation of a flow that stores the RNTI, LCG ID, LC ID, QCI, priority, and
+ * head-of-line delay of the flow.
+ */
+struct LcObservation
+{
+    uint16_t rnti;
+    uint8_t lcgId;
+    uint8_t lcId;
+    uint8_t qci;
+    uint8_t priority;
+    uint16_t holDelay;
+};
 
 /**
  * \ingroup scheduler
- * \brief UE representation of a scheduler with AI implementation
+ * \brief UE representation for a AI-based scheduler
+ *
+ * The representation stores the weights of a UE, which are also referred to as actions in the RL
+ * model, in response to sending the predefined observation. The observation is a vector of
+ * LcObservation, each representing an observation of a flow. In addition to RL-related operations,
+ * it updates the metrics in NrMacSchedulerUeInfoQos by inheriting from the NrMacSchedulerUeInfoQos
+ * class. In resource allocation per symbol, we can design the reward function of a UE using the QoS
+ * metrics.
+ *
+ * \see LcObservation
+ * \see Weights
+ * \see NrMacSchedulerUeInfoQos
  */
 class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
 {
   public:
     /**
      * \brief NrMacSchedulerUeInfoAi constructor
+     * \param alpha The fairness metric
      * \param rnti RNTI of the UE
      * \param beamId BeamId of the UE
      * \param fn A function that tells how many RB per RBG
@@ -45,128 +87,102 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     /**
      * \brief Reset DL AI scheduler info
      *
-     * Set the last average throughput to the current average throughput,
-     * and zeroes the average throughput as well as the current throughput.
-     *
-     * It calls also NrMacSchedulerUeInfoAi::ResetDlSchedInfo.
+     * Clear the weights for the downlink.
+     * It calls also NrMacSchedulerUeInfoQos::ResetDlSchedInfo.
      */
     void ResetDlSchedInfo() override
     {
-        m_lastAvgTputDl = m_avgTputDl;
-        m_avgTputDl = 0.0;
-        m_currTputDl = 0.0;
-        m_potentialTputDl = 0.0;
         m_weightsDl.clear();
-        NrMacSchedulerUeInfo::ResetDlSchedInfo();
+        NrMacSchedulerUeInfoQos::ResetDlSchedInfo();
     }
 
     /**
      * \brief Reset UL AI scheduler info
      *
-     * Set the last average throughput to the current average throughput,
-     * and zeroes the average throughput as well as the current throughput.
-     *
-     * It also calls NrMacSchedulerUeInfoAi::ResetUlSchedInfo.
+     * Clear the weights for the uplink.
+     * It also calls NrMacSchedulerUeInfoQos::ResetUlSchedInfo.
      */
     void ResetUlSchedInfo() override
     {
-        m_lastAvgTputUl = m_avgTputUl;
-        m_avgTputUl = 0.0;
-        m_currTputUl = 0.0;
-        m_potentialTputUl = 0.0;
         m_weightsUl.clear();
-        NrMacSchedulerUeInfo::ResetUlSchedInfo();
-    }
-
-    /**
-     * \brief Reset the DL avg Th to the last value
-     */
-    void ResetDlMetric() override
-    {
-        NrMacSchedulerUeInfo::ResetDlMetric();
-        m_avgTputDl = m_lastAvgTputDl;
-    }
-
-    /**
-     * \brief Reset the UL avg Th to the last value
-     */
-    void ResetUlMetric() override
-    {
-        NrMacSchedulerUeInfo::ResetUlMetric();
-        m_avgTputUl = m_lastAvgTputUl;
+        NrMacSchedulerUeInfoQos::ResetUlSchedInfo();
     }
 
     /**
      * \brief Get the current observation for downlink
      * \param ue the UE
-     * \return a vector of double with the current observation
+     * \return a vector of LcObservation with the current observation
+     *
+     * Get the current observation for downlink by iterating over the active LCs of the UE.
+     * The observation is stored in a vector of LcObservation and Each consists of the RNTI,
+     * LCG ID, LC ID, QCI, priority, and head-of-line delay of the flow.
      */
-    Observation GetDlObservation();
+    std::vector<LcObservation> GetDlObservation();
 
     /**
      * \brief Get the current observation for uplink
      * \param ue the UE
-     * \return a vector of double with the current observation
+     * \return a vector of LcObservation with the current observation
+     *
+     * Get the current observation for uplink by iterating over the active LCs of the UE.
+     * The observation is stored in a vector of LcObservation and Each consists of the RNTI,
+     * LCG ID, LC ID, QCI, priority, and head-of-line delay of the flow.
      */
-    Observation GetUlObservation();
+    std::vector<LcObservation> GetUlObservation();
 
     /**
      * \brief Update the weights for downlink
-     * \param weights the weights assigned to the UEs
+     * \param weights The weights assigned to a UE
      *
-     * Updates m_weights by copying the weights assigned to the UEs.
-     * The weights consists of the unordered_map of the pair <LCG, LC> and the weight.
+     * Update m_weights by copying the weights assigned to a UE.
+     * The weights consist of an unordered_map of (key, value) pairs where the combination of lcgId
+     * and lcId is the key, and the weight of the lcId is the value. The higher the weight, the
+     * higher the priority of the flow in scheduling.
      */
     void UpdateDlWeights(Weights& weights);
 
     /**
      * \brief Update the weights for uplink
-     * \param weights the weights assigned to the UEs
+     * \param weights the weights assigned to a UE
      *
-     * Updates m_weights by copying the weights assigned to the UEs.
-     * The weights consists of the unordered_map of the pair <LCG, LC> and the weight.
+     * Update m_weights by copying the weights assigned to a UE.
+     * The weights consist of an unordered_map of (key, value) pairs where the combination of lcgId
+     * and lcId is the key, and the weight of the lcId is the value. The higher the weight, the
+     * higher the priority of the flow in scheduling.
      */
     void UpdateUlWeights(Weights& weights);
 
     /**
-     * \brief Update the reward for downlink
-     * \return the reward for the downlink
+     * \brief Get the reward for downlink
+     * \return The reward for the downlink
+     *
+     * Calculate the reward for the downlink based on the latest observation and the given weights.
+     * The reward is calculated as the sum of the rewards of the active LCs.
+     * The reward for an LC \( i \) is calculated as
+     * \f$ \text{reward}_{i} = \frac{\text{std::pow}(\text{potentialTput}, \alpha)}{\max(1E-9,
+     * \text{avgTput})} \times P_{i} \times \text{HOL}_{i} \f$.
+     *
+     * \alpha is a fairness metric. \( P \) is the priority associated with the QCI.
+     * HOL is the head-of-line delay of the LC.
+     * Please note that the throughput is calculated in bit/symbol.
      */
     float GetDlReward();
 
     /**
-     * \brief Update the reward for uplink
-     * \return the reward for the uplink
+     * \brief Get the reward for uplink
+     * \return The reward for the uplink
+     *
+     * Calculate the reward for the uplink based on the latest observation and the given weights.
+     * The reward is calculated as the sum of the rewards of the active LCs.
+     * The reward for an LC \( i \) is calculated as
+     * \f$ \text{reward}_{i} = \frac{\text{std::pow}(\text{potentialTput}, \alpha)}{\max(1E-9,
+     * \text{avgTput})} \times P_{i} \times \text{HOL}_{i} \f$.
+     *
+     * \alpha is a fairness metric. \( P \) is the priority associated with the QCI.
+     * HOL is the head-of-line delay of the LC.
+     * Please note that the throughput is calculated in bit/symbol.
      */
     float GetUlReward();
-
-    /**
-     * \brief Update the AI metric for downlink
-     * \param totAssigned the resources assigned
-     * \param timeWindow the time window
-     * \param amc a pointer to the AMC
-     *
-     * Updates m_currTputDl and m_avgTputDl by keeping in consideration
-     * the assigned resources (in form of TBS) and the time window.
-     * It gets the tbSize by calling NrMacSchedulerUeInfo::UpdateDlMetric.
-     */
-    void UpdateDlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
-                          double timeWindow,
-                          const Ptr<const NrAmc>& amc);
-
-    /**
-     * \brief Update the AI metric for uplink
-     * \param totAssigned the resources assigned
-     * \param timeWindow the time window
-     * \param amc a pointer to the AMC
-     *
-     * Updates m_currTputUl and m_avgTputUl by keeping in consideration
-     * the assigned resources (in form of TBS) and the time window.
-     * It gets the tbSize by calling NrMacSchedulerUeInfo::UpdateUlMetric.
-     */
-    void UpdateUlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
-                          double timeWindow,
-                          const Ptr<const NrAmc>& amc);
 
     /**
      * \brief comparison function object (i.e. an object that satisfies the
@@ -191,9 +207,13 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     }
 
     /**
-     * \brief comparison function object (i.e. an object that satisfies the
-     * requirements of Compare) which returns ​true if the first argument is less
-     * than (i.e. is ordered before) the second.
+     * \brief Calculate the weight of a UE in the downlink
+     * \param ue the UE
+     * \return the weight of the UE
+     *
+     * Calculate the weight of a UE in the downlink by iterating over the active LCs of the UE.
+     * The weight is calculated as the sum of the weights of the active LCs.
+     * The weight of an LC is retrieved from the m_weightsDl map.
      */
     static double CalculateDlWeight(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
     {
@@ -226,8 +246,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * \param rue Right UE
      * \return true if the AI metric of the left UE is higher than the right UE
      *
-     * The AI metric is calculated as following:
-     *
+     * The AI metric is calculated in CalculateUlWeight()
      */
     static bool CompareUeWeightsUl(const NrMacSchedulerNs3::UePtrAndBufferReq& lue,
                                    const NrMacSchedulerNs3::UePtrAndBufferReq& rue)
@@ -239,9 +258,13 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     }
 
     /**
-     * \brief comparison function object (i.e. an object that satisfies the
-     * requirements of Compare) which returns ​true if the first argument is less
-     * than (i.e. is ordered before) the second.
+     * \brief Calculate the weight of a UE in the uplink
+     * \param ue the UE
+     * \return the weight of the UE
+     *
+     * Calculate the weight of a UE in the uplink by iterating over the active LCs of the UE.
+     * The weight is calculated as the sum of the weights of the active LCs.
+     * The weight of an LC is retrieved from the m_weightsUl map.
      */
     static double CalculateUlWeight(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
     {
@@ -266,8 +289,8 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
         return weight;
     }
 
-    Weights m_weightsDl; //!< Weights assigned to the UEs in downlink
-    Weights m_weightsUl; //!< Weights assigned to the UEs in uplink
+    Weights m_weightsDl; //!< Weights assigned to each flow for a UE in the downlink
+    Weights m_weightsUl; //!< Weights assigned to each flow for a UE in the uplink
 };
 
 } // namespace ns3

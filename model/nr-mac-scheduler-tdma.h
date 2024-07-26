@@ -214,7 +214,9 @@ class NrMacSchedulerTdma : public NrMacSchedulerNs3
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    virtual void CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const = 0;
+    virtual void CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const
+    {
+    }
 
     /**
      * \brief Call the notify callback function in the OpenGymEnv class
@@ -222,7 +224,9 @@ class NrMacSchedulerTdma : public NrMacSchedulerNs3
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    virtual void CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const = 0;
+    virtual void CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const
+    {
+    }
 
   private:
     /**

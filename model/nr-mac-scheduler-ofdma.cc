@@ -184,7 +184,7 @@ NrMacSchedulerOfdma::AssignDLRBG(uint32_t symAvail, const ActiveUeMap& activeDl)
 
         while (resources > 0)
         {
-            if (m_activeAIDL)
+            if (m_activeDlAi)
             {
                 CallNotifyDlFn(ueVector);
             }
@@ -280,7 +280,7 @@ NrMacSchedulerOfdma::AssignULRBG(uint32_t symAvail, const ActiveUeMap& activeUl)
 
         while (resources > 0)
         {
-            if (m_activeAIUL)
+            if (m_activeUlAi)
             {
                 CallNotifyUlFn(ueVector);
             }

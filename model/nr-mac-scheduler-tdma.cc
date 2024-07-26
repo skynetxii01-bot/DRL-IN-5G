@@ -138,7 +138,7 @@ NrMacSchedulerTdma::AssignRBGTDMA(uint32_t symAvail,
 
     while (resources > 0)
     {
-        if (m_activeAIDL || m_activeAIUL)
+        if (m_activeDlAi || m_activeUlAi)
         {
             callNotifyFn(ueVector);
         }
