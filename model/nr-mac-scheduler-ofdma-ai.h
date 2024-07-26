@@ -156,7 +156,7 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    void CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const;
+    void CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const override;
 
     /**
      * \brief Call the notify callback function in the OpenGymEnv class
@@ -164,7 +164,7 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    void CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const;
+    void CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const override;
 
     /**
      * \brief Update weights of all UE for downlink
