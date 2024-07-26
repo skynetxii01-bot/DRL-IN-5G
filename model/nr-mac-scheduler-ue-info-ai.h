@@ -44,7 +44,7 @@ typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weigh
  * A struct for an observation of a flow that stores the RNTI, LCG ID, LC ID, QCI, priority, and
  * head-of-line delay of the flow.
  */
-typedef struct LcObservation
+struct LcObservation
 {
     uint16_t rnti;
     uint8_t lcgId;
