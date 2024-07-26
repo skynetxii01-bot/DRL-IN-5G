@@ -188,8 +188,6 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
 
   private:
     float m_alpha{0.0}; //!< PF Fairness index
-    double m_timeWindow{
-        99.0}; //!< Time window to calculate the throughput. Better to make it an attribute.
     TracedValue<uint32_t> m_tracedValueSymPerBeam;
     NotifyCb m_notifyCb;
 };

@@ -185,8 +185,6 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
                               std::vector<UePtrAndBufferReq>& ueVector);
 
   private:
-    double m_timeWindow{
-        99.0}; //!< Time window to calculate the throughput. Better to make it an attribute.
     double m_alpha{0.0}; //!< PF Fairness index
     NotifyCb m_notifyCb;
 };
