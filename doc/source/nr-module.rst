@@ -1545,13 +1545,13 @@ considering the priority of the LCs. Additionally, the RL-based scheduler can be
 that maximizes the throughput of the UEs. To achieve this, the reward of a UE is calculated as:
 
 .. math::
-    :nowrap:
-  
-    \[
-    \text{reward} = \sum_{i=1}^{N} \frac{r^{\gamma}}{R(\tau) \times \text{priority}_i \times \text{holDelay}_i}
-    \]
+   :nowrap:
 
-where :math:`N` is the number of active LCs of the UE, :math:`\text{priority}_i` is the priority of the LC, 
+   \[
+   \text{reward} = \sum_{i=1}^{N} \frac{r^{\gamma}}{R(\tau) \times \text{priority}_i \times \text{holDelay}_i}
+   \]
+
+where :math:`N` is the number of active LCs of the UE, :math:`\text{priority}_i` is the priority of the LC,
 and :math:`\text{holDelay}_i` is the HOL delay of the LC. The total reward of the scheduler is the sum of the rewards of all active UEs.
 
 Timing relations
