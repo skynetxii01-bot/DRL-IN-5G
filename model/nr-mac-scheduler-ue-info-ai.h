@@ -114,7 +114,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * \return a vector of LcObservation with the current observation
      *
      * Get the current observation for downlink by iterating over the active LCs of the UE.
-     * The observation is stored in a vector of LcObservation and Each consists of the RNTI,
+     * The observation is stored in a vector of LcObservation and each consists of the RNTI,
      * LCG ID, LC ID, QCI, priority, and head-of-line delay of the flow.
      */
     std::vector<LcObservation> GetDlObservation();
@@ -125,7 +125,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * \return a vector of LcObservation with the current observation
      *
      * Get the current observation for uplink by iterating over the active LCs of the UE.
-     * The observation is stored in a vector of LcObservation and Each consists of the RNTI,
+     * The observation is stored in a vector of LcObservation and each consists of the RNTI,
      * LCG ID, LC ID, QCI, priority, and head-of-line delay of the flow.
      */
     std::vector<LcObservation> GetUlObservation();
