@@ -11,50 +11,6 @@
 namespace ns3
 {
 /**
- * \struct pair_hash
- * \brief A hash function for std::pair
- *
- * A hash function for std::pair that combines the hash values of the two elements of the pair.
- * Combine two hash values using bit shift and XOR
- */
-struct pair_hash
-{
-    template <class T1, class T2>
-    std::size_t operator()(const std::pair<T1, T2>& p) const
-    {
-        auto hash1 = std::hash<T1>{}(p.first);
-        auto hash2 = std::hash<T2>{}(p.second);
-        return hash1 ^ (hash2 << 1);
-    }
-};
-
-/**
- * \struct Weights
- * \brief A hash map for weights
- *
- * A hash map for weights that maps a pair of uint8_t to a double.
- * The pair represents the LCG and the LC ID, and the double represents the weight of the LC.
- */
-typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
-
-/**
- * \struct LcObservation
- * \brief A struct for an observation of a flow
- *
- * A struct for an observation of a flow that stores the RNTI, LCG ID, LC ID, QCI, priority, and
- * head-of-line delay of the flow.
- */
-struct LcObservation
-{
-    uint16_t rnti;
-    uint8_t lcgId;
-    uint8_t lcId;
-    uint8_t qci;
-    uint8_t priority;
-    uint16_t holDelay;
-};
-
-/**
  * \ingroup scheduler
  * \brief UE representation for a AI-based scheduler
  *
@@ -83,6 +39,50 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
         : NrMacSchedulerUeInfoQos(alpha, rnti, beamId, fn)
     {
     }
+
+    /**
+     * \struct pair_hash
+     * \brief A hash function for std::pair
+     *
+     * A hash function for std::pair that combines the hash values of the two elements of the pair.
+     * Combine two hash values using bit shift and XOR
+     */
+    struct pair_hash
+    {
+        template <class T1, class T2>
+        std::size_t operator()(const std::pair<T1, T2>& p) const
+        {
+            auto hash1 = std::hash<T1>{}(p.first);
+            auto hash2 = std::hash<T2>{}(p.second);
+            return hash1 ^ (hash2 << 1);
+        }
+    };
+
+    /**
+     * \struct Weights
+     * \brief A hash map for weights
+     *
+     * A hash map for weights that maps a pair of uint8_t to a double.
+     * The pair represents the LCG and the LC ID, and the double represents the weight of the LC.
+     */
+    typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
+
+    /**
+     * \struct LcObservation
+     * \brief A struct for an observation of a flow
+     *
+     * A struct for an observation of a flow that stores the RNTI, LCG ID, LC ID, QCI, priority, and
+     * head-of-line delay of the flow.
+     */
+    struct LcObservation
+    {
+        uint16_t rnti;
+        uint8_t lcgId;
+        uint8_t lcId;
+        uint8_t qci;
+        uint8_t priority;
+        uint16_t holDelay;
+    };
 
     /**
      * \brief Reset DL AI scheduler info
@@ -117,7 +117,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * The observation is stored in a vector of LcObservation and each consists of the RNTI,
      * LCG ID, LC ID, QCI, priority, and head-of-line delay of the flow.
      */
-    std::vector<LcObservation> GetDlObservation();
+    std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetDlObservation();
 
     /**
      * \brief Get the current observation for uplink
@@ -128,7 +128,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * The observation is stored in a vector of LcObservation and each consists of the RNTI,
      * LCG ID, LC ID, QCI, priority, and head-of-line delay of the flow.
      */
-    std::vector<LcObservation> GetUlObservation();
+    std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetUlObservation();
 
     /**
      * \brief Update the weights for downlink
@@ -139,7 +139,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * and lcId is the key, and the weight of the lcId is the value. The higher the weight, the
      * higher the priority of the flow in scheduling.
      */
-    void UpdateDlWeights(Weights& weights);
+    void UpdateDlWeights(NrMacSchedulerUeInfoAi::Weights& weights);
 
     /**
      * \brief Update the weights for uplink
@@ -150,7 +150,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * and lcId is the key, and the weight of the lcId is the value. The higher the weight, the
      * higher the priority of the flow in scheduling.
      */
-    void UpdateUlWeights(Weights& weights);
+    void UpdateUlWeights(NrMacSchedulerUeInfoAi::Weights& weights);
 
     /**
      * \brief Get the reward for downlink
