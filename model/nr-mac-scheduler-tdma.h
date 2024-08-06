@@ -214,7 +214,7 @@ class NrMacSchedulerTdma : public NrMacSchedulerNs3
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    virtual void CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const
+    virtual void CallNotifyDlFn(const std::vector<UePtrAndBufferReq>& ueVector) const
     {
     }
 
@@ -224,7 +224,7 @@ class NrMacSchedulerTdma : public NrMacSchedulerNs3
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    virtual void CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const
+    virtual void CallNotifyUlFn(const std::vector<UePtrAndBufferReq>& ueVector) const
     {
     }
 
