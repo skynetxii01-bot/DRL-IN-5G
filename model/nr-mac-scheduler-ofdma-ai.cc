@@ -64,10 +64,19 @@ NrMacSchedulerOfdmaAi::GetUeCompareUlFn() const
 }
 
 void
-NrMacSchedulerOfdmaAi::SetNotifyCb(NotifyCb notifyCb)
+NrMacSchedulerOfdmaAi::SetNotifyCbDl(NotifyCb notifyCb)
 {
     NS_LOG_FUNCTION(this);
-    m_notifyCb = notifyCb;
+    m_notifyCbDl = notifyCb;
+    m_activeDlAi = true;
+}
+
+void
+NrMacSchedulerOfdmaAi::SetNotifyCbUl(NotifyCb notifyCb)
+{
+    NS_LOG_FUNCTION(this);
+    m_notifyCbUl = notifyCb;
+    m_activeUlAi = true;
 }
 
 std::vector<LcObservation>
@@ -142,14 +151,14 @@ void
 NrMacSchedulerOfdmaAi::CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
-    if (!m_notifyCb.IsNull())
+    if (!m_notifyCbDl.IsNull())
     {
         std::string extraInfo = "";
-        m_notifyCb(GetUeObservationsDl(ueVector),
-                   GetIsGameOverDl(),
-                   GetUeRewardsDl(ueVector),
-                   extraInfo,
-                   this);
+        m_notifyCbDl(GetUeObservationsDl(ueVector),
+                     GetIsGameOverDl(),
+                     GetUeRewardsDl(ueVector),
+                     extraInfo,
+                     this);
     }
 }
 
@@ -157,14 +166,14 @@ void
 NrMacSchedulerOfdmaAi::CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
-    if (!m_notifyCb.IsNull())
+    if (!m_notifyCbUl.IsNull())
     {
         std::string extraInfo = "";
-        m_notifyCb(GetUeObservationsUl(ueVector),
-                   GetIsGameOverUl(),
-                   GetUeRewardsUl(ueVector),
-                   extraInfo,
-                   this);
+        m_notifyCbUl(GetUeObservationsUl(ueVector),
+                     GetIsGameOverUl(),
+                     GetUeRewardsUl(ueVector),
+                     extraInfo,
+                     this);
     }
 }
 

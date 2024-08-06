@@ -101,10 +101,16 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
                      const NrMacSchedulerOfdmaAi*>
         NotifyCb;
     /**
-     * \brief Set the notify callback function.
+     * \brief Set the notify callback function for downlink
      * \param notifyCb The callback function to be set
      */
-    void SetNotifyCb(NotifyCb notifyCb);
+    void SetNotifyCbDl(NotifyCb notifyCb);
+
+    /**
+     * \brief Set the notify callback function for uplink
+     * \param notifyCb The callback function to be set
+     */
+    void SetNotifyCbUl(NotifyCb notifyCb);
 
     /**
      * \brief Get UE observations for downlink
@@ -189,6 +195,7 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
   private:
     float m_alpha{0.0}; //!< PF Fairness index
     TracedValue<uint32_t> m_tracedValueSymPerBeam;
-    NotifyCb m_notifyCb;
+    NotifyCb m_notifyCbDl; //!< Notify callback function for downlink
+    NotifyCb m_notifyCbUl; //!< Notify callback function for uplink
 };
 } // namespace ns3
