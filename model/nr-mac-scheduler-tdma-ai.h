@@ -99,10 +99,16 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
                      const NrMacSchedulerTdmaAi*>
         NotifyCb;
     /**
-     * \brief Set the notify callback function.
+     * \brief Set the notify callback function for downlink
      * \param notifyCb The callback function to be set
      */
-    void SetNotifyCb(NotifyCb notifyCb);
+    void SetNotifyCbDl(NotifyCb notifyCb);
+
+    /**
+     * \brief Set the notify callback function for uplink
+     * \param notifyCb The callback function to be set
+     */
+    void SetNotifyCbUl(NotifyCb notifyCb);
 
     /**
      * \brief Get UE observations for downlink
@@ -185,8 +191,9 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
                               std::vector<UePtrAndBufferReq>& ueVector);
 
   private:
-    double m_alpha{0.0}; //!< PF Fairness index
-    NotifyCb m_notifyCb;
+    double m_alpha{0.0};   //!< PF Fairness index
+    NotifyCb m_notifyCbDl; //!< Notify callback function for downlink
+    NotifyCb m_notifyCbUl; //!< Notify callback function for uplink
 };
 
 } // namespace ns3
