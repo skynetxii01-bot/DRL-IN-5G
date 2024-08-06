@@ -94,7 +94,7 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * - A pointer to a const NrMacSchedulerOfdmaAi instance
      */
     typedef Callback<void,
-                     std::vector<LcObservation>,
+                     std::vector<NrMacSchedulerUeInfoAi::LcObservation>,
                      bool,
                      float,
                      std::string,
@@ -118,7 +118,8 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * requests
      * \return An Observation object representing the observations for all UEs
      */
-    std::vector<LcObservation> GetUeObservationsDl(std::vector<UePtrAndBufferReq>& ueVector) const;
+    std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetUeObservationsDl(
+        std::vector<UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Get UE observations for uplink
@@ -126,7 +127,8 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * requests
      * \return An Observation object representing the observations for all UEs
      */
-    std::vector<LcObservation> GetUeObservationsUl(std::vector<UePtrAndBufferReq>& ueVector) const;
+    std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetUeObservationsUl(
+        std::vector<UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Check if the downlink game is over
@@ -179,8 +181,9 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector
      * containing pointers to active UEs and their corresponding buffer requests
      */
-    void UpdateAllUeWeightsDl(std::unordered_map<uint8_t, Weights>& ueWeights,
-                              std::vector<UePtrAndBufferReq>& ueVector);
+    void UpdateAllUeWeightsDl(
+        std::unordered_map<uint8_t, NrMacSchedulerUeInfoAi::Weights>& ueWeights,
+        std::vector<UePtrAndBufferReq>& ueVector);
 
     /**
      * \brief Update weights of all UE for uplink
@@ -189,8 +192,9 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector
      * containing pointers to active UEs and their corresponding buffer requests
      */
-    void UpdateAllUeWeightsUl(std::unordered_map<uint8_t, Weights>& ueWeights,
-                              std::vector<UePtrAndBufferReq>& ueVector);
+    void UpdateAllUeWeightsUl(
+        std::unordered_map<uint8_t, NrMacSchedulerUeInfoAi::Weights>& ueWeights,
+        std::vector<UePtrAndBufferReq>& ueVector);
 
   private:
     float m_alpha{0.0}; //!< PF Fairness index
