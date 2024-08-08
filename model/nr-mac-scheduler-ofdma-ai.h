@@ -146,7 +146,8 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    void CallNotifyDlFn(const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
+    void CallNotifyDlFn(
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
 
     /**
      * \brief Call the notify callback function in the OpenGymEnv class
@@ -154,7 +155,8 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    void CallNotifyUlFn(const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
+    void CallNotifyUlFn(
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
 
     /**
      * \brief Update weights of all UE for downlink
@@ -163,8 +165,9 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector
      * containing pointers to active UEs and their corresponding buffer requests
      */
-    void UpdateAllUeWeightsDl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-                              const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector);
+    void UpdateAllUeWeightsDl(
+        const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Update weights of all UE for uplink
@@ -173,8 +176,9 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector
      * containing pointers to active UEs and their corresponding buffer requests
      */
-    void UpdateAllUeWeightsUl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-                              const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector);
+    void UpdateAllUeWeightsUl(
+        const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
   private:
     float m_alpha{0.0}; //!< PF Fairness index
