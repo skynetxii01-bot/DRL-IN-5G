@@ -51,11 +51,11 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     /**
      * \typedef UeWeightsMap
      * \brief A hash map for UE weights
-     * 
+     *
      * A hash map for UE weights that maps a uint8_t to a Weights.
      * The key is the RNTI, and the value is the Weights of the UE.
      */
-    typedef std::unordered_map<uint8_t, NrMacSchedulerUeInfoAi::Weights> UeWeightsMap;
+    typedef std::unordered_map<uint8_t, Weights> UeWeightsMap;
 
     /**
      * \struct LcObservation
@@ -92,7 +92,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * - A pointer to a const NrMacSchedulerOfdmaAi instance
      */
     typedef Callback<void,
-                     const std::vector<NrMacSchedulerUeInfoAi::LcObservation>,
+                     const std::vector<LcObservation>,
                      const bool,
                      const float,
                      const std::string,
@@ -132,7 +132,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * The observation is stored in a vector of LcObservation and each consists of the RNTI,
      * LCG ID, LC ID, QCI, priority, and head-of-line delay of the flow.
      */
-    std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetDlObservation();
+    std::vector<LcObservation> GetDlObservation();
 
     /**
      * \brief Get the current observation for uplink
@@ -143,7 +143,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * The observation is stored in a vector of LcObservation and each consists of the RNTI,
      * LCG ID, LC ID, QCI, priority, and head-of-line delay of the flow.
      */
-    std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetUlObservation();
+    std::vector<LcObservation> GetUlObservation();
 
     /**
      * \brief Update the weights for downlink
@@ -154,7 +154,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * and lcId is the key, and the weight of the lcId is the value. The higher the weight, the
      * higher the priority of the flow in scheduling.
      */
-    void UpdateDlWeights(NrMacSchedulerUeInfoAi::Weights& weights);
+    void UpdateDlWeights(Weights& weights);
 
     /**
      * \brief Update the weights for uplink
@@ -165,7 +165,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * and lcId is the key, and the weight of the lcId is the value. The higher the weight, the
      * higher the priority of the flow in scheduling.
      */
-    void UpdateUlWeights(NrMacSchedulerUeInfoAi::Weights& weights);
+    void UpdateUlWeights(Weights& weights);
 
     /**
      * \brief Get the reward for downlink
