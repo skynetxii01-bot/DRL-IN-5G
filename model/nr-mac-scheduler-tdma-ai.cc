@@ -200,7 +200,7 @@ NrMacSchedulerTdmaAi::CallNotifyUlFn(
 void
 NrMacSchedulerTdmaAi::UpdateAllUeWeightsDl(
     const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-    const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector)
+    const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
     for (const auto& ue : ueVector)
@@ -214,7 +214,7 @@ NrMacSchedulerTdmaAi::UpdateAllUeWeightsDl(
 void
 NrMacSchedulerTdmaAi::UpdateAllUeWeightsUl(
     const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-    const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector)
+    const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
     for (const auto& ue : ueVector)

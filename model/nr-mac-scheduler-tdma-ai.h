@@ -163,8 +163,9 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * \param ueVector A vector
      * containing pointers to active UEs and their corresponding buffer requests
      */
-    void UpdateAllUeWeightsDl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-                              const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector);
+    void UpdateAllUeWeightsDl(
+        const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Update weights of all UE for uplink
@@ -173,8 +174,9 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * \param ueVector A vector
      * containing pointers to active UEs and their corresponding buffer requests
      */
-    void UpdateAllUeWeightsUl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-                              const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector);
+    void UpdateAllUeWeightsUl(
+        const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
   private:
     double m_alpha{0.0};                           //!< PF Fairness index
