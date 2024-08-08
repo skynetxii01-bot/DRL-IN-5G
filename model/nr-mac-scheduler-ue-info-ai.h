@@ -41,13 +41,21 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     }
 
     /**
-     * \struct Weights
+     * \typedef Weights
      * \brief A hash map for weights
      *
      * A hash map for weights that maps a pair of uint8_t to a double.
      * The key is the LC ID, and the value is the weight of the LC as a double.
      */
     typedef std::unordered_map<uint8_t, double> Weights;
+    /**
+     * \typedef UeWeightsMap
+     * \brief A hash map for UE weights
+     * 
+     * A hash map for UE weights that maps a uint8_t to a Weights.
+     * The key is the RNTI, and the value is the Weights of the UE.
+     */
+    typedef std::unordered_map<uint8_t, NrMacSchedulerUeInfoAi::Weights> UeWeightsMap;
 
     /**
      * \struct LcObservation
@@ -64,6 +72,32 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
         uint8_t priority;
         uint16_t holDelay;
     };
+
+    /**
+     * \typedef UpdateAllUeWeightsFn
+     * \brief A function type for updating the weights of all UEs.
+     */
+    typedef std::function<void(const UeWeightsMap&,
+                               const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>&)>
+        UpdateAllUeWeightsFn;
+    /**
+     * \typedef NotifyCb
+     * \brief A callback type for notifying with specific parameters.
+     *
+     * This callback takes the following parameters:
+     * - An Observation object representing the observations
+     * - A boolean value indicating whether the game is over (true) or not (false)
+     * - A float value representing the reward
+     * - A string value representing extra information
+     * - A pointer to a const NrMacSchedulerOfdmaAi instance
+     */
+    typedef Callback<void,
+                     const std::vector<NrMacSchedulerUeInfoAi::LcObservation>,
+                     const bool,
+                     const float,
+                     const std::string,
+                     const UpdateAllUeWeightsFn&>
+        NotifyCb;
 
     /**
      * \brief Reset DL AI scheduler info
