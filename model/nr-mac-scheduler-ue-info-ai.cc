@@ -28,7 +28,6 @@ NrMacSchedulerUeInfoAi::GetDlObservation()
 
             NrMacSchedulerUeInfoAi::LcObservation lcObservation = {
                 m_rnti,
-                ueLcg.first,
                 lcId,
                 LCPtr->m_qci,
                 LCPtr->m_priority,
@@ -55,7 +54,6 @@ NrMacSchedulerUeInfoAi::GetUlObservation()
 
             NrMacSchedulerUeInfoAi::LcObservation lcObservation = {
                 m_rnti,
-                ueLcg.first,
                 lcId,
                 LCPtr->m_qci,
                 LCPtr->m_priority,

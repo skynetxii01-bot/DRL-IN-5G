@@ -41,31 +41,13 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     }
 
     /**
-     * \struct pair_hash
-     * \brief A hash function for std::pair
-     *
-     * A hash function for std::pair that combines the hash values of the two elements of the pair.
-     * Combine two hash values using bit shift and XOR
-     */
-    struct pair_hash
-    {
-        template <class T1, class T2>
-        std::size_t operator()(const std::pair<T1, T2>& p) const
-        {
-            auto hash1 = std::hash<T1>{}(p.first);
-            auto hash2 = std::hash<T2>{}(p.second);
-            return hash1 ^ (hash2 << 1);
-        }
-    };
-
-    /**
      * \struct Weights
      * \brief A hash map for weights
      *
      * A hash map for weights that maps a pair of uint8_t to a double.
-     * The pair represents the LCG and the LC ID, and the double represents the weight of the LC.
+     * The key is the LC ID, and the value is the weight of the LC as a double.
      */
-    typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
+    typedef std::unordered_map<uint8_t, double> Weights;
 
     /**
      * \struct LcObservation
@@ -77,7 +59,6 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
     struct LcObservation
     {
         uint16_t rnti;
-        uint8_t lcgId;
         uint8_t lcId;
         uint8_t qci;
         uint8_t priority;
@@ -226,10 +207,9 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
 
             for (const auto lcId : ueActiveLCs)
             {
-                std::pair<uint8_t, uint8_t> lcgLcPair = std::make_pair(ueLcg.first, lcId);
-                auto it = uePtr->m_weightsDl.find(lcgLcPair);
+                auto it = uePtr->m_weightsDl.find(lcId);
 
-                NS_ASSERT_MSG(it != uePtr->m_weightsDl.end(), "Weight not found");
+                NS_ASSERT_MSG(it != uePtr->m_weightsDl.end(), "Weight not found for LC " << lcId);
                 weight += it->second;
 
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
@@ -277,10 +257,9 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
 
             for (const auto lcId : ueActiveLCs)
             {
-                std::pair<uint8_t, uint8_t> lcgLcPair = std::make_pair(ueLcg.first, lcId);
-                auto it = uePtr->m_weightsUl.find(lcgLcPair);
+                auto it = uePtr->m_weightsUl.find(lcId);
 
-                NS_ASSERT_MSG(it != uePtr->m_weightsUl.end(), "Weight not found");
+                NS_ASSERT_MSG(it != uePtr->m_weightsUl.end(), "Weight not found for LC " << lcId);
                 weight += it->second;
 
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
