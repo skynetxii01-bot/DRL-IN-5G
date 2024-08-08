@@ -9,6 +9,7 @@
 #include <ns3/log.h>
 
 #include <algorithm>
+#include <functional>
 
 namespace ns3
 {
@@ -64,7 +65,7 @@ NrMacSchedulerOfdmaAi::GetUeCompareUlFn() const
 }
 
 void
-NrMacSchedulerOfdmaAi::SetNotifyCbDl(NotifyCb notifyCb)
+NrMacSchedulerOfdmaAi::SetNotifyCbDl(NrMacSchedulerUeInfoAi::NotifyCb notifyCb)
 {
     NS_LOG_FUNCTION(this);
     m_notifyCbDl = notifyCb;
@@ -72,7 +73,7 @@ NrMacSchedulerOfdmaAi::SetNotifyCbDl(NotifyCb notifyCb)
 }
 
 void
-NrMacSchedulerOfdmaAi::SetNotifyCbUl(NotifyCb notifyCb)
+NrMacSchedulerOfdmaAi::SetNotifyCbUl(NrMacSchedulerUeInfoAi::NotifyCb notifyCb)
 {
     NS_LOG_FUNCTION(this);
     m_notifyCbUl = notifyCb;
@@ -156,11 +157,16 @@ NrMacSchedulerOfdmaAi::CallNotifyDlFn(const std::vector<UePtrAndBufferReq>& ueVe
     if (!m_notifyCbDl.IsNull())
     {
         std::string extraInfo = "";
+        NrMacSchedulerUeInfoAi::UpdateAllUeWeightsFn updateWeightsFn =
+            std::bind(&NrMacSchedulerOfdmaAi::UpdateAllUeWeightsDl,
+                      this,
+                      std::placeholders::_1,
+                      std::placeholders::_2);
         m_notifyCbDl(GetUeObservationsDl(ueVector),
                      GetIsGameOverDl(),
                      GetUeRewardsDl(ueVector),
                      extraInfo,
-                     this);
+                     updateWeightsFn);
     }
 }
 
@@ -171,18 +177,22 @@ NrMacSchedulerOfdmaAi::CallNotifyUlFn(const std::vector<UePtrAndBufferReq>& ueVe
     if (!m_notifyCbUl.IsNull())
     {
         std::string extraInfo = "";
+        NrMacSchedulerUeInfoAi::UpdateAllUeWeightsFn updateWeightsFn =
+            std::bind(&NrMacSchedulerOfdmaAi::UpdateAllUeWeightsUl,
+                      this,
+                      std::placeholders::_1,
+                      std::placeholders::_2);
         m_notifyCbUl(GetUeObservationsUl(ueVector),
                      GetIsGameOverUl(),
                      GetUeRewardsUl(ueVector),
                      extraInfo,
-                     this);
+                     updateWeightsFn);
     }
 }
 
 void
-NrMacSchedulerOfdmaAi::UpdateAllUeWeightsDl(
-    const std::unordered_map<uint8_t, NrMacSchedulerUeInfoAi::Weights>& ueWeights,
-    const std::vector<UePtrAndBufferReq>& ueVector)
+NrMacSchedulerOfdmaAi::UpdateAllUeWeightsDl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
+                                            const std::vector<UePtrAndBufferReq>& ueVector)
 {
     NS_LOG_FUNCTION(this);
     for (const auto& ue : ueVector)
@@ -194,9 +204,8 @@ NrMacSchedulerOfdmaAi::UpdateAllUeWeightsDl(
 }
 
 void
-NrMacSchedulerOfdmaAi::UpdateAllUeWeightsUl(
-    const std::unordered_map<uint8_t, NrMacSchedulerUeInfoAi::Weights>& ueWeights,
-    const std::vector<UePtrAndBufferReq>& ueVector)
+NrMacSchedulerOfdmaAi::UpdateAllUeWeightsUl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
+                                            const std::vector<UePtrAndBufferReq>& ueVector)
 {
     NS_LOG_FUNCTION(this);
     for (const auto& ue : ueVector)

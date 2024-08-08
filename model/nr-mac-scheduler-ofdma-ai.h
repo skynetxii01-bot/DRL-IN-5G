@@ -83,34 +83,16 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
     GetUeCompareUlFn() const override;
 
     /**
-     * \typedef NotifyCb
-     * \brief A callback type for notifying with specific parameters.
-     *
-     * This callback takes the following parameters:
-     * - An Observation object representing the observations
-     * - A boolean value indicating whether the game is over (true) or not (false)
-     * - A float value representing the reward
-     * - A string value representing extra information
-     * - A pointer to a const NrMacSchedulerOfdmaAi instance
-     */
-    typedef Callback<void,
-                     const std::vector<NrMacSchedulerUeInfoAi::LcObservation>,
-                     const bool,
-                     const float,
-                     const std::string,
-                     const NrMacSchedulerOfdmaAi*>
-        NotifyCb;
-    /**
      * \brief Set the notify callback function for downlink
      * \param notifyCb The callback function to be set
      */
-    void SetNotifyCbDl(NotifyCb notifyCb);
+    void SetNotifyCbDl(NrMacSchedulerUeInfoAi::NotifyCb notifyCb);
 
     /**
      * \brief Set the notify callback function for uplink
      * \param notifyCb The callback function to be set
      */
-    void SetNotifyCbUl(NotifyCb notifyCb);
+    void SetNotifyCbUl(NrMacSchedulerUeInfoAi::NotifyCb notifyCb);
 
     /**
      * \brief Get UE observations for downlink
@@ -181,9 +163,8 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector
      * containing pointers to active UEs and their corresponding buffer requests
      */
-    void UpdateAllUeWeightsDl(
-        const std::unordered_map<uint8_t, NrMacSchedulerUeInfoAi::Weights>& ueWeights,
-        const std::vector<UePtrAndBufferReq>& ueVector);
+    void UpdateAllUeWeightsDl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
+                              const std::vector<UePtrAndBufferReq>& ueVector);
 
     /**
      * \brief Update weights of all UE for uplink
@@ -192,14 +173,13 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector
      * containing pointers to active UEs and their corresponding buffer requests
      */
-    void UpdateAllUeWeightsUl(
-        const std::unordered_map<uint8_t, NrMacSchedulerUeInfoAi::Weights>& ueWeights,
-        const std::vector<UePtrAndBufferReq>& ueVector);
+    void UpdateAllUeWeightsUl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
+                              const std::vector<UePtrAndBufferReq>& ueVector);
 
   private:
     float m_alpha{0.0}; //!< PF Fairness index
     TracedValue<uint32_t> m_tracedValueSymPerBeam;
-    NotifyCb m_notifyCbDl; //!< Notify callback function for downlink
-    NotifyCb m_notifyCbUl; //!< Notify callback function for uplink
+    NrMacSchedulerUeInfoAi::NotifyCb m_notifyCbDl; //!< Notify callback function for downlink
+    NrMacSchedulerUeInfoAi::NotifyCb m_notifyCbUl; //!< Notify callback function for uplink
 };
 } // namespace ns3
