@@ -99,7 +99,7 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * \return An Observation object representing the observations for all UEs
      */
     std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetUeObservationsDl(
-        const std::vector<UePtrAndBufferReq>& ueVector) const;
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Get UE observations for uplink
@@ -108,7 +108,7 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * \return An Observation object representing the observations for all UEs
      */
     std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetUeObservationsUl(
-        const std::vector<UePtrAndBufferReq>& ueVector) const;
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Check if the downlink game is over
@@ -128,7 +128,7 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * requests
      * \return A float value representing the calculated rewards
      */
-    float GetUeRewardsDl(const std::vector<UePtrAndBufferReq>& ueVector) const;
+    float GetUeRewardsDl(const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Get rewards for uplink
@@ -136,7 +136,7 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * requests
      * \return A float value representing the calculated rewards
      */
-    float GetUeRewardsUl(const std::vector<UePtrAndBufferReq>& ueVector) const;
+    float GetUeRewardsUl(const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Call the notify callback function in the OpenGymEnv class
@@ -144,7 +144,8 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    void CallNotifyDlFn(const std::vector<UePtrAndBufferReq>& ueVector) const override;
+    void CallNotifyDlFn(
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
 
     /**
      * \brief Call the notify callback function in the OpenGymEnv class
@@ -152,7 +153,8 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests
      */
-    void CallNotifyUlFn(const std::vector<UePtrAndBufferReq>& ueVector) const override;
+    void CallNotifyUlFn(
+        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
 
     /**
      * \brief Update weights of all UE for downlink
@@ -162,7 +164,7 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * containing pointers to active UEs and their corresponding buffer requests
      */
     void UpdateAllUeWeightsDl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-                              const std::vector<UePtrAndBufferReq>& ueVector);
+                              const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector);
 
     /**
      * \brief Update weights of all UE for uplink
@@ -172,7 +174,7 @@ class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
      * containing pointers to active UEs and their corresponding buffer requests
      */
     void UpdateAllUeWeightsUl(const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-                              const std::vector<UePtrAndBufferReq>& ueVector);
+                              const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector);
 
   private:
     double m_alpha{0.0};                           //!< PF Fairness index
