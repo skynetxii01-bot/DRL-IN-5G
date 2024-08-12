@@ -88,6 +88,10 @@ NrMacSchedulerUeInfoAi::GetDlReward()
         for (const auto lcId : ueActiveLCs)
         {
             std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
+            if (m_avgTputDl == 0 || LCPtr->m_rlcTransmissionQueueHolDelay)
+            {
+                continue;
+            }
             reward += std::pow(m_potentialTputDl, m_alpha) /
                       (std::max(1E-9, m_avgTputDl) * LCPtr->m_priority *
                        LCPtr->m_rlcTransmissionQueueHolDelay);
@@ -108,6 +112,10 @@ NrMacSchedulerUeInfoAi::GetUlReward()
         for (const auto lcId : ueActiveLCs)
         {
             std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
+            if (m_avgTputUl == 0 || LCPtr->m_rlcTransmissionQueueHolDelay)
+            {
+                continue;
+            }
             reward += std::pow(m_potentialTputUl, m_alpha) /
                       (std::max(1E-9, m_avgTputUl) * LCPtr->m_priority *
                        LCPtr->m_rlcTransmissionQueueHolDelay);
