@@ -227,6 +227,8 @@ class NrMacSchedulerLcAlgorithm;
  */
 class NrMacSchedulerNs3 : public NrMacScheduler
 {
+    friend class NrTestSchedulerAiCase;
+
   public:
     /**
      * \brief GetTypeId

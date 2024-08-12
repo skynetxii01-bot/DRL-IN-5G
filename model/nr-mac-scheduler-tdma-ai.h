@@ -34,6 +34,8 @@ namespace ns3
  */
 class NrMacSchedulerTdmaAi : public NrMacSchedulerTdmaQos
 {
+    friend class NrTestSchedulerAiCase;
+
   public:
     /**
      * \brief GetTypeId
