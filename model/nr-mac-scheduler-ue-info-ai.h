@@ -77,9 +77,7 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * \typedef UpdateAllUeWeightsFn
      * \brief A function type for updating the weights of all UEs.
      */
-    typedef std::function<void(const UeWeightsMap&,
-                               const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>&)>
-        UpdateAllUeWeightsFn;
+    typedef std::function<void(const UeWeightsMap&)> UpdateAllUeWeightsFn;
     /**
      * \typedef NotifyCb
      * \brief A callback type for notifying with specific parameters.

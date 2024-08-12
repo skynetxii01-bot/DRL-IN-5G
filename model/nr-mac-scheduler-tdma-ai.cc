@@ -167,7 +167,7 @@ NrMacSchedulerTdmaAi::CallNotifyDlFn(
             std::bind(&NrMacSchedulerTdmaAi::UpdateAllUeWeightsDl,
                       this,
                       std::placeholders::_1,
-                      std::placeholders::_2);
+                      ueVector);
         m_notifyCbDl(GetUeObservationsDl(ueVector),
                      GetIsGameOverDl(),
                      GetUeRewardsDl(ueVector),
@@ -188,7 +188,7 @@ NrMacSchedulerTdmaAi::CallNotifyUlFn(
             std::bind(&NrMacSchedulerTdmaAi::UpdateAllUeWeightsUl,
                       this,
                       std::placeholders::_1,
-                      std::placeholders::_2);
+                      ueVector);
         m_notifyCbUl(GetUeObservationsUl(ueVector),
                      GetIsGameOverUl(),
                      GetUeRewardsUl(ueVector),
