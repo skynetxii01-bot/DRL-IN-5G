@@ -92,10 +92,10 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * - A pointer to a const NrMacSchedulerOfdmaAi instance
      */
     typedef Callback<void,
-                     const std::vector<LcObservation>,
-                     const bool,
-                     const float,
-                     const std::string,
+                     const std::vector<LcObservation>&,
+                     bool,
+                     float,
+                     const std::string&,
                      const UpdateAllUeWeightsFn&>
         NotifyCb;
 
