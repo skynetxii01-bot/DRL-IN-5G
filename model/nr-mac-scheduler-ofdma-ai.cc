@@ -19,9 +19,20 @@ NS_OBJECT_ENSURE_REGISTERED(NrMacSchedulerOfdmaAi);
 TypeId
 NrMacSchedulerOfdmaAi::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::NrMacSchedulerOfdmaAi")
-                            .SetParent<NrMacSchedulerOfdmaQos>()
-                            .AddConstructor<NrMacSchedulerOfdmaAi>();
+    static TypeId tid =
+        TypeId("ns3::NrMacSchedulerOfdmaAi")
+            .SetParent<NrMacSchedulerOfdmaQos>()
+            .AddConstructor<NrMacSchedulerOfdmaAi>()
+            .AddAttribute("NotifyCbDl",
+                          "The callback function to notify the AI model for the downlink",
+                          CallbackValue(MakeNullCallback<NrMacSchedulerUeInfoAi::NotifyCb>()),
+                          MakeCallbackAccessor(&NrMacSchedulerOfdmaAi::m_notifyCbDl),
+                          MakeCallbackChecker())
+            .AddAttribute("NotifyCbUl",
+                          "The callback function to notify the AI model for the uplink",
+                          CallbackValue(MakeNullCallback<NrMacSchedulerUeInfoAi::NotifyCb>()),
+                          MakeCallbackAccessor(&NrMacSchedulerOfdmaAi::m_notifyCbUl),
+                          MakeCallbackChecker());
     return tid;
 }
 
