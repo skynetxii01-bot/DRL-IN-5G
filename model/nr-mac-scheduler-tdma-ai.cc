@@ -6,6 +6,7 @@
 
 #include "nr-mac-scheduler-tdma-ai.h"
 
+#include <ns3/callback.h>
 #include <ns3/log.h>
 
 #include <algorithm>
@@ -20,9 +21,20 @@ NS_OBJECT_ENSURE_REGISTERED(NrMacSchedulerTdmaAi);
 TypeId
 NrMacSchedulerTdmaAi::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::NrMacSchedulerTdmaAi")
-                            .SetParent<NrMacSchedulerTdmaQos>()
-                            .AddConstructor<NrMacSchedulerTdmaAi>();
+    static TypeId tid =
+        TypeId("ns3::NrMacSchedulerTdmaAi")
+            .SetParent<NrMacSchedulerTdmaQos>()
+            .AddConstructor<NrMacSchedulerTdmaAi>()
+            .AddAttribute("NotifyCbDl",
+                          "The callback function to notify the AI model for the downlink",
+                          CallbackValue(MakeNullCallback<NrMacSchedulerUeInfoAi::NotifyCb>()),
+                          MakeCallbackAccessor(&NrMacSchedulerTdmaAi::m_notifyCbDl),
+                          MakeCallbackChecker())
+            .AddAttribute("NotifyCbUl",
+                          "The callback function to notify the AI model for the uplink",
+                          CallbackValue(MakeNullCallback<NrMacSchedulerUeInfoAi::NotifyCb>()),
+                          MakeCallbackAccessor(&NrMacSchedulerTdmaAi::m_notifyCbUl),
+                          MakeCallbackChecker());
     return tid;
 }
 
