@@ -42,6 +42,11 @@ $ ./ns3 run "cttc-nr-rl-based-sched --PrintHelp"
 #include "ns3/nr-module.h"
 #include "ns3/point-to-point-module.h"
 
+#if __has_include("ns3/opengym-module.h")
+#define HAVE_OPENGYM
+#include "ns3/opengym-module.h"
+#endif
+
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("CttcNrRlBasedSched");
@@ -252,11 +257,17 @@ main(int argc, char* argv[])
     std::string sched;
 
     subType = !enableOfdma ? "Tdma" : "Ofdma";
+#ifdef HAVE_OPENGYM
     sched = "Ai";
+#else
+    sched = "Qos";
+#endif
     schedulerType << "ns3::NrMacScheduler" << subType << sched;
     std::cout << "SchedulerType: " << schedulerType.str() << std::endl;
     nrHelper->SetSchedulerTypeId(TypeId::LookupByName(schedulerType.str()));
+#ifdef HAVE_OPENGYM
     nrHelper->SetSchedulerAttribute("NotifyCbDl", CallbackValue(MakeCallback(&Notify)));
+#endif
 
     // Error Model: gNB and UE with same spectrum error model.
     std::string errorModel = "ns3::NrEesmIrT" + std::to_string(mcsTable);
