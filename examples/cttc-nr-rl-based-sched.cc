@@ -46,6 +46,28 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("CttcNrRlBasedSched");
 
+void
+Notify(const std::vector<NrMacSchedulerUeInfoAi::LcObservation>& observation,
+       bool isGameOver,
+       float reward,
+       const std::string& extraInfo,
+       const NrMacSchedulerUeInfoAi::UpdateAllUeWeightsFn& updateWeightsFn)
+{
+    std::cout << "Notify called" << std::endl;
+    std::cout << "isGameOver: " << isGameOver << std::endl;
+    std::cout << "reward: " << reward << std::endl;
+    std::cout << "extraInfo: " << extraInfo << std::endl;
+    std::cout << "observation size: " << observation.size() << std::endl;
+    NrMacSchedulerUeInfoAi::UeWeightsMap ueWeightsMap;
+    for (auto& obs : observation)
+    {
+        std::cout << "rnti: " << obs.rnti << " qci: " << obs.qci << " lcId: " << obs.lcId
+                  << " priority: " << obs.priority << " holDelay: " << obs.holDelay << std::endl;
+        ueWeightsMap[obs.rnti] = NrMacSchedulerUeInfoAi::Weights{{obs.lcId, 1.0}};
+    }
+    updateWeightsFn(ueWeightsMap);
+}
+
 int
 main(int argc, char* argv[])
 {
@@ -224,15 +246,17 @@ main(int argc, char* argv[])
     Config::SetDefault("ns3::ThreeGppChannelModel::UpdatePeriod", TimeValue(MilliSeconds(0)));
     nrHelper->SetChannelConditionModelAttribute("UpdatePeriod", TimeValue(MilliSeconds(0)));
 
+    // Set the scheduler type
     std::stringstream schedulerType;
     std::string subType;
     std::string sched;
 
     subType = !enableOfdma ? "Tdma" : "Ofdma";
-    sched = "Qos";
+    sched = "Ai";
     schedulerType << "ns3::NrMacScheduler" << subType << sched;
     std::cout << "SchedulerType: " << schedulerType.str() << std::endl;
     nrHelper->SetSchedulerTypeId(TypeId::LookupByName(schedulerType.str()));
+    nrHelper->SetSchedulerAttribute("NotifyCbDl", CallbackValue(MakeCallback(&Notify)));
 
     // Error Model: gNB and UE with same spectrum error model.
     std::string errorModel = "ns3::NrEesmIrT" + std::to_string(mcsTable);
