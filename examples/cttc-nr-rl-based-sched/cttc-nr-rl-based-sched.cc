@@ -29,6 +29,8 @@ $ ./ns3 run "cttc-nr-rl-based-sched --PrintHelp"
  *
  */
 
+#include "mygym.h"
+
 #include "ns3/antenna-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/buildings-module.h"
@@ -41,11 +43,6 @@ $ ./ns3 run "cttc-nr-rl-based-sched --PrintHelp"
 #include "ns3/network-module.h"
 #include "ns3/nr-module.h"
 #include "ns3/point-to-point-module.h"
-
-#if __has_include("ns3/opengym-module.h")
-#define HAVE_OPENGYM
-#include "ns3/opengym-module.h"
-#endif
 
 using namespace ns3;
 
@@ -99,7 +96,6 @@ main(int argc, char* argv[])
     double totalTxPower = 43;
 
     bool enableOfdma = false;
-    bool enableAi = false;
 
     uint8_t priorityTrafficScenario = 1; // default is saturation
     uint8_t numTrafficProfile = 2;       // default is 2
@@ -145,9 +141,6 @@ main(int argc, char* argv[])
     cmd.AddValue("enableOfdma",
                  "If set to true it enables Ofdma scheduler. Default value is false (Tdma)",
                  enableOfdma);
-    cmd.AddValue("enableAi",
-                 "If set to true it enables Ai scheduler. Default value is false (Qos)",
-                 enableAi);
 
     cmd.Parse(argc, argv);
 
@@ -261,19 +254,12 @@ main(int argc, char* argv[])
     std::string sched;
 
     subType = !enableOfdma ? "Tdma" : "Ofdma";
-#ifdef HAVE_OPENGYM
-    sched = enableAi ? "Ai" : "Qos";
-#else
-    sched = "Qos";
-#endif
+    sched = "Ai";
     schedulerType << "ns3::NrMacScheduler" << subType << sched;
     std::cout << "SchedulerType: " << schedulerType.str() << std::endl;
     nrHelper->SetSchedulerTypeId(TypeId::LookupByName(schedulerType.str()));
 #ifdef HAVE_OPENGYM
-    if (enableAi)
-    {
-        nrHelper->SetSchedulerAttribute("NotifyCbDl", CallbackValue(MakeCallback(&Notify)));
-    }
+    nrHelper->SetSchedulerAttribute("NotifyCbDl", CallbackValue(MakeCallback(&Notify)));
 #endif
 
     // Error Model: gNB and UE with same spectrum error model.
