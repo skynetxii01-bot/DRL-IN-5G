@@ -114,3 +114,21 @@ else()
     LIBRARIES_TO_LINK ${libraries_to_link}
   )
 endif()
+
+if(${libopengym})
+    build_lib_example(
+        NAME cttc-nr-rl-based-sched
+        SOURCE_FILES cttc-nr-rl-based-sched/cttc-nr-rl-based-sched.cc
+                     cttc-nr-rl-based-sched/mygym.cc
+        LIBRARIES_TO_LINK ${libnr}
+                          ${libopengym}
+                          ${libflow-monitor}
+    )
+else()
+    build_lib_example(
+        NAME cttc-nr-rl-based-sched
+        SOURCE_FILES cttc-nr-rl-based-sched/cttc-nr-rl-based-sched.cc
+        LIBRARIES_TO_LINK ${libnr}
+                          ${libflow-monitor}
+    )
+endif()
