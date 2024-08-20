@@ -57,8 +57,7 @@ main(int argc, char* argv[])
      * possibly overridden below when command-line arguments are parsed.
      */
     // Scenario parameters (that we will use inside this script):
-    uint16_t gNbNum = 1;
-    uint16_t ueNumPergNb = 3;
+    uint16_t ueNum = 3;
     bool logging = false;
 
     // Simulation parameters. Please don't use double to indicate seconds; use
@@ -95,8 +94,7 @@ main(int argc, char* argv[])
      */
     CommandLine cmd;
 
-    cmd.AddValue("gNbNum", "The number of gNbs in multiple-ue topology", gNbNum);
-    cmd.AddValue("ueNumPergNb", "The number of UE per gNb in multiple-ue topology", ueNumPergNb);
+    cmd.AddValue("ueNum", "The number of UE per gNb in multiple-ue topology", ueNum);
     cmd.AddValue("logging", "Enable logging", logging);
     cmd.AddValue("priorityTrafficScenario",
                  "The traffic scenario for the case of priority. Can be 0: saturation"
@@ -149,15 +147,15 @@ main(int argc, char* argv[])
 
     GridScenarioHelper gridScenario;
     gridScenario.SetRows(1);
-    gridScenario.SetColumns(gNbNum);
+    gridScenario.SetColumns(1);
     gridScenario.SetHorizontalBsDistance(5.0);
     gridScenario.SetVerticalBsDistance(5.0);
     gridScenario.SetBsHeight(1.5);
     gridScenario.SetUtHeight(1.5);
     // must be set before BS number
     gridScenario.SetSectorization(GridScenarioHelper::SINGLE);
-    gridScenario.SetBsNumber(gNbNum);
-    gridScenario.SetUtNumber(ueNumPergNb * gNbNum);
+    gridScenario.SetBsNumber(1);
+    gridScenario.SetUtNumber(ueNum);
     gridScenario.SetScenarioHeight(3); // Create a 3x3 scenario where the UE will
     gridScenario.SetScenarioLength(3); // be distributed.
     randomStream += gridScenario.AssignStreams(randomStream);
