@@ -10,6 +10,7 @@
 #define HAVE_OPENGYM
 
 #include "ns3/core-module.h"
+#include "ns3/nr-module.h"
 #include "ns3/opengym-module.h"
 
 namespace ns3
@@ -29,6 +30,20 @@ class MyGymEnv : public OpenGymEnv
     float GetReward() override;
     std::string GetExtraInfo() override;
     bool ExecuteActions(Ptr<OpenGymDataContainer> action) override;
+
+    void NotifyCurrentIteration(
+        const std::vector<NrMacSchedulerUeInfoAi::LcObservation>& observations,
+        bool isGameOver,
+        float reward,
+        const std::string& extraInfo,
+        const NrMacSchedulerUeInfoAi::UpdateAllUeWeightsFn& updateAllUeWeightsFn);
+
+  private:
+    bool m_gameOver;
+    std::vector<NrMacSchedulerUeInfoAi::LcObservation> m_observation;
+    float m_reward;
+    std::string m_extraInfo;
+    NrMacSchedulerUeInfoAi::UpdateAllUeWeightsFn m_updateAllUeWeightsFn;
 };
 } // namespace ns3
 #endif

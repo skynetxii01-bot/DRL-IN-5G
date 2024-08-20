@@ -100,4 +100,21 @@ MyGymEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
     return true;
 }
 
+void
+MyGymEnv::NotifyCurrentIteration(
+    const std::vector<NrMacSchedulerUeInfoAi::LcObservation>& observations,
+    bool isGameOver,
+    float reward,
+    const std::string& extraInfo,
+    const NrMacSchedulerUeInfoAi::UpdateAllUeWeightsFn& updateAllUeWeightsFn)
+{
+    NS_LOG_FUNCTION(this);
+    m_observation = observations;
+    m_gameOver = isGameOver;
+    m_reward = reward;
+    m_extraInfo = extraInfo;
+    m_updateAllUeWeightsFn = updateAllUeWeightsFn;
+    Notify();
+}
+
 } // namespace ns3
