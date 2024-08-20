@@ -48,28 +48,6 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("CttcNrRlBasedSched");
 
-void
-Notify(const std::vector<NrMacSchedulerUeInfoAi::LcObservation>& observation,
-       bool isGameOver,
-       float reward,
-       const std::string& extraInfo,
-       const NrMacSchedulerUeInfoAi::UpdateAllUeWeightsFn& updateWeightsFn)
-{
-    std::cout << "Notify called" << std::endl;
-    std::cout << "isGameOver: " << isGameOver << std::endl;
-    std::cout << "reward: " << reward << std::endl;
-    std::cout << "extraInfo: " << extraInfo << std::endl;
-    std::cout << "observation size: " << observation.size() << std::endl;
-    NrMacSchedulerUeInfoAi::UeWeightsMap ueWeightsMap;
-    for (auto& obs : observation)
-    {
-        std::cout << "rnti: " << obs.rnti << " qci: " << obs.qci << " lcId: " << obs.lcId
-                  << " priority: " << obs.priority << " holDelay: " << obs.holDelay << std::endl;
-        ueWeightsMap[obs.rnti] = NrMacSchedulerUeInfoAi::Weights{{obs.lcId, 1.0}};
-    }
-    updateWeightsFn(ueWeightsMap);
-}
-
 int
 main(int argc, char* argv[])
 {
@@ -96,6 +74,7 @@ main(int argc, char* argv[])
     double totalTxPower = 43;
 
     bool enableOfdma = false;
+    bool enableAi = false;
 
     uint8_t priorityTrafficScenario = 1; // default is saturation
     uint8_t numTrafficProfile = 2;       // default is 2
@@ -105,6 +84,9 @@ main(int argc, char* argv[])
     // Where we will store the output files.
     std::string simTag = "default";
     std::string outputDir = "./";
+
+    // OpenGym parameters
+    uint32_t openGymPort = 5555;
 
     /*
      * From here, we instruct the ns3::CommandLine class of all the input parameters
@@ -141,6 +123,9 @@ main(int argc, char* argv[])
     cmd.AddValue("enableOfdma",
                  "If set to true it enables Ofdma scheduler. Default value is false (Tdma)",
                  enableOfdma);
+    cmd.AddValue("enableAi",
+                 "If set to true it enables Ai scheduler. Default value is false (Qos)",
+                 enableAi);
 
     cmd.Parse(argc, argv);
 
@@ -259,7 +244,18 @@ main(int argc, char* argv[])
     std::cout << "SchedulerType: " << schedulerType.str() << std::endl;
     nrHelper->SetSchedulerTypeId(TypeId::LookupByName(schedulerType.str()));
 #ifdef HAVE_OPENGYM
-    nrHelper->SetSchedulerAttribute("NotifyCbDl", CallbackValue(MakeCallback(&Notify)));
+    // Setup the OpenGym interface
+    Ptr<OpenGymInterface> openGymInterface = CreateObject<OpenGymInterface>(openGymPort);
+    Ptr<MyGymEnv> myGymEnv = CreateObject<MyGymEnv>();
+    myGymEnv->SetOpenGymInterface(openGymInterface);
+    if (enableAi)
+    {
+        nrHelper->SetSchedulerAttribute(
+            "NotifyCbDl",
+            CallbackValue(MakeCallback(&MyGymEnv::NotifyCurrentIteration, myGymEnv)));
+    }
+#else
+    NS_ASSERT_MSG(!enableAi, "OpenGym Module is not enabled. Please enable it to use AI scheduler");
 #endif
 
     // Error Model: gNB and UE with same spectrum error model.
@@ -660,7 +656,12 @@ main(int argc, char* argv[])
     {
         std::cout << f.rdbuf();
     }
-
+#ifdef HAVE_OPENGYM
+    if (enableAi)
+    {
+        myGymEnv->NotifySimulationEnd();
+    }
+#endif
     Simulator::Destroy();
     return 0;
 }
