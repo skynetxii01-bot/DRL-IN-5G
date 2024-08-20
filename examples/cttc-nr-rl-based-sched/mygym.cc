@@ -17,6 +17,12 @@ MyGymEnv::MyGymEnv()
     NS_LOG_FUNCTION(this);
 }
 
+MyGymEnv::MyGymEnv(uint32_t numUes)
+{
+    NS_LOG_FUNCTION(this);
+    m_numUes = numUes;
+}
+
 MyGymEnv::~MyGymEnv()
 {
     NS_LOG_FUNCTION(this);

@@ -244,7 +244,7 @@ main(int argc, char* argv[])
 #ifdef HAVE_OPENGYM
     // Setup the OpenGym interface
     Ptr<OpenGymInterface> openGymInterface = CreateObject<OpenGymInterface>(openGymPort);
-    Ptr<MyGymEnv> myGymEnv = CreateObject<MyGymEnv>();
+    Ptr<MyGymEnv> myGymEnv = CreateObject<MyGymEnv>(ueNum);
     myGymEnv->SetOpenGymInterface(openGymInterface);
     if (enableAi)
     {
