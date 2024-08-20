@@ -28,12 +28,12 @@ NrMacSchedulerTdmaAi::GetTypeId()
             .AddAttribute("NotifyCbDl",
                           "The callback function to notify the AI model for the downlink",
                           CallbackValue(MakeNullCallback<NrMacSchedulerUeInfoAi::NotifyCb>()),
-                          MakeCallbackAccessor(&NrMacSchedulerTdmaAi::m_notifyCbDl),
+                          MakeCallbackAccessor(&NrMacSchedulerTdmaAi::SetNotifyCbDl),
                           MakeCallbackChecker())
             .AddAttribute("NotifyCbUl",
                           "The callback function to notify the AI model for the uplink",
                           CallbackValue(MakeNullCallback<NrMacSchedulerUeInfoAi::NotifyCb>()),
-                          MakeCallbackAccessor(&NrMacSchedulerTdmaAi::m_notifyCbUl),
+                          MakeCallbackAccessor(&NrMacSchedulerTdmaAi::SetNotifyCbUl),
                           MakeCallbackChecker());
     return tid;
 }
