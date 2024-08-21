@@ -48,7 +48,11 @@ Ptr<OpenGymSpace>
 MyGymEnv::GetActionSpace()
 {
     NS_LOG_FUNCTION(this);
-    return Create<OpenGymDiscreteSpace>(3);
+    float low = 0.0;
+    float high = 1.0;
+    std::vector<uint32_t> shape = {m_numUes};
+    std::string dtype = TypeNameGet<float>();
+    return Create<OpenGymBoxSpace>(low, high, shape, dtype);
 }
 
 Ptr<OpenGymSpace>
@@ -58,9 +62,10 @@ MyGymEnv::GetObservationSpace()
     float low = 0.0;
     float high = 100.0;
     std::vector<uint32_t> shape = {
-        3,
+        m_numUes,
+        4,
     };
-    std::string dtype = TypeNameGet<float>();
+    std::string dtype = TypeNameGet<uint16_t>();
     return Create<OpenGymBoxSpace>(low, high, shape, dtype);
 }
 
@@ -68,7 +73,7 @@ bool
 MyGymEnv::GetGameOver()
 {
     NS_LOG_FUNCTION(this);
-    return false;
+    return m_gameOver;
 }
 
 Ptr<OpenGymDataContainer>
@@ -76,12 +81,18 @@ MyGymEnv::GetObservation()
 {
     NS_LOG_FUNCTION(this);
     std::vector<uint32_t> shape = {
-        3,
+        m_numUes,
+        4,
     };
-    Ptr<OpenGymBoxContainer<float>> observation = CreateObject<OpenGymBoxContainer<float>>(shape);
-    observation->AddValue(1.0);
-    observation->AddValue(2.0);
-    observation->AddValue(3.0);
+    Ptr<OpenGymBoxContainer<uint16_t>> observation =
+        CreateObject<OpenGymBoxContainer<uint16_t>>(shape);
+    for (auto& obs : m_observation)
+    {
+        observation->AddValue(obs.rnti);
+        observation->AddValue(obs.lcId);
+        observation->AddValue(obs.priority);
+        observation->AddValue(obs.holDelay);
+    }
     return observation;
 }
 
@@ -89,20 +100,32 @@ float
 MyGymEnv::GetReward()
 {
     NS_LOG_FUNCTION(this);
-    return 1.0;
+    return m_reward;
 }
 
 std::string
 MyGymEnv::GetExtraInfo()
 {
     NS_LOG_FUNCTION(this);
-    return "Extra info";
+    return m_extraInfo;
 }
 
 bool
 MyGymEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
 {
     NS_LOG_FUNCTION(this);
+    Ptr<OpenGymBoxContainer<float>> actionBox = DynamicCast<OpenGymBoxContainer<float>>(action);
+    std::vector<float> actionData = actionBox->GetData();
+    NrMacSchedulerUeInfoAi::UeWeightsMap ueWeightsMap;
+    for (uint32_t i = 0; i < m_numUes; i++)
+    {
+        if (ueWeightsMap.end() == ueWeightsMap.find(m_observation[i].rnti))
+        {
+            ueWeightsMap[m_observation[i].rnti] = NrMacSchedulerUeInfoAi::Weights();
+        }
+        ueWeightsMap[m_observation[i].rnti][m_observation[i].lcId] = actionData[i];
+    }
+    m_updateAllUeWeightsFn(ueWeightsMap);
     return true;
 }
 
