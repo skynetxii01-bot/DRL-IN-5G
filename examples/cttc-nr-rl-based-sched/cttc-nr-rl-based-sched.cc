@@ -84,8 +84,10 @@ main(int argc, char* argv[])
     std::string simTag = "default";
     std::string outputDir = "./";
 
+#ifdef HAVE_OPENGYM
     // OpenGym parameters
     uint32_t openGymPort = 5555;
+#endif
 
     /*
      * From here, we instruct the ns3::CommandLine class of all the input parameters
