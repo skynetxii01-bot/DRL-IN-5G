@@ -87,6 +87,7 @@ main(int argc, char* argv[])
 #ifdef HAVE_OPENGYM
     // OpenGym parameters
     uint32_t openGymPort = 5555;
+    uint32_t simSeed = 0;
 #endif
 
     /*
@@ -126,8 +127,17 @@ main(int argc, char* argv[])
     cmd.AddValue("enableAi",
                  "If set to true it enables Ai scheduler. Default value is false (Qos)",
                  enableAi);
+#ifdef HAVE_OPENGYM
+    cmd.AddValue("openGymPort", "Port number to use for OpenGym interface", openGymPort);
+    cmd.AddValue("simSeed", "Seed for the simulation", simSeed);
+#endif
 
     cmd.Parse(argc, argv);
+
+#ifdef HAVE_OPENGYM
+    RngSeedManager::SetSeed(1);
+    RngSeedManager::SetRun(simSeed);
+#endif
 
     // enable logging or not
     if (logging)
