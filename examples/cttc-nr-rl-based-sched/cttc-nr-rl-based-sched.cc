@@ -266,9 +266,15 @@ main(int argc, char* argv[])
         nrHelper->SetSchedulerAttribute(
             "ActiveDlAi",
             BooleanValue(true)); // Activate the AI model for the downlink
+        std::cout << "AI scheduler is enabled" << std::endl;
+    }
+    else
+    {
+        std::cout << "AI scheduler is not enabled. QoS scheduler is used" << std::endl;
     }
 #else
     NS_ASSERT_MSG(!enableAi, "OpenGym Module is not enabled. Please enable it to use AI scheduler");
+    std::cout << "AI scheduler is not enabled. QoS scheduler is used" << std::endl;
 #endif
 
     // Error Model: gNB and UE with same spectrum error model.
