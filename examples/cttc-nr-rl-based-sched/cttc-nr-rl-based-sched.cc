@@ -263,6 +263,9 @@ main(int argc, char* argv[])
         nrHelper->SetSchedulerAttribute(
             "NotifyCbDl",
             CallbackValue(MakeCallback(&MyGymEnv::NotifyCurrentIteration, myGymEnv)));
+        nrHelper->SetSchedulerAttribute(
+            "ActiveDlAi",
+            BooleanValue(true)); // Activate the AI model for the downlink
     }
 #else
     NS_ASSERT_MSG(!enableAi, "OpenGym Module is not enabled. Please enable it to use AI scheduler");
