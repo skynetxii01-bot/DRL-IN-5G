@@ -6,6 +6,7 @@
 
 #include "nr-mac-scheduler-ofdma-ai.h"
 
+#include <ns3/boolean.h>
 #include <ns3/log.h>
 
 #include <algorithm>
@@ -26,13 +27,23 @@ NrMacSchedulerOfdmaAi::GetTypeId()
             .AddAttribute("NotifyCbDl",
                           "The callback function to notify the AI model for the downlink",
                           CallbackValue(MakeNullCallback<NrMacSchedulerUeInfoAi::NotifyCb>()),
-                          MakeCallbackAccessor(&NrMacSchedulerOfdmaAi::SetNotifyCbDl),
+                          MakeCallbackAccessor(&NrMacSchedulerOfdmaAi::m_notifyCbDl),
                           MakeCallbackChecker())
             .AddAttribute("NotifyCbUl",
                           "The callback function to notify the AI model for the uplink",
                           CallbackValue(MakeNullCallback<NrMacSchedulerUeInfoAi::NotifyCb>()),
-                          MakeCallbackAccessor(&NrMacSchedulerOfdmaAi::SetNotifyCbUl),
-                          MakeCallbackChecker());
+                          MakeCallbackAccessor(&NrMacSchedulerOfdmaAi::m_notifyCbUl),
+                          MakeCallbackChecker())
+            .AddAttribute("ActiveDlAi",
+                          "The flag to activate the AI model for the downlink",
+                          BooleanValue(false),
+                          MakeBooleanAccessor(&NrMacSchedulerOfdmaAi::m_activeDlAi),
+                          MakeBooleanChecker())
+            .AddAttribute("ActiveUlAi",
+                          "The flag to activate the AI model for the uplink",
+                          BooleanValue(false),
+                          MakeBooleanAccessor(&NrMacSchedulerOfdmaAi::m_activeUlAi),
+                          MakeBooleanChecker());
     return tid;
 }
 
