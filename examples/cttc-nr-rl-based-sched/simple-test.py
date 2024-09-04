@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Copyright (c) 2024 Seoul National University (SNU)
 # Copyright (c) 2024 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
 #
 # SPDX-License-Identifier: GPL-2.0-only
