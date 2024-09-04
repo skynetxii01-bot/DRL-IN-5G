@@ -184,8 +184,7 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
         const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
   private:
-    float m_alpha{0.0}; //!< PF Fairness index
-    TracedValue<uint32_t> m_tracedValueSymPerBeam;
+    float m_alpha{0.0};                            //!< PF Fairness index
     NrMacSchedulerUeInfoAi::NotifyCb m_notifyCbDl; //!< Notify callback function for downlink
     NrMacSchedulerUeInfoAi::NotifyCb m_notifyCbUl; //!< Notify callback function for uplink
 };
