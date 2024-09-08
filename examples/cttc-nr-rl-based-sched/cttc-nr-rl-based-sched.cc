@@ -24,7 +24,7 @@
  * divided into different NodeContainers according to the traffic type.
  *
  * The openGymPort parameter is used to set the port number for the OpenGym interface.
- * The simSeed parameter is used to set the seed for the simulation. Theses two parameters
+ * The simSeed parameter is used to set the seed for the simulation. These two parameters
  * are always passed from the ns3-gym module.
  *
  * When the ns3-gym module is available and the enableAi parameter is set to true,
