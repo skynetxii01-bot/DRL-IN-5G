@@ -2412,6 +2412,25 @@ the QCI of which can be set as desired.
 The complete details of the simulation script are provided in
 https://cttc-lena.gitlab.io/nr/html/cttc-nr-multi-flow-qos-sched_8cc.html.
 
+cttc-nr-rl-based-sched.cc
+=========================
+
+The program ``examples/cttc-nr-rl-based-sched`` is an example that allows testing
+the performance of the RL-based schedulers (see :ref:`RLScheduler`). The example
+has been designed to test the E2E delay and throughput in a single-cell scenario
+with 3 UEs, where one UE has a NON-GBR flow (5QI=80), the second UE has a GBR flow
+(5QI=1) and the third UE has a delay critical GBR flow (5QI=87).
+
+Users can configure the number of UEs, and the number of types of flows (2 or 3).
+If the number of types of flows is set to 2, the GBR flow is not considered.
+UEs are divided into groups, where each group has a different type of flow.
+
+To enable the RL-based scheduler, the ns3-gym module must be installed and the enableAi
+parameter must be set to true.
+
+The complete details of the simulation script are provided in
+https://cttc-lena.gitlab.io/nr/html/cttc-nr-rl-based-sched_8cc.html.
+
 .. _Validation:
 
 Validation
