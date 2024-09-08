@@ -19,7 +19,13 @@
  * Using parameters from the command line, the user can choose the number of UEs,
  * the numerology, the central frequency, the bandwidth, the total Tx power, the
  * scheduler type (TDMA or OFDMA), and the numTrafficProfile (2 or 3) which will
- * define the number of traffic types.
+ * define the number of traffic types. The default value of the numTrafficProfile
+ * is 3, and the low-latency flow is not considered in the case of 2. The UEs are
+ * divided into different NodeContainers according to the traffic type.
+ *
+ * The openGymPort parameter is used to set the port number for the OpenGym interface.
+ * The simSeed parameter is used to set the seed for the simulation. Theses two parameters
+ * are always passed from the ns3-gym module.
  *
  * When the ns3-gym module is available and the enableAi parameter is set to true,
  * the example will use the AI scheduler to schedule the UEs. The AI scheduler will
