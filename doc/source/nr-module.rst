@@ -1502,7 +1502,7 @@ considered for the QoS LC Assignment can found in [WNS3-QosSchedulers]_.
 
 RL-based Scheduler
 ===================
-The 'NR' module includes reinforcement learning (RL)-based schedulers that allocate
+The 'NR' module includes Reinforcement Learning (RL)-based schedulers that allocate
 available resources (i.e., symbols and Physical Resource Blocks (PRBs)) based on the RL model.
 The RL-based scheduler communicates with the RL model, implemented using the ns3-gym module,
 to determine the actions for the current state. To obtain these actions, the RL-based scheduler
