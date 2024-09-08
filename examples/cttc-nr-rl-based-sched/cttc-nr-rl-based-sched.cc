@@ -10,14 +10,26 @@
  * \file cttc-nr-rl-based-sched.cc
  * \brief A example for RL based scheduler (nr-mac-scheduler-ofdma/tdma-ai)
  *
- * This example describes how to setup a simulation using the QoS scheduler and
+ * This example describes how to setup a simulation using the AI scheduler and
  * the 3GPP channel model from TR 38.900. This example consists of a simple
- * topology, in which there is only one gNB and three UEs with different QCI flows.
- * Have a look at the possible parameters to know what you can configure through
- * the command line.
+ * topology, in which there is one gNB and three UEs with different QCI flows.
+ * One UE will have a voice flow (5QI 1), another UE will have a low-latency flow
+ * (5QI 80), and the last UE will have a motion tracking flow (5QI 87).
  *
- * With the default configuration, the example will create one flow for each UE,
- * with different QCIs that will go through the same BWP.
+ * Using parameters from the command line, the user can choose the number of UEs,
+ * the numerology, the central frequency, the bandwidth, the total Tx power, the
+ * scheduler type (TDMA or OFDMA), and the numTrafficProfile (2 or 3) which will
+ * define the number of traffic types.
+ *
+ * When the ns3-gym module is available and the enableAi parameter is set to true,
+ * the example will use the AI scheduler to schedule the UEs. The AI scheduler will
+ * send observations to the custom MyGymEnv class inheriting from OpenGymEnv, which
+ * will be used to train the AI model. The AI model will send back the weights for
+ * all flows of all UEs, which will be used to schedule the UEs. The AI scheduler
+ * will also send rewards to the MyGymEnv class, which will be used to train the AI
+ * model. All information needed by the gym is sent once through the NotifyCb callback
+ * function. The NotifyCb function is defined in the MyGymEnv class and is set in the
+ * AI scheduler as the attribute `m_notifyCbDl` for the downlink.
  *
  * The example will print the end-to-end result of three different QoS flows
  * with different resource types on-screen, as well as writing them on a file.
