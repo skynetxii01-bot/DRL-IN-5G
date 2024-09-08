@@ -138,14 +138,12 @@ NrMacSchedulerOfdmaAi::GetUeObservationsUl(
 bool
 NrMacSchedulerOfdmaAi::GetIsGameOverDl() const
 {
-    NS_LOG_FUNCTION(this);
     return false;
 }
 
 bool
 NrMacSchedulerOfdmaAi::GetIsGameOverUl() const
 {
-    NS_LOG_FUNCTION(this);
     return false;
 }
 
