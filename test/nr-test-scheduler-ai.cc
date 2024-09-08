@@ -165,92 +165,6 @@ TestSchedulerAiPhySapProvider::GetBeamId(uint8_t rnti) const
     return beamId;
 }
 
-class TestSchedulerAiGnbMac : public NrGnbMac
-{
-  public:
-    static TypeId GetTypeId();
-    TestSchedulerAiGnbMac(const std::vector<uint8_t>& inputMask);
-    ~TestSchedulerAiGnbMac() override;
-    void DoSchedConfigIndication(NrMacSchedSapUser::SchedConfigIndParameters ind) override;
-    void SetVerbose(bool verbose);
-
-  private:
-    std::vector<uint8_t> m_inputMask;
-    bool m_verboseMac = false;
-};
-
-NS_OBJECT_ENSURE_REGISTERED(TestSchedulerAiGnbMac);
-
-TypeId
-TestSchedulerAiGnbMac::GetTypeId()
-{
-    static TypeId tid = TypeId("ns3::TestSchedulerAiGnbMac").SetParent<NrGnbMac>()
-        //.AddConstructor<TestSchedulerAiGnbMac> ()
-        ;
-    return tid;
-}
-
-TestSchedulerAiGnbMac::TestSchedulerAiGnbMac(const std::vector<uint8_t>& inputMask)
-{
-    m_inputMask = inputMask;
-}
-
-TestSchedulerAiGnbMac::~TestSchedulerAiGnbMac()
-{
-}
-
-void
-TestSchedulerAiGnbMac::SetVerbose(bool verbose)
-{
-    m_verboseMac = verbose;
-}
-
-void
-TestSchedulerAiGnbMac::DoSchedConfigIndication(NrMacSchedSapUser::SchedConfigIndParameters ind)
-{
-    // Check that the allocations in `ind` have the correct RBG mask
-    // Will be called after SchedDlTriggerReq is called
-    // test that ind.m_slotAllocInfo is ok: the sfnf, and the varAlloc deque
-
-    for (auto& varTtiAllocInfo : ind.m_slotAllocInfo.m_varTtiAllocInfo)
-    {
-        if (varTtiAllocInfo.m_dci->m_rnti == 0)
-        {
-            continue;
-        }
-
-        if (m_verboseMac)
-        {
-            std::ostringstream oss;
-            for (auto& x : varTtiAllocInfo.m_dci->m_rbgBitmask)
-            {
-                oss << std::to_string(x) << " ";
-            }
-
-            std::cout << "UE " << varTtiAllocInfo.m_dci->m_rnti << " assigned RBG"
-                      << " with mask: " << oss.str() << std::endl;
-        }
-
-        NS_ASSERT_MSG(varTtiAllocInfo.m_dci->m_rbgBitmask.size() == m_inputMask.size(),
-                      "dci bitmask is not of same size as the mask");
-
-        unsigned zeroes = std::count(varTtiAllocInfo.m_dci->m_rbgBitmask.begin(),
-                                     varTtiAllocInfo.m_dci->m_rbgBitmask.end(),
-                                     0);
-
-        NS_ASSERT_MSG(zeroes != m_inputMask.size(), "dci rbgBitmask is filled with zeros");
-
-        for (unsigned index = 0; index < varTtiAllocInfo.m_dci->m_rbgBitmask.size(); index++)
-        {
-            if (m_inputMask[index] == 0)
-            {
-                NS_ASSERT_MSG(varTtiAllocInfo.m_dci->m_rbgBitmask[index] == 0,
-                              "dci is diff from mask");
-            }
-        }
-    }
-}
-
 class NrTestSchedulerAiCase : public TestCase
 {
   public:
@@ -276,9 +190,8 @@ class NrTestSchedulerAiCase : public TestCase
   private:
     void DoRun() override;
     Ptr<NrMacSchedulerNs3> CreateScheduler(const std::string& schedulerType) const;
-    Ptr<TestSchedulerAiGnbMac> CreateMac(
-        Ptr<NrMacSchedulerNs3>& scheduler,
-        NrMacCschedSapProvider::CschedCellConfigReqParameters& params) const;
+    Ptr<NrGnbMac> CreateMac(Ptr<NrMacSchedulerNs3>& scheduler,
+                            NrMacCschedSapProvider::CschedCellConfigReqParameters& params) const;
     bool m_verbose = false;
     std::string m_schedulerType;
     TestSchedulerAiPhySapProvider* m_phySapProvider;
@@ -353,12 +266,12 @@ NrTestSchedulerAiCase::CreateScheduler(const std::string& schedulerType) const
     return sched;
 }
 
-Ptr<TestSchedulerAiGnbMac>
+Ptr<NrGnbMac>
 NrTestSchedulerAiCase::CreateMac(
     Ptr<NrMacSchedulerNs3>& scheduler,
     NrMacCschedSapProvider::CschedCellConfigReqParameters& params) const
 {
-    Ptr<TestSchedulerAiGnbMac> mac = CreateObject<TestSchedulerAiGnbMac>(m_mask);
+    Ptr<NrGnbMac> mac = CreateObject<NrGnbMac>();
 
     mac->SetNrMacSchedSapProvider(scheduler->GetMacSchedSapProvider());
     mac->SetNrMacCschedSapProvider(scheduler->GetMacCschedSapProvider());
@@ -386,7 +299,6 @@ NrTestSchedulerAiCase::DoRun()
     m_phySapProvider->SetParams(m_epsBearerMap.size(), 1);
 
     mac->SetPhySapProvider(m_phySapProvider);
-    mac->SetVerbose(m_verbose);
 
     Ptr<NrAmc> amc = CreateObject<NrAmc>();
     sched->InstallDlAmc(amc);
