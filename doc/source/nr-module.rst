@@ -1528,8 +1528,8 @@ the actions for the current state. The actions are the weights for all active LC
 After receiving the actions, the RL-based scheduler sorts the UEs by the sum of the weights of their active LC flows.
 The scheduler then allocates resources to the UE with the highest sum of weights, and the process is repeated for each symbol.
 
-The observation for a UE includes the observation for each active flow of the UE.
-The observation for each flow is represented as ``LcObservation`` structures, which contain the following fields:
+The observation for an UE includes information for each of its active flows.
+Each flow information is contained in a ``LcObservation`` structure, which contain the following fields:
 
 * ``rnti``
 * ``lcgId``
