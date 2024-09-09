@@ -29,6 +29,15 @@
  *
  * \brief Unit-testing for the scheduler AI. The test checks that the scheduler
  * is created correctly.
+ *
+ * This unit test is designed to verify the functionality of the callback used for invoking
+ * the gym module during the resource assigning process of an AI scheduler.
+ * The test defines a custom callback and checks whether the information passed as
+ * arguments matches the information of the User Equipment (UE) and the associated flow installed in
+ * each UE. Specifically, the test involves three UEs, each containing flow information
+ * corresponding to 5QI values of 1, 3, and 9, respectively. The test ensures that the callback
+ * receives the correct flow and UE details, confirming the proper interaction between the AI
+ * scheduler and the gym environment.
  */
 namespace ns3
 {
