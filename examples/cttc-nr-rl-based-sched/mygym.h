@@ -16,6 +16,17 @@
 
 namespace ns3
 {
+/**
+ * \brief The Gym environment for the RL-based scheduler
+ *
+ * This class extends the OpenGymEnv class and implements the Gym environment for the RL-based
+ * scheduler. The environment receives observations, gameover status, rewards and extra information
+ * from the scheduler and sends them to the RL model via the the OpenGymInterface. The class also
+ * receives actions from the RL model and sends them to the scheduler.
+ *
+ * \see NotifyCurrentIteration
+ * \see ExecuteActions
+ */
 class MyGymEnv : public OpenGymEnv
 {
   public:
