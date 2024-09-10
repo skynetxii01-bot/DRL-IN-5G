@@ -1502,7 +1502,8 @@ considered for the QoS LC Assignment can found in [WNS3-QosSchedulers]_.
 
 RL-based Scheduler
 ===================
-The 'NR' module includes Reinforcement Learning (RL)-based schedulers that allocate
+The 'NR' module includes Reinforcement Learning (RL)-based schedulers, namely
+the ``NrMacSchedulerTdmaAi`` and the ``NrMacSchedulerOfdmaAi``, that allocate
 available resources (i.e., symbols and Physical Resource Blocks (PRBs)) based on the RL model.
 The RL model is implemented using Python scripts and receives data from the RL-based scheduler
 to determine the actions for the current state. To communicate with the RL model, the RL-based
@@ -1545,11 +1546,14 @@ that maximizes the throughput of the UEs. To achieve this, the reward of a UE is
    :nowrap:
 
    \[
-   \text{reward} = \sum_{i=1}^{N} \frac{r^{\gamma}}{R(\tau) \times \text{priority}_i \times \text{holDelay}_i}
+   \text{reward} = \sum_{i=1}^{N} \frac{r^{\gamma}}{R(\tau) \times P_i \times {HOL}_i}
    \]
 
-where :math:`N` is the number of active LCs of the UE, :math:`\text{priority}_i` is the priority of the LC,
-and :math:`\text{holDelay}_i` is the HOL delay of the LC. The total reward of the scheduler is the sum of the rewards of all active UEs.
+where :math:`N` is the number of active LCs of the UE, :math:`P_i` is the priority of the LC,
+:math:`HOL_i` is the HOL delay of the LC. The total reward of the scheduler is the sum of
+the rewards of all active UEs, :math:`r` is the instantaneous achievable data rate calculated by
+the spectrum efficiency and the channel bandwidth, :math:`\gamma` is a configurable parameter, and :math:`R(\tau)`
+is the past average data rate of the UE.
 
 Timing relations
 ================
