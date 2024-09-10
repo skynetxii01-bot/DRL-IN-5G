@@ -208,11 +208,6 @@ class NrTestSchedulerAiCase : public TestCase
         {1, static_cast<EpsBearer::Qci>(1)},
         {2, static_cast<EpsBearer::Qci>(3)},
         {3, static_cast<EpsBearer::Qci>(9)}};
-    const std::vector<uint8_t> m_mask = {
-        0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1}; // 53 RBs
-                                                                                       // with BW of
-                                                                                       // 10 MHz
 };
 
 void
@@ -286,8 +281,6 @@ NrTestSchedulerAiCase::CreateMac(
     mac->SetNrMacCschedSapProvider(scheduler->GetMacCschedSapProvider());
     scheduler->SetMacSchedSapUser(mac->GetNrMacSchedSapUser());
     scheduler->SetMacCschedSapUser(mac->GetNrMacCschedSapUser());
-    scheduler->SetDlNotchedRbgMask(m_mask);
-    scheduler->SetUlNotchedRbgMask(m_mask);
     // Config sched
     scheduler->DoCschedCellConfigReq(params);
 
@@ -298,8 +291,8 @@ void
 NrTestSchedulerAiCase::DoRun()
 {
     NrMacCschedSapProvider::CschedCellConfigReqParameters params;
-    params.m_ulBandwidth = m_mask.size();
-    params.m_dlBandwidth = m_mask.size();
+    params.m_ulBandwidth = 53;
+    params.m_dlBandwidth = 53;
 
     auto sched = CreateScheduler(m_schedulerType);
     auto mac = CreateMac(sched, params);
