@@ -214,9 +214,6 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
         double lAiMetric = CalculateDlWeight(lue);
         double rAiMetric = CalculateDlWeight(rue);
 
-        NS_ASSERT_MSG(lAiMetric > 0, "Weight must be greater than zero");
-        NS_ASSERT_MSG(rAiMetric > 0, "Weight must be greater than zero");
-
         return (lAiMetric > rAiMetric);
     }
 
@@ -244,8 +241,6 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
 
                 NS_ASSERT_MSG(it != uePtr->m_weightsDl.end(), "Weight not found for LC " << lcId);
                 weight += it->second;
-
-                NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
             }
         }
         return weight;
@@ -294,8 +289,6 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
 
                 NS_ASSERT_MSG(it != uePtr->m_weightsUl.end(), "Weight not found for LC " << lcId);
                 weight += it->second;
-
-                NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
             }
         }
         return weight;
