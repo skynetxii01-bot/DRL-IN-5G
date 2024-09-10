@@ -22,7 +22,7 @@ namespace ns3
  * This class extends the NrMacSchedulerOfdmaQos class and implements the AI
  * scheduler for the downlink and uplink. If the AI model is activated, the scheduler
  * uses the AI model to schedule the UEs. If the AI model is not activated, the scheduler
- * uses the QoS scheduler to schedule the UEs.
+ * works in a similar manner as the QoS scheduler.
  *
  * When the AI model is activated, the scheduler sends observations to the OpenGymEnv
  * class in the ns3-gym module, which are used to train the AI model. The AI model then
@@ -162,7 +162,7 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
         const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
 
     /**
-     * \brief Update weights of all UE for downlink
+     * \brief Update weights of all UEs for downlink
      * \param ueWeights An unordered map where the key is the UE's RNTI (Radio Network Temporary
      * Identifier) and the value is the UE's weights for all flows
      * \param ueVector A vector
@@ -173,7 +173,7 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
         const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
 
     /**
-     * \brief Update weights of all UE for uplink
+     * \brief Update weights of all UEs for uplink
      * \param ueWeights An unordered map where the key is the UE's RNTI (Radio Network Temporary
      * Identifier) and the value is the UE's weights for all flows
      * \param ueVector A vector
