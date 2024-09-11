@@ -60,11 +60,11 @@ class PPO:
             raise NotImplementedError
 
         def act(self, state):
-            # print(f"State shape: {state.shape}")  # Debugging: print the shape of the state,s
+            debug(f"State shape: {state.shape}", args.debug)  # Debugging: print the shape of the state
             state = torch.from_numpy(state).float()  # state is (1000, 3, 4)
             action_probs = []
             for i in range(state.shape[0]):  # Iterate over the batch
-                # print(f"State shape: {state[i].shape}")  # Debugging: print the shape of each state
+                debug(f"State shape: {state[i].shape}", args.debug)  # Debugging: print the shape of each state
                 action_prob = self.actor(state[i])  # state[i] is (3, 4)
                 action_probs.append(action_prob)
 
@@ -76,11 +76,9 @@ class PPO:
             return actions.numpy(), dist.log_prob(actions)
 
         def evaluate(self, state, action):
-            # print(f"Original state shape: {state.shape}")  # Debugging: print the shape of the state
-
             action_probs = []
             for i in range(state.shape[0]):  # state.shape[0] is 1000 (batch size)
-                # print(f"State shape: {state[i].shape}")  # Debugging: print the shape of each state
+                debug(f"State shape: {state[i].shape}", args.debug)  # Debugging: print the shape of each state
                 action_prob = self.actor(
                     state[i]
                 )  # state[i] is (3, 4) for each element in the batch
@@ -96,7 +94,7 @@ class PPO:
 
             # Flatten each state in the batch for the critic
             flattened_state = state.view(state.shape[0], -1)  # Flatten each sample in the batch
-            # print(f"Flattened state shape: {flattened_state.shape}")  # Debugging: should print (1000, 12)
+            debug(f"Flattened state shape: {flattened_state.shape}", args.debug)  # Debugging: should print (1000, 12)
 
             state_value = self.critic(flattened_state)  # Pass flattened states to the critic
 
@@ -172,6 +170,9 @@ class Memory:
         del self.rewards[:]
         del self.is_terminals[:]
 
+def debug(msg, debug_flag):
+    if debug_flag:
+        print(msg)
 
 def main(args):
     simArgs = {
@@ -202,11 +203,11 @@ def main(args):
         state = env.reset()
         while True:
             action = ppo.select_action(state.reshape(state_shape), memory)
-            print(f"State: {state.reshape(state_shape)}")  # Debugging: print the state
-            print(f"Selected action: {action}")  # Debugging: print the selected action
+            debug(f"State: {state.reshape(state_shape)}", args.debug)
+            debug(f"Selected action: {action}", args.debug)
 
             state, reward, done, _ = env.step(action)
-            print(f"Reward: {reward}")
+            debug(f"Reward: {reward}", args.debug)
 
             memory.rewards.append(reward)
             memory.is_terminals.append(done)
