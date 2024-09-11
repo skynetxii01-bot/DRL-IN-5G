@@ -34,22 +34,23 @@ def main(args):
     }
     # Create the environment
     env = ns3env.Ns3Env(port=args.port, simSeed=args.seed, simArgs=simArgs, debug=args.debug)
-    stepIdx = 0
+    step_idx = 0
+    step_interval = args.stepInterval
     print("Start")
     # Run an episode
     try:
         obs = env.reset()
-        print("Step: ", stepIdx)
+        print("Step: ", step_idx)
         print("---obs: ", obs)
 
         while True:
-            stepIdx += 1
+            step_idx += 1
 
             action = env.action_space.sample()
             obs, reward, done, info = env.step(action)
 
-            if stepIdx % 1000 == 0:
-                print("Step: ", stepIdx)
+            if step_idx % step_interval == 0:
+                print("Step: ", step_idx)
                 print("---action: ", action)
                 print("---obs, reward, done, info: ", obs, reward, done, info)
 
@@ -65,9 +66,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    # Arguments used for the gym script
     parser.add_argument("--port", type=int, default=5552, help="Port number")
     parser.add_argument("--seed", type=int, default=3002, help="Seed number")
     parser.add_argument("--debug", type=bool, default=False, help="Debug mode")
+    # Arguments used for the ns3 simulation (simArgs)
     parser.add_argument("--ueNum", type=int, default=3, help="Number of UEs")
     parser.add_argument("--logging", type=bool, default=False, help="Logging")
     parser.add_argument(
@@ -87,6 +90,9 @@ if __name__ == "__main__":
     parser.add_argument("--simTag", type=str, default="default", help="Simulation tag")
     parser.add_argument("--outputDir", type=str, default="./", help="Output directory")
     parser.add_argument("--enableOfdma", type=bool, default=False, help="Enable OFDMA")
+    # Step interval for logging in the gym environment
+    parser.add_argument("--stepInterval", type=int, default=1000, help="Step interval for logging")
+
     args = parser.parse_args()
 
     main(args)
