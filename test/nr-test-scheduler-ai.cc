@@ -291,6 +291,7 @@ void
 NrTestSchedulerAiCase::DoRun()
 {
     NrMacCschedSapProvider::CschedCellConfigReqParameters params;
+    // 53 RBs for 10 MHz bandwidth
     params.m_ulBandwidth = 53;
     params.m_dlBandwidth = 53;
 
