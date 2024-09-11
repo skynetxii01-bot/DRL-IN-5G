@@ -149,8 +149,8 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * \param weights The weights assigned to a UE
      *
      * Update m_weights by copying the weights assigned to a UE.
-     * The weights consist of an unordered_map of (key, value) pairs where the combination of lcgId
-     * and lcId is the key, and the weight of the lcId is the value. The higher the weight, the
+     * The weights consist of an unordered_map of (key, value) pairs where the lcId is the key,
+     * and the weight of the lcId is the value. The higher the weight, the
      * higher the priority of the flow in scheduling.
      */
     void UpdateDlWeights(Weights& weights);
