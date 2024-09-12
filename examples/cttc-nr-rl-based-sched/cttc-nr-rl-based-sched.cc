@@ -76,7 +76,7 @@ main(int argc, char* argv[])
      * possibly overridden below when command-line arguments are parsed.
      */
     // Scenario parameters (that we will use inside this script):
-    uint16_t ueNum = 3;
+    uint16_t ueNum = 2;
     bool logging = false;
 
     // Simulation parameters. Please don't use double to indicate seconds; use
@@ -92,10 +92,10 @@ main(int argc, char* argv[])
     double totalTxPower = 43;
 
     bool enableOfdma = false;
-    bool enableAi = false;
+    std::string schedulerType = "Qos";
+    bool enableQoSLcScheduler = false;
 
-    uint8_t priorityTrafficScenario = 1; // default is saturation
-    uint8_t numTrafficProfile = 2;       // default is 2
+    uint8_t priorityTrafficScenario = 0; // default is saturation
 
     uint16_t mcsTable = 2;
 
@@ -122,12 +122,6 @@ main(int argc, char* argv[])
                  "The traffic scenario for the case of priority. Can be 0: saturation"
                  "or 1: medium-load",
                  priorityTrafficScenario);
-    cmd.AddValue(
-        "numTrafficProfile",
-        "Specifies the flow profile based on the number of traffic types. Possible values are:"
-        " 2: Two types of traffic (5QI 80, 87),"
-        " 3: Three types of traffic (5QI 1, 80, 87).",
-        numTrafficProfile);
     cmd.AddValue("simTime", "Simulation time", simTime);
     cmd.AddValue("numerology", "The numerology to be used", numerology);
     cmd.AddValue("centralFrequency", "The system frequency to be used", centralFrequency);
@@ -143,9 +137,12 @@ main(int argc, char* argv[])
     cmd.AddValue("enableOfdma",
                  "If set to true it enables Ofdma scheduler. Default value is false (Tdma)",
                  enableOfdma);
-    cmd.AddValue("enableAi",
-                 "If set to true it enables Ai scheduler. Default value is false (Qos)",
-                 enableAi);
+    cmd.AddValue("schedulerType",
+                 "PF: Proportional Fair (default), RR: Round-Robin, Qos, Ai",
+                 schedulerType);
+    cmd.AddValue("enableQoSLcScheduler",
+                 "If set to true, it enables the QoS LC scheduler. Default is RR (false)",
+                 enableQoSLcScheduler);
 #ifdef HAVE_OPENGYM
     cmd.AddValue("openGymPort", "Port number to use for OpenGym interface", openGymPort);
     cmd.AddValue("simSeed", "Seed for the simulation", simSeed);
@@ -192,25 +189,20 @@ main(int argc, char* argv[])
     randomStream += gridScenario.AssignStreams(randomStream);
     gridScenario.CreateScenario();
 
-    uint32_t udpPacketSizeCV; // 5QI 1, GBR
-    uint32_t udpPacketSizeLL; // 5QI 80, non-GBR
-    uint32_t udpPacketSizeMT; // 5QI 87, Delay Critical GBR
-
-    uint32_t lambdaCV = 1000;
-    uint32_t lambdaLL = 1000;
-    uint32_t lambdaMT = 1000;
+    uint32_t udpPacketSize1;
+    uint32_t udpPacketSize2;
+    uint32_t lambda1 = 1000;
+    uint32_t lambda2 = 1000;
 
     if (priorityTrafficScenario == 0) // saturation
     {
-        udpPacketSizeCV = 3000;
-        udpPacketSizeLL = 3000;
-        udpPacketSizeMT = 3000;
+        udpPacketSize1 = 3000;
+        udpPacketSize2 = 3000;
     }
     else if (priorityTrafficScenario == 1) // medium-load
     {
-        udpPacketSizeCV = 1252;
-        udpPacketSizeLL = 3000;
-        udpPacketSizeMT = 1252;
+        udpPacketSize1 = 3000;
+        udpPacketSize2 = 1252;
     }
     else
     {
@@ -218,34 +210,26 @@ main(int argc, char* argv[])
                      "Please choose among 0: saturation and 1: medium-load");
     }
 
-    /*
-     * Create three different NodeContainer for the different traffic type.
-     * In ueLowLat, we will put the UEs that will receive low-latency traffic (5QI 80: Low Latency
-     * eMBB, e.g., Augmented Reality). In ueVoice, we will put the UEs that will receive voice
-     * traffic (5QI 1: Conversational Voice). In ueMoTrac, we will put the UEs that will receive
-     * motion tracking data traffic. (5QI 87: Motion Tracking Interactive Service)
+    /**
+     * Create two different NodeContainer for the different traffic type.
+     * In ue1flowContainer, we will put the UEs that will receive the one flow traffic, i.e.,
+     * Non-GBR. In ue2flowsContainer, we will put the UEs that will receive the two flows traffic,
+     * i.e., Non-GBR and Delay Critical GBR.
      */
-    NodeContainer ueVoiceContainer;
-    NodeContainer ueLowLatContainer;
-    NodeContainer ueMoTracContainer;
+    NodeContainer ue1flowContainer;
+    NodeContainer ue2flowsContainer;
 
-    if (numTrafficProfile == 2)
+    for (uint32_t j = 0; j < gridScenario.GetUserTerminals().GetN(); ++j)
     {
-        for (uint32_t j = 0; j < gridScenario.GetUserTerminals().GetN(); ++j)
-        {
-            Ptr<Node> ue = gridScenario.GetUserTerminals().Get(j);
-            j % 2 == 0 ? ueLowLatContainer.Add(ue) : ueMoTracContainer.Add(ue);
-        }
+        Ptr<Node> ue = gridScenario.GetUserTerminals().Get(j);
+
+        j % 2 == 0 ? ue1flowContainer.Add(ue) : ue2flowsContainer.Add(ue);
     }
-    else if (numTrafficProfile == 3)
+
+    if (priorityTrafficScenario == 1)
     {
-        for (uint32_t j = 0; j < gridScenario.GetUserTerminals().GetN(); ++j)
-        {
-            Ptr<Node> ue = gridScenario.GetUserTerminals().Get(j);
-            j % 3 == 0   ? ueVoiceContainer.Add(ue)
-            : j % 3 == 1 ? ueLowLatContainer.Add(ue)
-                         : ueMoTracContainer.Add(ue);
-        }
+        lambda1 = 1000 / ue1flowContainer.GetN();
+        lambda2 = 1000 / ue2flowsContainer.GetN();
     }
 
     // setup the nr simulation
@@ -263,21 +247,20 @@ main(int argc, char* argv[])
     nrHelper->SetChannelConditionModelAttribute("UpdatePeriod", TimeValue(MilliSeconds(0)));
 
     // Set the scheduler type
-    std::stringstream schedulerType;
+    std::stringstream scheduler;
     std::string subType;
-    std::string sched;
 
     subType = !enableOfdma ? "Tdma" : "Ofdma";
-    sched = "Ai";
-    schedulerType << "ns3::NrMacScheduler" << subType << sched;
-    std::cout << "SchedulerType: " << schedulerType.str() << std::endl;
-    nrHelper->SetSchedulerTypeId(TypeId::LookupByName(schedulerType.str()));
+    scheduler << "ns3::NrMacScheduler" << subType << schedulerType;
+    std::cout << "Scheduler: " << scheduler.str() << std::endl;
+    nrHelper->SetSchedulerTypeId(TypeId::LookupByName(scheduler.str()));
 #ifdef HAVE_OPENGYM
     // Setup the OpenGym interface
     Ptr<OpenGymInterface> openGymInterface = CreateObject<OpenGymInterface>(openGymPort);
-    Ptr<MyGymEnv> myGymEnv = CreateObject<MyGymEnv>(ueNum);
+    Ptr<MyGymEnv> myGymEnv =
+        CreateObject<MyGymEnv>(ue1flowContainer.GetN() + ue2flowsContainer.GetN() * 2);
     myGymEnv->SetOpenGymInterface(openGymInterface);
-    if (enableAi)
+    if (schedulerType == "Ai")
     {
         nrHelper->SetSchedulerAttribute(
             "NotifyCbDl",
@@ -287,14 +270,18 @@ main(int argc, char* argv[])
             BooleanValue(true)); // Activate the AI model for the downlink
         std::cout << "AI scheduler is enabled" << std::endl;
     }
-    else
-    {
-        std::cout << "AI scheduler is not enabled. QoS scheduler is used" << std::endl;
-    }
 #else
-    NS_ASSERT_MSG(!enableAi, "OpenGym Module is not enabled. Please enable it to use AI scheduler");
-    std::cout << "AI scheduler is not enabled. QoS scheduler is used" << std::endl;
+    NS_ASSERT_MSG(schedulerType != "Ai",
+                  "OpenGym Module is not enabled. Please enable it to use AI scheduler");
 #endif
+
+    // Set the scheduler type for the QoS LC scheduler if enabled
+    if (enableQoSLcScheduler)
+    {
+        nrHelper->SetSchedulerAttribute("SchedLcAlgorithmType",
+                                        TypeIdValue(NrMacSchedulerLcQos::GetTypeId()));
+        std::cout << "QoS LC scheduler is enabled" << std::endl;
+    }
 
     // Error Model: gNB and UE with same spectrum error model.
     std::string errorModel = "ns3::NrEesmIrT" + std::to_string(mcsTable);
@@ -330,6 +317,8 @@ main(int argc, char* argv[])
     OperationBandInfo band;
     const uint8_t numOfCcs = 1;
 
+    auto bandMask = NrHelper::INIT_PROPAGATION | NrHelper::INIT_CHANNEL;
+
     /*
      * The configured spectrum division for TDD is:
      *
@@ -349,7 +338,7 @@ main(int argc, char* argv[])
     // By using the configuration created, it is time to make the operation band
     band = ccBwpCreator.CreateOperationBandContiguousCc(bandConf);
 
-    nrHelper->InitializeOperationBand(&band);
+    nrHelper->InitializeOperationBand(&band, bandMask);
     allBwps = CcBwpCreator::GetAllBwps({band});
 
     double x = pow(10, totalTxPower / 10);
@@ -357,29 +346,20 @@ main(int argc, char* argv[])
     Packet::EnableChecking();
     Packet::EnablePrinting();
 
-    uint32_t bwpIdForVoice = 0;
-    uint32_t bwpIdForLowLat = 0;
-    uint32_t bwpIdForMoTrac = 0;
+    uint32_t bwpIdUe1 = 0;
+    uint32_t bwpIdUe2Flow1 = 0;
+    uint32_t bwpIdUe2Flow2 = 0;
 
     // gNb routing between Bearer and bandwidh part
-    if (numTrafficProfile == 3)
-    {
-        nrHelper->SetGnbBwpManagerAlgorithmAttribute("GBR_CONV_VOICE",
-                                                     UintegerValue(bwpIdForVoice));
-    }
-    nrHelper->SetGnbBwpManagerAlgorithmAttribute("NGBR_LOW_LAT_EMBB",
-                                                 UintegerValue(bwpIdForLowLat));
+    nrHelper->SetGnbBwpManagerAlgorithmAttribute("NGBR_LOW_LAT_EMBB", UintegerValue(bwpIdUe1));
+    nrHelper->SetGnbBwpManagerAlgorithmAttribute("NGBR_LOW_LAT_EMBB", UintegerValue(bwpIdUe2Flow1));
     nrHelper->SetGnbBwpManagerAlgorithmAttribute("DGBR_INTER_SERV_87",
-                                                 UintegerValue(bwpIdForMoTrac));
+                                                 UintegerValue(bwpIdUe2Flow2));
 
     // Ue routing between Bearer and bandwidth part
-    if (numTrafficProfile == 3)
-    {
-        nrHelper->SetUeBwpManagerAlgorithmAttribute("GBR_CONV_VOICE", UintegerValue(bwpIdForVoice));
-    }
-    nrHelper->SetUeBwpManagerAlgorithmAttribute("NGBR_LOW_LAT_EMBB", UintegerValue(bwpIdForLowLat));
-    nrHelper->SetUeBwpManagerAlgorithmAttribute("DGBR_INTER_SERV_87",
-                                                UintegerValue(bwpIdForMoTrac));
+    nrHelper->SetUeBwpManagerAlgorithmAttribute("NGBR_LOW_LAT_EMBB", UintegerValue(bwpIdUe1));
+    nrHelper->SetUeBwpManagerAlgorithmAttribute("NGBR_LOW_LAT_EMBB", UintegerValue(bwpIdUe2Flow1));
+    nrHelper->SetUeBwpManagerAlgorithmAttribute("DGBR_INTER_SERV_87", UintegerValue(bwpIdUe2Flow2));
 
     /*
      * We have configured the attributes we needed. Now, install and get the pointers
@@ -387,17 +367,11 @@ main(int argc, char* argv[])
      */
     NetDeviceContainer enbNetDev =
         nrHelper->InstallGnbDevice(gridScenario.GetBaseStations(), allBwps);
-    NetDeviceContainer ueVoiceNetDev;
-    if (numTrafficProfile == 3)
-    {
-        ueVoiceNetDev = nrHelper->InstallUeDevice(ueVoiceContainer, allBwps);
-    }
-    NetDeviceContainer ueLowLatNetDev = nrHelper->InstallUeDevice(ueLowLatContainer, allBwps);
-    NetDeviceContainer ueMoTracNetDev = nrHelper->InstallUeDevice(ueMoTracContainer, allBwps);
+    NetDeviceContainer ue1flowNetDev = nrHelper->InstallUeDevice(ue1flowContainer, allBwps);
+    NetDeviceContainer ue2flowsNetDev = nrHelper->InstallUeDevice(ue2flowsContainer, allBwps);
 
-    NetDeviceContainer ueNetDevs(ueVoiceNetDev);
-    ueNetDevs.Add(ueLowLatNetDev);
-    ueNetDevs.Add(ueMoTracNetDev);
+    NetDeviceContainer ueNetDevs(ue1flowNetDev);
+    ueNetDevs.Add(ue2flowsNetDev);
 
     randomStream += nrHelper->AssignStreams(enbNetDev, randomStream);
     randomStream += nrHelper->AssignStreams(ueNetDevs, randomStream);
@@ -443,12 +417,10 @@ main(int argc, char* argv[])
     Ipv4InterfaceContainer ueLowLatIpIface;
     Ipv4InterfaceContainer ueMoTracIpIface;
 
-    if (numTrafficProfile == 3)
-    {
-        ueVoiceIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ueVoiceNetDev));
-    }
-    ueLowLatIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ueLowLatNetDev));
-    ueMoTracIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ueMoTracNetDev));
+    Ipv4InterfaceContainer ue1FlowIpIface;
+    Ipv4InterfaceContainer ue2FlowsIpIface;
+    ue1FlowIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ue1flowNetDev));
+    ue2FlowsIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ue2flowsNetDev));
 
     // Set the default gateway for the UEs
     for (uint32_t j = 0; j < gridScenario.GetUserTerminals().GetN(); ++j)
@@ -459,131 +431,139 @@ main(int argc, char* argv[])
     }
 
     // attach UEs to the closest gNB
-    if (numTrafficProfile == 3)
-    {
-        nrHelper->AttachToClosestEnb(ueVoiceNetDev, enbNetDev);
-    }
-    nrHelper->AttachToClosestEnb(ueLowLatNetDev, enbNetDev);
-    nrHelper->AttachToClosestEnb(ueMoTracNetDev, enbNetDev);
+    nrHelper->AttachToClosestEnb(ueNetDevs, enbNetDev);
 
     /*
-     * Traffic Configuration: Install three types of traffic—low-latency, voice,
-     * and interactive service—each identified by a specific source port.
-     * Configure attributes for the different generators, using user-provided
-     * parameters to generate CBR traffic.
+     * Traffic Configuration: The UEs with one flow will have low-latency traffic, one of the
+     * NON-GBR traffic type. The UEs with two flows will have low-latency and voice traffic,
+     * one of the Non-GBR and one of the delay critical GBR traffic type.
      */
-
-    uint16_t dlPort = 1234;
+    uint16_t dlPortUe1flow = 1234;
+    uint16_t dlPortUe2flowsNgbr = 1235;
+    uint16_t dlPortUe2flowsDcGbr = 1236;
 
     ApplicationContainer serverApps;
+
+    // The sink will always listen to the specified ports
+    UdpServerHelper dlPacketSinkUe1flow(dlPortUe1flow);
+    UdpServerHelper dlPacketSinkUe2flowsNgbr(dlPortUe2flowsNgbr);
+    UdpServerHelper dlPacketSinkUe2flowsDcGgbr(dlPortUe2flowsDcGbr);
+
+    // The server, that is the application which is listening, is installed in the UE
+    serverApps.Add(dlPacketSinkUe1flow.Install(ue1flowContainer));
+    serverApps.Add(dlPacketSinkUe2flowsNgbr.Install(ue2flowsContainer));
+    serverApps.Add(dlPacketSinkUe2flowsDcGgbr.Install(ue2flowsContainer));
+
+    /*
+     * Configure attributes for the different generators, using user-provided
+     * parameters for generating a Non-GBR traffic type.
+     *
+     * UE with 1 flow configuration and object creation:
+     */
+    /******************************************************************************/
+    UdpClientHelper dlClientUe1flow;
+    dlClientUe1flow.SetAttribute("RemotePort", UintegerValue(dlPortUe1flow));
+    dlClientUe1flow.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
+    dlClientUe1flow.SetAttribute("PacketSize", UintegerValue(udpPacketSize1));
+    dlClientUe1flow.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambda1)));
+
+    // The bearer that will carry UE with 1 flow Non GBR traffic
+    EpsBearer ue1flowBearer(EpsBearer::NGBR_LOW_LAT_EMBB);
+
+    // The filter for the UE with 1 flow Non GBR traffic
+    Ptr<EpcTft> ue1flowTft = Create<EpcTft>();
+    EpcTft::PacketFilter dlpfUe1flow;
+    dlpfUe1flow.localPortStart = dlPortUe1flow;
+    dlpfUe1flow.localPortEnd = dlPortUe1flow;
+    ue1flowTft->Add(dlpfUe1flow);
+    /******************************************************************************/
+
+    /******************************************************************************/
+    // UE with 2 Flows Non-GBR configuration and object creation:
+    UdpClientHelper dlClientUe2flowsNgbr;
+    dlClientUe2flowsNgbr.SetAttribute("RemotePort", UintegerValue(dlPortUe2flowsNgbr));
+    dlClientUe2flowsNgbr.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
+    dlClientUe2flowsNgbr.SetAttribute("PacketSize", UintegerValue(udpPacketSize1));
+    dlClientUe2flowsNgbr.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambda1)));
+
+    // GbrQosInformation qosInfoInterServ2;
+    // qosInfoInterServ2.gbrDl = 6e6; // Downlink GBR
+
+    // The bearer that will carry UE with 2 Flows Non-GBR traffic
+    EpsBearer ue2flowsNgbrBearer(EpsBearer::NGBR_LOW_LAT_EMBB); // qosInfoInterServ2);
+
+    // The filter for the UE with 2 Flows Non-GBR traffic
+    Ptr<EpcTft> ue2flowsNgbrTft = Create<EpcTft>();
+    EpcTft::PacketFilter dlpfUe2flowsNgbr;
+    dlpfUe2flowsNgbr.localPortStart = dlPortUe2flowsNgbr;
+    dlpfUe2flowsNgbr.localPortEnd = dlPortUe2flowsNgbr;
+    ue2flowsNgbrTft->Add(dlpfUe2flowsNgbr);
+    /******************************************************************************/
+
+    /******************************************************************************/
+    UdpClientHelper dlClientUe2flowsDcGbr;
+    dlClientUe2flowsDcGbr.SetAttribute("RemotePort", UintegerValue(dlPortUe2flowsDcGbr));
+    dlClientUe2flowsDcGbr.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
+    dlClientUe2flowsDcGbr.SetAttribute("PacketSize", UintegerValue(udpPacketSize2));
+    dlClientUe2flowsDcGbr.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambda2)));
+
+    GbrQosInformation qosUe2flowsDcGbr;
+    qosUe2flowsDcGbr.gbrDl = 5e6; // Downlink GBR
+
+    // The bearer that will carry Ue 2 Flows DC-GBR traffic
+    EpsBearer ue2flowsDcGbrBearer(EpsBearer::DGBR_INTER_SERV_87, qosUe2flowsDcGbr);
+
+    // The filter for the 2 Flows DC-GBR traffic
+    Ptr<EpcTft> ue2FlowsDcGbrTft = Create<EpcTft>();
+    EpcTft::PacketFilter dlpfUe2flowsDcGbr;
+    dlpfUe2flowsDcGbr.localPortStart = dlPortUe2flowsDcGbr;
+    dlpfUe2flowsDcGbr.localPortEnd = dlPortUe2flowsDcGbr;
+    ue2FlowsDcGbrTft->Add(dlpfUe2flowsDcGbr);
+    /******************************************************************************/
+
+    //  Install the applications
     ApplicationContainer clientApps;
 
-    Ptr<EpcTft> voiceTft = Create<EpcTft>();
-    Ptr<EpcTft> lowLatTft = Create<EpcTft>();
-    Ptr<EpcTft> MoTracTft = Create<EpcTft>();
-
-    for (uint32_t i = 0; i < ueVoiceContainer.GetN(); ++i)
+    for (uint32_t i = 0; i < ue1flowContainer.GetN(); ++i)
     {
-        // The server, that is the application which is listening, is installed in the UE
-        // The sink will always listen to the specified ports
-        UdpServerHelper dlPacketSinkVoice(dlPort);
-        serverApps.Add(dlPacketSinkVoice.Install(ueVoiceContainer.Get(i)));
-
-        // Voice configuration and object creation:
-        UdpClientHelper dlClientVoice;
-        dlClientVoice.SetAttribute("RemotePort", UintegerValue(dlPort));
-        dlClientVoice.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
-        dlClientVoice.SetAttribute("PacketSize", UintegerValue(udpPacketSizeCV));
-        dlClientVoice.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaCV)));
-
-        // The filter for the voice traffic
-        EpcTft::PacketFilter dlpfVoice;
-        dlpfVoice.localPortStart = dlPort;
-        dlpfVoice.localPortEnd = dlPort;
-        voiceTft->Add(dlpfVoice);
-        dlPort++;
-
-        //  Install the applications
-        Ptr<NetDevice> ueDevice = ueVoiceNetDev.Get(i);
-        Address ueAddress = ueVoiceIpIface.GetAddress(i);
+        Ptr<NetDevice> ueDevice = ue1flowNetDev.Get(i);
+        Address ueAddress = ue1FlowIpIface.GetAddress(i);
 
         // The client, who is transmitting, is installed in the remote host,
         // with destination address set to the address of the UE
-        dlClientVoice.SetAttribute("RemoteAddress", AddressValue(ueAddress));
-        clientApps.Add(dlClientVoice.Install(remoteHost));
+        dlClientUe1flow.SetAttribute("RemoteAddress", AddressValue(ueAddress));
+        clientApps.Add(dlClientUe1flow.Install(remoteHost));
 
-        // The bearer that will carry voice traffic
-        EpsBearer voiceBearer(EpsBearer::GBR_CONV_VOICE);
         // Activate a dedicated bearer for the traffic type
-        nrHelper->ActivateDedicatedEpsBearer(ueDevice, voiceBearer, voiceTft);
+        nrHelper->ActivateDedicatedEpsBearer(ueDevice, ue1flowBearer, ue1flowTft);
     }
-    for (uint32_t i = 0; i < ueLowLatContainer.GetN(); ++i)
+
+    for (uint32_t i = 0; i < ue2flowsContainer.GetN(); ++i)
     {
-        // The server, that is the application which is listening, is installed in the UE
-        // The sink will always listen to the specified ports
-        UdpServerHelper dlPacketSinkLowLat(dlPort);
-        serverApps.Add(dlPacketSinkLowLat.Install(ueLowLatContainer.Get(i)));
-
-        // Low Latency configuration and object creation:
-        UdpClientHelper dlClientLowLat;
-        dlClientLowLat.SetAttribute("RemotePort", UintegerValue(dlPort));
-        dlClientLowLat.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
-        dlClientLowLat.SetAttribute("PacketSize", UintegerValue(udpPacketSizeLL));
-        dlClientLowLat.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaLL)));
-
-        // The filter for the low-latency traffic
-        EpcTft::PacketFilter dlpfLowLat;
-        dlpfLowLat.localPortStart = dlPort;
-        dlpfLowLat.localPortEnd = dlPort;
-        lowLatTft->Add(dlpfLowLat);
-        dlPort++;
-
-        // Install the applications
-        Ptr<NetDevice> ueDevice = ueLowLatNetDev.Get(i);
-        Address ueAddress = ueLowLatIpIface.GetAddress(i);
+        Ptr<NetDevice> ueDevice = ue2flowsNetDev.Get(i);
+        Address ueAddress = ue2FlowsIpIface.GetAddress(i);
 
         // The client, who is transmitting, is installed in the remote host,
         // with destination address set to the address of the UE
-        dlClientLowLat.SetAttribute("RemoteAddress", AddressValue(ueAddress));
-        clientApps.Add(dlClientLowLat.Install(remoteHost));
+        dlClientUe2flowsNgbr.SetAttribute("RemoteAddress", AddressValue(ueAddress));
+        clientApps.Add(dlClientUe2flowsNgbr.Install(remoteHost));
 
         // Activate a dedicated bearer for the traffic type
-        // The bearer that will carry voice traffic
-        EpsBearer lowLatBearer(EpsBearer::NGBR_LOW_LAT_EMBB);
-        nrHelper->ActivateDedicatedEpsBearer(ueDevice, lowLatBearer, lowLatTft);
+        nrHelper->ActivateDedicatedEpsBearer(ueDevice, ue2flowsNgbrBearer, ue2flowsNgbrTft);
     }
-    for (uint32_t i = 0; i < ueMoTracContainer.GetN(); ++i)
-    {
-        // The server, that is the application which is listening, is installed in the UE
-        // The sink will always listen to the specified ports
-        UdpServerHelper dlPacketSinkMoTrac(dlPort);
-        serverApps.Add(dlPacketSinkMoTrac.Install(ueMoTracContainer.Get(i)));
-        // Motion Tracking Data configuration and object creation:
-        UdpClientHelper dlClientMoTrac;
-        dlClientMoTrac.SetAttribute("RemotePort", UintegerValue(dlPort));
-        dlClientMoTrac.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
-        dlClientMoTrac.SetAttribute("PacketSize", UintegerValue(udpPacketSizeMT));
-        dlClientMoTrac.SetAttribute("Interval", TimeValue(Seconds(1.0 / lambdaMT)));
-        // The filter for the motion tracking data traffic
-        EpcTft::PacketFilter dlpfMoTrac;
-        dlpfMoTrac.localPortStart = dlPort;
-        dlpfMoTrac.localPortEnd = dlPort;
-        MoTracTft->Add(dlpfMoTrac);
-        dlPort++;
 
-        // Install the applications
-        Ptr<NetDevice> ueDevice = ueMoTracNetDev.Get(i);
-        Address ueAddress = ueMoTracIpIface.GetAddress(i);
+    for (uint32_t i = 0; i < ue2flowsContainer.GetN(); ++i)
+    {
+        Ptr<NetDevice> ueDevice = ue2flowsNetDev.Get(i);
+        Address ueAddress = ue2FlowsIpIface.GetAddress(i);
 
         // The client, who is transmitting, is installed in the remote host,
         // with destination address set to the address of the UE
-        dlClientMoTrac.SetAttribute("RemoteAddress", AddressValue(ueAddress));
-        clientApps.Add(dlClientMoTrac.Install(remoteHost));
+        dlClientUe2flowsDcGbr.SetAttribute("RemoteAddress", AddressValue(ueAddress));
+        clientApps.Add(dlClientUe2flowsDcGbr.Install(remoteHost));
 
         // Activate a dedicated bearer for the traffic type
-        // The bearer that will carry voice traffic
-        EpsBearer MoTracBearer(EpsBearer::DGBR_INTER_SERV_87);
-        nrHelper->ActivateDedicatedEpsBearer(ueDevice, MoTracBearer, MoTracTft);
+        nrHelper->ActivateDedicatedEpsBearer(ueDevice, ue2flowsDcGbrBearer, ue2FlowsDcGbrTft);
     }
 
     // start UDP server and client apps
@@ -695,7 +675,7 @@ main(int argc, char* argv[])
         std::cout << f.rdbuf();
     }
 #ifdef HAVE_OPENGYM
-    if (enableAi)
+    if (schedulerType == "Ai")
     {
         myGymEnv->NotifySimulationEnd();
     }
