@@ -12,22 +12,22 @@
  *
  * This example describes how to setup a simulation using the AI scheduler and
  * the 3GPP channel model from TR 38.900. This example consists of a simple
- * topology, in which there is one gNB and three UEs with different QCI flows.
- * One UE will have a voice flow (5QI 1), another UE will have a low-latency flow
- * (5QI 80), and the last UE will have a motion tracking flow (5QI 87).
+ * topology, in which a gNB is connected to multiple UEs. The UEs are divided
+ * into two different NodeContainers according to the traffic type. Even UEs
+ * will receive one flow traffic with Non-GBR, and odd UEs will receive two
+ * flows traffic with Non-GBR and Delay Critical GBR.
  *
  * Using parameters from the command line, the user can choose the number of UEs,
  * the numerology, the central frequency, the bandwidth, the total Tx power, the
- * scheduler type (TDMA or OFDMA), and the numTrafficProfile (2 or 3) which will
- * define the number of traffic types. The default value of the numTrafficProfile
- * is 3, and the low-latency flow is not considered in the case of 2. The UEs are
- * divided into different NodeContainers according to the traffic type.
+ * scheduler type (TDMA or OFDMA), the scheduler algorithm (PF, RR, QoS, or AI),
+ * and the priority traffic scenario (saturation or medium-load). The user can
+ * also choose the MCS table to be used and the LC scheduler type (RR or QoS).
  *
  * The openGymPort parameter is used to set the port number for the OpenGym interface.
  * The simSeed parameter is used to set the seed for the simulation. These two parameters
  * are always passed from the ns3-gym module.
  *
- * When the ns3-gym module is available and the enableAi parameter is set to true,
+ * When the ns3-gym module is available and the schedulerType is set to "Ai",
  * the example will use the AI scheduler to schedule the UEs. The AI scheduler will
  * send observations to the custom MyGymEnv class inheriting from OpenGymEnv, which
  * will be used to train the AI model. The AI model will send back the weights for
