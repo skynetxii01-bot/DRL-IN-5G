@@ -7,6 +7,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import argparse
+from collections import deque
 
 import numpy as np
 import torch
@@ -165,19 +166,19 @@ class PPO:
 
 
 class Memory:
-    def __init__(self):
-        self.states = []
-        self.actions = []
-        self.logprobs = []
-        self.rewards = []
-        self.is_terminals = []
+    def __init__(self, maxlen=1000):
+        self.states = deque(maxlen=maxlen)
+        self.actions = deque(maxlen=maxlen)
+        self.logprobs = deque(maxlen=maxlen)
+        self.rewards = deque(maxlen=maxlen)
+        self.is_terminals = deque(maxlen=maxlen)
 
     def clear_memory(self):
-        del self.states[:]
-        del self.actions[:]
-        del self.logprobs[:]
-        del self.rewards[:]
-        del self.is_terminals[:]
+        self.states.clear()
+        self.actions.clear()
+        self.logprobs.clear()
+        self.rewards.clear()
+        self.is_terminals.clear()
 
 
 def debug(msg, debug_flag):
@@ -206,7 +207,7 @@ def main(args):
     state_shape = env.observation_space.shape
     action_dim = env.action_space.shape[0]
     ppo = PPO(state_shape, action_dim)
-    memory = Memory()
+    memory = Memory(maxlen=args.stepInterval)
 
     # Training the agent
     step_idx = 0
