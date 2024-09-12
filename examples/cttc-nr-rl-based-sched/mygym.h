@@ -53,7 +53,7 @@ class MyGymEnv : public OpenGymEnv
         const NrMacSchedulerUeInfoAi::UpdateAllUeWeightsFn& updateAllUeWeightsFn);
 
   private:
-    uint32_t m_numUes;
+    uint32_t m_numFlows;
     bool m_gameOver;
     std::vector<NrMacSchedulerUeInfoAi::LcObservation> m_observation;
     float m_reward;

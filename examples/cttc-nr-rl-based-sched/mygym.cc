@@ -21,7 +21,7 @@ MyGymEnv::MyGymEnv()
 MyGymEnv::MyGymEnv(uint32_t numUes)
 {
     NS_LOG_FUNCTION(this);
-    m_numUes = numUes;
+    m_numFlows = numUes;
 }
 
 MyGymEnv::~MyGymEnv()
@@ -51,7 +51,7 @@ MyGymEnv::GetActionSpace()
     NS_LOG_FUNCTION(this);
     float low = 0.0;
     float high = 1.0;
-    std::vector<uint32_t> shape = {m_numUes};
+    std::vector<uint32_t> shape = {m_numFlows};
     std::string dtype = TypeNameGet<float>();
     return Create<OpenGymBoxSpace>(low, high, shape, dtype);
 }
@@ -63,7 +63,7 @@ MyGymEnv::GetObservationSpace()
     float low = 0.0;
     float high = 100.0;
     std::vector<uint32_t> shape = {
-        m_numUes,
+        m_numFlows,
         4,
     };
     std::string dtype = TypeNameGet<uint16_t>();
@@ -82,7 +82,7 @@ MyGymEnv::GetObservation()
 {
     NS_LOG_FUNCTION(this);
     std::vector<uint32_t> shape = {
-        m_numUes,
+        m_numFlows,
         4,
     };
     Ptr<OpenGymBoxContainer<uint16_t>> observation =
@@ -118,7 +118,7 @@ MyGymEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
     Ptr<OpenGymBoxContainer<float>> actionBox = DynamicCast<OpenGymBoxContainer<float>>(action);
     std::vector<float> actionData = actionBox->GetData();
     NrMacSchedulerUeInfoAi::UeWeightsMap ueWeightsMap;
-    for (uint32_t i = 0; i < m_numUes; i++)
+    for (uint32_t i = 0; i < m_numFlows; i++)
     {
         if (ueWeightsMap.end() == ueWeightsMap.find(m_observation[i].rnti))
         {
