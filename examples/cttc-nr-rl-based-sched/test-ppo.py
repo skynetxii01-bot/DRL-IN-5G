@@ -198,7 +198,8 @@ def main(args):
     memory = Memory()
 
     # Training the agent
-    stepIdx = 0
+    step_idx = 0
+    step_interval = args.stepInterval
     try:
         state = env.reset()
         while True:
@@ -215,11 +216,11 @@ def main(args):
             if done:
                 break
 
-            if stepIdx > 0 and stepIdx % 1000 == 0:
+            if step_idx > 0 and step_idx % step_interval == 0:
                 ppo.update(memory)
                 memory.clear_memory()
 
-            stepIdx += 1
+            step_idx += 1
 
     except KeyboardInterrupt:
         print("Ctrl-C -> Exit")
@@ -230,9 +231,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    # Arguments for the environment
     parser.add_argument("--port", type=int, default=5552, help="Port number")
     parser.add_argument("--seed", type=int, default=3002, help="Seed number")
     parser.add_argument("--debug", type=bool, default=False, help="Debug mode")
+    # Arguments for the simulation
     parser.add_argument("--ueNum", type=int, default=3, help="Number of UEs")
     parser.add_argument("--logging", type=bool, default=False, help="Logging")
     parser.add_argument(
@@ -252,6 +255,8 @@ if __name__ == "__main__":
     parser.add_argument("--simTag", type=str, default="default", help="Simulation tag")
     parser.add_argument("--outputDir", type=str, default="./", help="Output directory")
     parser.add_argument("--enableOfdma", type=bool, default=False, help="Enable OFDMA")
+    # Update interval for the PPO algorithm
+    parser.add_argument("--stepInterval", type=int, default=1000, help="Step interval for updating the PPO")
     args = parser.parse_args()
 
     main(args)
