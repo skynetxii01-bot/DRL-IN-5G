@@ -108,6 +108,7 @@ class PPO:
         return action
 
     def update(self, memory):
+        debug("Memory update", args.debug)
         rewards = []
         discounted_reward = 0
         for reward, is_terminal in zip(reversed(memory.rewards), reversed(memory.is_terminals)):
