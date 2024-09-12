@@ -21,7 +21,6 @@ def main(args):
         "--ueNum": args.ueNum,
         "--logging": args.logging,
         "--priorityTrafficScenario": args.priorityTrafficScenario,
-        "--numTrafficProfile": args.numTrafficProfile,
         "--simTime": args.simTime,
         "--numerology": args.numerology,
         "--centralFrequency": args.centralFrequency,
@@ -30,7 +29,8 @@ def main(args):
         "--simTag": args.simTag,
         "--outputDir": args.outputDir,
         "--enableOfdma": args.enableOfdma,
-        "--enableAi": True,
+        "--enableQoSLcScheduler": args.enableQoSLcScheduler,
+        "--schedulerType": "Ai",
     }
     # Create the environment
     env = ns3env.Ns3Env(port=args.port, simSeed=args.seed, simArgs=simArgs, debug=args.debug)
@@ -71,16 +71,13 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=3002, help="Seed number")
     parser.add_argument("--debug", type=bool, default=False, help="Debug mode")
     # Arguments used for the ns3 simulation (simArgs)
-    parser.add_argument("--ueNum", type=int, default=3, help="Number of UEs")
+    parser.add_argument("--ueNum", type=int, default=2, help="Number of UEs")
     parser.add_argument("--logging", type=bool, default=False, help="Logging")
     parser.add_argument(
         "--priorityTrafficScenario",
         type=int,
         default=0,
         help="The traffic scenario for the case of priority. Can be 0: saturation or 1: medium-load",
-    )
-    parser.add_argument(
-        "--numTrafficProfile", type=int, default=3, help="Number of traffic profiles"
     )
     parser.add_argument("--simTime", type=int, default=1, help="Simulation time")
     parser.add_argument("--numerology", type=int, default=0, help="Numerology")
@@ -90,6 +87,9 @@ if __name__ == "__main__":
     parser.add_argument("--simTag", type=str, default="default", help="Simulation tag")
     parser.add_argument("--outputDir", type=str, default="./", help="Output directory")
     parser.add_argument("--enableOfdma", type=bool, default=False, help="Enable OFDMA")
+    parser.add_argument(
+        "--enableQoSLcScheduler", type=bool, default=False, help="Enable QoS LC Scheduler"
+    )
     # Step interval for logging in the gym environment
     parser.add_argument("--stepInterval", type=int, default=1000, help="Step interval for logging")
 
