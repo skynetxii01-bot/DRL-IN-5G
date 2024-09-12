@@ -51,13 +51,6 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      */
     NrMacSchedulerOfdmaAi();
 
-    /**
-     * \brief Deconstructor
-     */
-    ~NrMacSchedulerOfdmaAi() override
-    {
-    }
-
   protected:
     /**
      * \brief Create an UE representation of the type NrMacSchedulerUeInfoAi
