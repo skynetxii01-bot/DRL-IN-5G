@@ -60,11 +60,15 @@ class PPO:
             raise NotImplementedError
 
         def act(self, state):
-            debug(f"State shape: {state.shape}", args.debug)  # Debugging: print the shape of the state
+            debug(
+                f"State shape: {state.shape}", args.debug
+            )  # Debugging: print the shape of the state
             state = torch.from_numpy(state).float()  # state is (1000, 3, 4)
             action_probs = []
             for i in range(state.shape[0]):  # Iterate over the batch
-                debug(f"State shape: {state[i].shape}", args.debug)  # Debugging: print the shape of each state
+                debug(
+                    f"State shape: {state[i].shape}", args.debug
+                )  # Debugging: print the shape of each state
                 action_prob = self.actor(state[i])  # state[i] is (3, 4)
                 action_probs.append(action_prob)
 
@@ -78,7 +82,9 @@ class PPO:
         def evaluate(self, state, action):
             action_probs = []
             for i in range(state.shape[0]):  # state.shape[0] is 1000 (batch size)
-                debug(f"State shape: {state[i].shape}", args.debug)  # Debugging: print the shape of each state
+                debug(
+                    f"State shape: {state[i].shape}", args.debug
+                )  # Debugging: print the shape of each state
                 action_prob = self.actor(
                     state[i]
                 )  # state[i] is (3, 4) for each element in the batch
@@ -94,7 +100,9 @@ class PPO:
 
             # Flatten each state in the batch for the critic
             flattened_state = state.view(state.shape[0], -1)  # Flatten each sample in the batch
-            debug(f"Flattened state shape: {flattened_state.shape}", args.debug)  # Debugging: should print (1000, 12)
+            debug(
+                f"Flattened state shape: {flattened_state.shape}", args.debug
+            )  # Debugging: should print (1000, 12)
 
             state_value = self.critic(flattened_state)  # Pass flattened states to the critic
 
@@ -171,9 +179,11 @@ class Memory:
         del self.rewards[:]
         del self.is_terminals[:]
 
+
 def debug(msg, debug_flag):
     if debug_flag:
         print(msg)
+
 
 def main(args):
     simArgs = {
@@ -257,7 +267,9 @@ if __name__ == "__main__":
     parser.add_argument("--outputDir", type=str, default="./", help="Output directory")
     parser.add_argument("--enableOfdma", type=bool, default=False, help="Enable OFDMA")
     # Update interval for the PPO algorithm
-    parser.add_argument("--stepInterval", type=int, default=1000, help="Step interval for updating the PPO")
+    parser.add_argument(
+        "--stepInterval", type=int, default=1000, help="Step interval for updating the PPO"
+    )
     args = parser.parse_args()
 
     main(args)
