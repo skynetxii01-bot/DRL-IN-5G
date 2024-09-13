@@ -141,6 +141,18 @@ Notice that ns-3 and nr prerequisites are required to use all nr features.
 Otherwise, you will get a warning at configuration time
 and/or an error message during compilation or execution.
 
+### cttc-nr-rl-based-sched Prerequisites
+
+To run this example with AI mode enabled, you need to install the `ns3-gym` module.  
+You can find the installation guide for `ns3-gym` here: [ns3-gym Github](https://github.com/tkn-tub/ns3-gym)
+
+For managing Python packages in a virtual environment, install `./model/ns3gym` without using the `--user` option.
+
+To run `test-ppo.py`, install the following additional Python packages:
+```bash
+pip install numpy torch
+```
+
 ## ns-3 + nr installation
 
 Check in the [nr RELEASE_NOTES.md Supported platforms](https://gitlab.com/cttc-lena/nr/-/blob/master/RELEASE_NOTES.md#supported-platforms) which is the
