@@ -7,12 +7,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import argparse
-import os
-import time
 
-import gym
-import matplotlib.pyplot as plt
-import numpy as np
 from ns3gym import ns3env
 
 
