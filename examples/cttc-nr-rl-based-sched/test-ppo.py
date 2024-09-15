@@ -18,6 +18,20 @@ from torch.distributions import Categorical
 
 
 class PPO:
+    """!
+    Proximal Policy Optimization (PPO) implementation for training a reinforcement learning agent.
+
+    @param state_shape: The shape of the state space, typically a tuple representing the observation dimensions.
+    @param action_dim: The dimension of the action space, representing the number of possible actions.
+    @param hidden_dim: The size of the hidden layers for the neural network (default is 64).
+    @param lr: Learning rate for the optimizer (default is 0.0003).
+    @param gamma: Discount factor for future rewards (default is 0.99).
+    @param eps_clip: Clipping value for the surrogate loss to stabilize training (default is 0.2).
+    @param k_epochs: Number of epochs for which PPO updates are applied (default is 4).
+
+    @return PPO object for policy optimization during the RL simulation.
+    """
+
     def __init__(
         self,
         state_shape,
@@ -40,6 +54,16 @@ class PPO:
         self.mse_loss = nn.MSELoss()
 
     class ActorCritic(nn.Module):
+        """!
+        A neural network module that contains both the actor and critic components for PPO.
+
+        @param state_shape: Shape of the state space (e.g., for a 3D observation, it could be (batch_size, 3, 4)).
+        @param action_dim: Number of possible actions the agent can take.
+        @param hidden_dim: Dimension of hidden layers for both actor and critic networks.
+
+        @return ActorCritic object with methods to compute actions and evaluate states.
+        """
+
         def __init__(self, state_shape, action_dim, hidden_dim):
             super(PPO.ActorCritic, self).__init__()
             self.actor = nn.Sequential(
@@ -61,6 +85,12 @@ class PPO:
             raise NotImplementedError
 
         def act(self, state):
+            """!
+            Takes in the current state of the environment and outputs an action based on the policy.
+
+            @param state: The state of the environment, usually a multi-dimensional array (e.g., (batch_size, 3, 4)).
+            @return Tuple containing the selected action and the log-probability of that action.
+            """
             debug(
                 f"State shape: {state.shape}", args.debug
             )  # Debugging: print the shape of the state
@@ -81,6 +111,13 @@ class PPO:
             return actions.numpy(), dist.log_prob(actions)
 
         def evaluate(self, state, action):
+            """!
+            Evaluates the state and action to compute log-probabilities, state values, and entropy.
+
+            @param state: The state from the environment, potentially batch-processed.
+            @param action: The action taken by the agent.
+            @return Tuple containing the log-probabilities of the actions, the state values (critic), and the entropy.
+            """
             action_probs = []
             for i in range(state.shape[0]):  # state.shape[0] is 1000 (batch size)
                 debug(
@@ -110,6 +147,13 @@ class PPO:
             return action_log_probs, torch.squeeze(state_value), dist_entropy
 
     def select_action(self, state, memory):
+        """!
+        Selects an action based on the current policy and stores relevant information in memory.
+
+        @param state: The current state of the environment.
+        @param memory: An instance of the Memory class to store states, actions, and log probabilities for future updates.
+        @return action: The action selected by the policy.
+        """
         action, action_logprob = self.policy_old.act(state)
         memory.states.append(state)
         memory.actions.append(action)
@@ -117,6 +161,12 @@ class PPO:
         return action
 
     def update(self, memory):
+        """!
+        Updates the policy using the memory of past actions and states based on the PPO update rule.
+
+        @param memory: Memory instance containing past states, actions, log probabilities, and rewards.
+        @return None: This function updates the policy parameters based on the experience stored in memory.
+        """
         debug("Memory update", args.debug)
         rewards = []
         discounted_reward = 0
@@ -166,6 +216,19 @@ class PPO:
 
 
 class Memory:
+    """!
+    Memory class for storing states, actions, log probabilities, rewards, and terminal flags during training.
+
+    The PPO algorithm requires storage of past experiences (states, actions, rewards, etc.) so that they can be
+    used during the policy update step. This class implements a memory buffer using dequeues with a fixed size to
+    prevent excessive memory consumption.
+
+    @param maxlen: Maximum length of the memory buffer. The default value is 1000, which means the memory will hold
+                   up to 1000 samples before older samples start being discarded.
+
+    @return Memory object for storing experiences during the RL simulation.
+    """
+
     def __init__(self, maxlen=1000):
         self.states = deque(maxlen=maxlen)
         self.actions = deque(maxlen=maxlen)
@@ -174,6 +237,11 @@ class Memory:
         self.is_terminals = deque(maxlen=maxlen)
 
     def clear_memory(self):
+        """!
+        Clears the memory of stored states, actions, log probabilities, rewards, and terminal flags after an update.
+
+        @return None: This function resets the memory buffers.
+        """
         self.states.clear()
         self.actions.clear()
         self.logprobs.clear()
@@ -182,11 +250,26 @@ class Memory:
 
 
 def debug(msg, debug_flag):
+    """!
+    Prints debug messages if the debug flag is enabled.
+
+    @param msg: The debug message to print.
+    @param debug_flag: A boolean flag indicating whether to print debug information.
+    @return None: This function prints debug messages when necessary.
+    """
     if debug_flag:
         print(msg)
 
 
 def main(args):
+    """!
+    Main function for running the PPO-based reinforcement learning simulation using the ns-3 gym environment.
+
+    @param args: Command-line arguments containing simulation parameters, such as the number of UEs,
+                 simulation time, bandwidth, and other necessary configuration options.
+
+    @return None: This function runs the PPO agent in the environment, selecting actions, and updating the model.
+    """
     simArgs = {
         "--ueNum": args.ueNum,
         "--logging": args.logging,
@@ -200,7 +283,7 @@ def main(args):
         "--outputDir": args.outputDir,
         "--enableOfdma": args.enableOfdma,
         "--enableQoSLcScheduler": args.enableQoSLcScheduler,
-        "--schedulerType": "Ai",
+        "--schedulerType": "Ai",  # Type of scheduler being used in the simulation (here, AI-based)
     }
     # Create the environment
     env = ns3env.Ns3Env(port=args.port, simSeed=args.seed, simArgs=simArgs, debug=args.debug)
@@ -243,29 +326,57 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # Arguments for the environment
+    parser = argparse.ArgumentParser()
+    # Arguments used for the gym script
     parser.add_argument("--port", type=int, default=5552, help="Port number")
     parser.add_argument("--seed", type=int, default=3002, help="Seed number")
     parser.add_argument("--debug", type=bool, default=False, help="Debug mode")
-    # Arguments for the simulation
-    parser.add_argument("--ueNum", type=int, default=2, help="Number of UEs")
-    parser.add_argument("--logging", type=bool, default=False, help="Logging")
+    # Arguments used for the ns3 simulation (simArgs)
+    parser.add_argument(
+        "--ueNum", type=int, default=2, help="Number of UEs (User Equipment) in the simulation"
+    )
+    parser.add_argument(
+        "--logging",
+        type=bool,
+        default=False,
+        help="Enable or disable logging during the simulation",
+    )
     parser.add_argument(
         "--priorityTrafficScenario",
         type=int,
         default=0,
         help="The traffic scenario for the case of priority. Can be 0: saturation or 1: medium-load",
     )
-    parser.add_argument("--simTime", type=int, default=1, help="Simulation time")
-    parser.add_argument("--numerology", type=int, default=0, help="Numerology")
-    parser.add_argument("--centralFrequency", type=float, default=4e9, help="Central frequency")
-    parser.add_argument("--bandwidth", type=float, default=10e6, help="Bandwidth")
-    parser.add_argument("--totalTxPower", type=float, default=43, help="Total Tx power")
-    parser.add_argument("--simTag", type=str, default="default", help="Simulation tag")
-    parser.add_argument("--outputDir", type=str, default="./", help="Output directory")
-    parser.add_argument("--enableOfdma", type=bool, default=False, help="Enable OFDMA")
+    parser.add_argument("--simTime", type=int, default=1, help="Total simulation time in seconds")
     parser.add_argument(
-        "--enableQoSLcScheduler", type=bool, default=False, help="Enable QoS LC Scheduler"
+        "--numerology", type=int, default=0, help="Numerology parameter for the simulation"
+    )
+    parser.add_argument(
+        "--centralFrequency",
+        type=float,
+        default=4e9,
+        help="Central frequency for the simulation in Hz",
+    )
+    parser.add_argument(
+        "--bandwidth", type=float, default=10e6, help="Bandwidth in Hz for the simulation"
+    )
+    parser.add_argument(
+        "--totalTxPower", type=float, default=43, help="Total transmission power in dBm"
+    )
+    parser.add_argument(
+        "--simTag", type=str, default="default", help="Tag to label the simulation for reference"
+    )
+    parser.add_argument(
+        "--outputDir", type=str, default="./", help="Directory where output data will be stored"
+    )
+    parser.add_argument(
+        "--enableOfdma", type=bool, default=False, help="Whether to enable OFDMA in the simulation"
+    )
+    parser.add_argument(
+        "--enableQoSLcScheduler",
+        type=bool,
+        default=False,
+        help="Whether to enable QoS LC scheduler",
     )
     # Update interval for the PPO algorithm
     parser.add_argument(
