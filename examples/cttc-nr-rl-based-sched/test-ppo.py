@@ -296,13 +296,15 @@ def main(args):
     step_idx = 0
     step_interval = args.stepInterval
     try:
-        state = env.reset()
+        obs = env.reset()
         while True:
-            action = ppo.select_action(state.reshape(state_shape), memory)
+            state = np.zeros(state_shape)
+            state.flat[: obs.shape[0]] = obs
+            action = ppo.select_action(state, memory)
             debug(f"State: {state.reshape(state_shape)}", args.debug)
             debug(f"Selected action: {action}", args.debug)
 
-            state, reward, done, _ = env.step(action)
+            obs, reward, done, _ = env.step(action)
             debug(f"Reward: {reward}", args.debug)
 
             memory.rewards.append(reward)
