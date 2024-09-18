@@ -91,9 +91,9 @@ main(int argc, char* argv[])
     double bandwidth = 10e6;
     double totalTxPower = 43;
 
-    bool enableOfdma = false;
+    uint8_t enableOfdma = 0;
     std::string schedulerType = "Qos";
-    bool enableQoSLcScheduler = false;
+    uint8_t enableQoSLcScheduler = 0;
 
     uint8_t priorityTrafficScenario = 0; // default is saturation
 
