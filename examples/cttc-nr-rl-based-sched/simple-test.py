@@ -37,7 +37,7 @@ def main(args):
     }
 
     # Create the environment using ns3-gym integration
-    env = ns3env.Ns3Env(port=args.port, simSeed=args.seed, simArgs=simArgs, debug=args.debug)
+    env = ns3env.Ns3Env(port=args.port, simSeed=args.simSeed, simArgs=simArgs, debug=args.debug)
 
     step_idx = 0  # Initialize the step counter
     step_interval = args.stepInterval  # Define the interval for logging steps
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Arguments used for the gym script
     parser.add_argument("--port", type=int, default=5552, help="Port number")
-    parser.add_argument("--seed", type=int, default=3002, help="Seed number")
+    parser.add_argument("--simSeed", type=int, default=3002, help="Seed number")
     parser.add_argument("--debug", type=bool, default=False, help="Debug mode")
     # Arguments used for the ns3 simulation (simArgs)
     parser.add_argument(
@@ -123,12 +123,12 @@ if __name__ == "__main__":
         "--outputDir", type=str, default="./", help="Directory where output data will be stored"
     )
     parser.add_argument(
-        "--enableOfdma", type=bool, default=False, help="Whether to enable OFDMA in the simulation"
+        "--enableOfdma", type=int, default=0, help="Whether to enable OFDMA in the simulation"
     )
     parser.add_argument(
         "--enableQoSLcScheduler",
-        type=bool,
-        default=False,
+        type=int,
+        default=0,
         help="Whether to enable QoS LC scheduler",
     )
     # Step interval for logging in the gym environment
