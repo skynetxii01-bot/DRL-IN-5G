@@ -261,6 +261,29 @@ def debug(msg, debug_flag):
         print(msg)
 
 
+def reorder_state(obs, obj_order, num_features):
+    """Reorders the state rows to match the obj_order and fills missing entries with zeros."""
+    # Reshape the observation to match the state shape
+    reshaped_obs = obs.reshape(int(len(obs) / num_features), num_features)
+    # Initialize the reordered state with zeros
+    reordered_state = np.zeros((obj_order.shape[0], num_features))
+
+    # Iterate over the obj_order and match it with the new state
+    for i, order in enumerate(obj_order):
+        # Find rows in the state that match the current obj_order entry
+        matching_row = None
+        for row in reshaped_obs:
+            if np.array_equal(row[0:2], order):  # Check if 1st and 2nd columns match the order
+                matching_row = row
+                break
+        # If a matching row is found, place it in the correct position
+        if matching_row is not None:
+            reordered_state[i] = matching_row
+        # If no matching row is found, the initialized zeros will remain
+
+    return reordered_state
+
+
 def main(args):
     """!
     Main function for running the PPO-based reinforcement learning simulation using the ns-3 gym environment.
@@ -297,11 +320,13 @@ def main(args):
     step_interval = args.stepInterval
     try:
         obs = env.reset()
+        reshaped_obs = obs.reshape(state_shape)
+        sorted_obs = np.lexsort((reshaped_obs[:, 1], reshaped_obs[:, 0]))
+        flow_order = reshaped_obs[sorted_obs, 0:2]
         while True:
-            state = np.zeros(state_shape)
-            state.flat[: obs.shape[0]] = obs
+            state = reorder_state(obs, flow_order, state_shape[1])
             action = ppo.select_action(state, memory)
-            debug(f"State: {state.reshape(state_shape)}", args.debug)
+            debug(f"State: \n{state.reshape(state_shape)}", args.debug)
             debug(f"Selected action: {action}", args.debug)
 
             obs, reward, done, _ = env.step(action)
