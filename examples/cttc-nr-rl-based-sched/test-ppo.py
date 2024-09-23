@@ -14,7 +14,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from ns3gym import ns3env
-from torch.distributions import Categorical
 
 
 class PPO:
@@ -22,7 +21,6 @@ class PPO:
     Proximal Policy Optimization (PPO) implementation for training a reinforcement learning agent.
 
     @param state_shape: The shape of the state space, typically a tuple representing the observation dimensions.
-    @param action_dim: The dimension of the action space, representing the number of possible actions.
     @param hidden_dim: The size of the hidden layers for the neural network (default is 64).
     @param lr: Learning rate for the optimizer (default is 0.0003).
     @param gamma: Discount factor for future rewards (default is 0.99).
@@ -35,7 +33,6 @@ class PPO:
     def __init__(
         self,
         state_shape,
-        action_dim,
         hidden_dim=64,
         lr=0.0003,
         gamma=0.99,
@@ -46,6 +43,7 @@ class PPO:
         self.eps_clip = eps_clip
         self.k_epochs = k_epochs
 
+        action_dim = state_shape[0]  # 각 row에 대한 action 수는 state_shape[0]와 동일
         self.policy = self.ActorCritic(state_shape, action_dim, hidden_dim)
         self.optimizer = optim.Adam(self.policy.parameters(), lr=lr)
         self.policy_old = self.ActorCritic(state_shape, action_dim, hidden_dim)
@@ -66,13 +64,19 @@ class PPO:
 
         def __init__(self, state_shape, action_dim, hidden_dim):
             super(PPO.ActorCritic, self).__init__()
+
+            self.action_dim = action_dim  # Store action_dim as an instance variable
+
+            # Actor Network outputs mean and log_std for Normal distribution
             self.actor = nn.Sequential(
                 nn.Linear(state_shape[1], hidden_dim),  # Expect input of shape (4,)
                 nn.ReLU(),
-                nn.Linear(hidden_dim, action_dim),
-                nn.Softmax(dim=-1),
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.ReLU(),
+                nn.Linear(hidden_dim, 2),  # Output: 2 (mean and log_std) for each row
             )
 
+            # Critic Network for value estimation
             self.critic = nn.Sequential(
                 nn.Linear(
                     state_shape[0] * state_shape[1], hidden_dim
@@ -84,80 +88,125 @@ class PPO:
         def forward(self):
             raise NotImplementedError
 
-        def act(self, state):
+        def act(self, state, mask):
             """!
-            Takes in the current state of the environment and outputs an action based on the policy.
+            Takes in the current state of the environment and outputs a continuous action based on the policy.
 
-            @param state: The state of the environment, usually a multi-dimensional array (e.g., (batch_size, 3, 4)).
+            @param state: The state of the environment, usually a multi-dimensional array (e.g., (3, 4)).
+            @param mask: Boolean mask indicating which rows are active.
             @return Tuple containing the selected action and the log-probability of that action.
             """
-            debug(
-                f"State shape: {state.shape}", args.debug
-            )  # Debugging: print the shape of the state
-            state = torch.from_numpy(state).float()  # state is (1000, 3, 4)
-            action_probs = []
-            for i in range(state.shape[0]):  # Iterate over the batch
-                debug(
-                    f"State shape: {state[i].shape}", args.debug
-                )  # Debugging: print the shape of each state
-                action_prob = self.actor(state[i])  # state[i] is (3, 4)
-                action_probs.append(action_prob)
+            if len(state.shape) == 2:  # If state is (3, 4), add batch dimension
+                state = state[np.newaxis, :]  # Shape: (1, 3, 4)
 
-            action_probs = torch.stack(
-                action_probs
-            )  # Stack results into a (1000, action_dim) tensor
-            dist = Categorical(action_probs)
-            actions = dist.sample()
-            return actions.numpy(), dist.log_prob(actions)
+            state = torch.from_numpy(state).float()  # Convert state to tensor
+            batch_size, num_objects, _ = state.size()
 
-        def evaluate(self, state, action):
+            actions = []
+            action_log_probs = []
+
+            for i in range(num_objects):
+                if mask[i]:  # If the row is active
+                    actor_output = self.actor(state[:, i, :])  # Shape: (batch_size, 2)
+                    mean, log_std = actor_output[:, 0], actor_output[:, 1]
+                    std = torch.exp(log_std)  # Convert log_std to std
+                    dist = torch.distributions.Normal(mean, std)
+                    action = dist.sample()  # Sample action from the distribution
+                    action = torch.clamp(action, 0, 2)  # Ensure action is within [0, 2]
+                    actions.append(action)
+                    action_log_probs.append(dist.log_prob(action))  # Save log probability
+                else:  # Inactive row
+                    actions.append(torch.tensor([0.0]))  # Set action to 0
+                    action_log_probs.append(torch.tensor(0.0))  # Log-probability is also 0
+
+            # Convert list of actions to a single tensor
+            actions = torch.stack(actions).squeeze()  # Shape: (num_objects,)
+            action_log_probs = torch.stack(action_log_probs).squeeze()  # Shape: (num_objects,)
+
+            return actions.detach().numpy(), action_log_probs
+
+        def evaluate(self, state, action, mask):
             """!
             Evaluates the state and action to compute log-probabilities, state values, and entropy.
 
             @param state: The state from the environment, potentially batch-processed.
             @param action: The action taken by the agent.
+            @param mask: Boolean mask indicating which rows are active.
             @return Tuple containing the log-probabilities of the actions, the state values (critic), and the entropy.
             """
-            action_probs = []
-            for i in range(state.shape[0]):  # state.shape[0] is 1000 (batch size)
-                debug(
-                    f"State shape: {state[i].shape}", args.debug
-                )  # Debugging: print the shape of each state
-                action_prob = self.actor(
-                    state[i]
-                )  # state[i] is (3, 4) for each element in the batch
-                action_probs.append(action_prob)
+            # Check if state and action are already tensors
+            if not isinstance(state, torch.Tensor):
+                state = torch.from_numpy(state).float()  # Convert state to tensor if not already
+            if not isinstance(action, torch.Tensor):
+                action = torch.from_numpy(action).float()  # Convert action to tensor if not already
 
-            action_probs = torch.stack(
-                action_probs
-            )  # Stack results into a (1000, action_dim) tensor
-            dist = Categorical(action_probs)
+            if len(state.shape) == 2:  # If state is (3, 4), add batch dimension
+                state = state[np.newaxis, :]  # Shape: (1, 3, 4)
+            if len(action.shape) == 1:  # If action is (3,), add batch dimension
+                action = action[np.newaxis, :]  # Shape: (1, 3)
 
-            action_log_probs = dist.log_prob(action)
-            dist_entropy = dist.entropy()
+            batch_size, num_objects, _ = state.size()
+            action_log_probs = []
+            entropies = []
 
-            # Flatten each state in the batch for the critic
+            for i in range(num_objects):
+                if mask[i]:  # If the row is active
+                    actor_output = self.actor(state[:, i, :])  # Shape: (batch_size, 2)
+                    mean, log_std = actor_output[:, 0], actor_output[:, 1]
+                    std = torch.exp(log_std)
+                    dist = torch.distributions.Normal(mean, std)
+
+                    log_prob = dist.log_prob(action[:, i])  # Shape: (batch_size,)
+                    entropy = dist.entropy()  # Shape: (batch_size,)
+
+                    # Check if log_prob and entropy need dimension adjustment
+                    if log_prob.dim() == 0:
+                        log_prob = log_prob.unsqueeze(0)
+                    if entropy.dim() == 0:
+                        entropy = entropy.unsqueeze(0)
+
+                    action_log_probs.append(log_prob)  # Add with correct dimensions
+                    entropies.append(entropy)
+                else:
+                    # Add zero tensors with appropriate batch size
+                    action_log_probs.append(torch.zeros(batch_size))
+                    entropies.append(torch.zeros(batch_size))
+
+            # Check dimensions and apply unsqueeze if needed
+            action_log_probs = [
+                log_prob.unsqueeze(1) if log_prob.dim() == 1 else log_prob
+                for log_prob in action_log_probs
+            ]
+            entropies = [
+                entropy.unsqueeze(1) if entropy.dim() == 1 else entropy for entropy in entropies
+            ]
+
+            # Stack tensors along new dimension
+            action_log_probs = torch.stack(
+                action_log_probs, dim=1
+            )  # Shape: (batch_size, num_objects)
+            dist_entropy = torch.stack(entropies, dim=1).mean()  # Average over all objects
+
+            # Flatten state for critic input
             flattened_state = state.view(state.shape[0], -1)  # Flatten each sample in the batch
-            debug(
-                f"Flattened state shape: {flattened_state.shape}", args.debug
-            )  # Debugging: should print (1000, 12)
-
             state_value = self.critic(flattened_state)  # Pass flattened states to the critic
 
             return action_log_probs, torch.squeeze(state_value), dist_entropy
 
-    def select_action(self, state, memory):
+    def select_action(self, state, memory, mask):
         """!
         Selects an action based on the current policy and stores relevant information in memory.
 
         @param state: The current state of the environment.
         @param memory: An instance of the Memory class to store states, actions, and log probabilities for future updates.
+        @param mask: Boolean mask indicating which rows are active.
         @return action: The action selected by the policy.
         """
-        action, action_logprob = self.policy_old.act(state)
+        action, action_logprob = self.policy_old.act(state, mask)
         memory.states.append(state)
         memory.actions.append(action)
         memory.logprobs.append(action_logprob)
+        memory.mask.append(mask)  # Store mask in memory for future updates
         return action
 
     def update(self, memory):
@@ -167,7 +216,6 @@ class PPO:
         @param memory: Memory instance containing past states, actions, log probabilities, and rewards.
         @return None: This function updates the policy parameters based on the experience stored in memory.
         """
-        debug("Memory update", args.debug)
         rewards = []
         discounted_reward = 0
         for reward, is_terminal in zip(reversed(memory.rewards), reversed(memory.is_terminals)):
@@ -179,8 +227,14 @@ class PPO:
         rewards = torch.tensor(rewards, dtype=torch.float32)
         rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
 
-        old_states = torch.tensor(np.array(memory.states), dtype=torch.float32)
-        old_actions = torch.tensor(np.array(memory.actions), dtype=torch.int64)
+        old_states = memory.states
+        old_actions = memory.actions
+
+        # Convert old_states and old_actions to tensors if they are not already
+        if not isinstance(old_states, torch.Tensor):
+            old_states = torch.tensor(np.array(old_states), dtype=torch.float32)
+        if not isinstance(old_actions, torch.Tensor):
+            old_actions = torch.tensor(np.array(old_actions), dtype=torch.float32)
 
         # Convert logprobs more efficiently to avoid warnings
         if isinstance(memory.logprobs[0], torch.Tensor):
@@ -190,16 +244,23 @@ class PPO:
         else:
             old_logprobs = torch.tensor(np.array(memory.logprobs), dtype=torch.float32)
 
+        # Adjust the size of old_logprobs to match the size of logprobs from evaluate function
+        old_logprobs = old_logprobs.view(-1, 3)  # Adjust the shape to match logprobs from evaluate
+
         for _ in range(self.k_epochs):
-            logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
+            logprobs, state_values, dist_entropy = self.policy.evaluate(
+                old_states, old_actions, memory.mask
+            )
+
+            # Adjust size of logprobs to match old_logprobs if needed
+            logprobs = logprobs.view(-1, 3)  # Adjust the shape to match old_logprobs
 
             ratios = torch.exp(logprobs - old_logprobs.detach())
 
-            # Ensure advantages is of shape [1000, 3] to match ratios
             advantages = rewards - state_values.detach()
-            advantages = advantages.unsqueeze(1)  # Now shape [1000, 1]
+            advantages = advantages.unsqueeze(1)  # Add a new dimension for broadcasting
 
-            surr1 = ratios * advantages  # Broadcasting should now work correctly
+            surr1 = ratios * advantages
             surr2 = torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages
 
             loss = (
@@ -235,6 +296,7 @@ class Memory:
         self.logprobs = deque(maxlen=maxlen)
         self.rewards = deque(maxlen=maxlen)
         self.is_terminals = deque(maxlen=maxlen)
+        self.mask = deque(maxlen=maxlen)
 
     def clear_memory(self):
         """!
@@ -247,6 +309,7 @@ class Memory:
         self.logprobs.clear()
         self.rewards.clear()
         self.is_terminals.clear()
+        self.mask.clear()  # Clear mask as well
 
 
 def debug(msg, debug_flag):
@@ -281,7 +344,9 @@ def reorder_state(obs, obj_order, num_features):
             reordered_state[i] = matching_row
         # If no matching row is found, the initialized zeros will remain
 
-    return reordered_state
+    mask = [0 if np.array_equal(row, np.zeros(num_features)) else 1 for row in reordered_state]
+
+    return reordered_state, mask
 
 
 def main(args):
@@ -311,7 +376,7 @@ def main(args):
     # Create the environment
     env = ns3env.Ns3Env(port=args.port, simSeed=args.simSeed, simArgs=simArgs, debug=args.debug)
     state_shape = env.observation_space.shape
-    action_dim = env.action_space.shape[0]
+    action_dim = state_shape[0]
     ppo = PPO(state_shape, action_dim)
     memory = Memory(maxlen=args.stepInterval)
 
@@ -324,9 +389,10 @@ def main(args):
         sorted_obs = np.lexsort((reshaped_obs[:, 1], reshaped_obs[:, 0]))
         flow_order = reshaped_obs[sorted_obs, 0:2]
         while True:
-            state = reorder_state(obs, flow_order, state_shape[1])
-            action = ppo.select_action(state, memory)
+            state, mask = reorder_state(obs, flow_order, state_shape[1])
+            action = ppo.select_action(state, memory, mask)
             debug(f"State: \n{state.reshape(state_shape)}", args.debug)
+            debug(f"Mask: {mask}", args.debug)
             debug(f"Selected action: {action}", args.debug)
 
             obs, reward, done, _ = env.step(action)
