@@ -8,6 +8,7 @@
 
 import argparse
 from collections import deque
+from types import MappingProxyType
 
 import numpy as np
 import torch
@@ -74,6 +75,7 @@ class PPO:
                 nn.Linear(hidden_dim, hidden_dim),
                 nn.ReLU(),
                 nn.Linear(hidden_dim, 2),  # Output: 2 (mean and log_std) for each row
+                nn.Tanh(),  # Add Tanh activation to limit the range of mean and log_std
             )
 
             # Critic Network for value estimation
@@ -108,16 +110,39 @@ class PPO:
             for i in range(num_objects):
                 if mask[i]:  # If the row is active
                     actor_output = self.actor(state[:, i, :])  # Shape: (batch_size, 2)
-                    mean, log_std = actor_output[:, 0], actor_output[:, 1]
+
+                    # Tanh 활성화 후 스케일링하여 mean 값 조정
+                    mean, log_std = (
+                        actor_output[:, 0] * (num_objects - 1) / 2 + (num_objects - 1) / 2,
+                        actor_output[:, 1],
+                    )
+
+                    # log_std 값 제한
+                    log_std = torch.clamp(
+                        log_std, -2, 2
+                    )  # Log standard deviation within a reasonable range
+
                     std = torch.exp(log_std)  # Convert log_std to std
                     dist = torch.distributions.Normal(mean, std)
                     action = dist.sample()  # Sample action from the distribution
-                    action = torch.clamp(action, 0, 2)  # Ensure action is within [0, 2]
+
+                    # Ensure action is within [0, num_objects - 1]
+                    action = torch.clamp(
+                        action, 0, num_objects - 1
+                    )  # 범위를 num_objects - 1로 조정
+
                     actions.append(action)
                     action_log_probs.append(dist.log_prob(action))  # Save log probability
+
+                    # Print statements for debugging
+                    debug(
+                        f"Selected action for flow {i}: {action.item()} (mean: {mean.item()}, std: {std.item()})",
+                        args.debug,
+                    )
                 else:  # Inactive row
                     actions.append(torch.tensor([0.0]))  # Set action to 0
                     action_log_probs.append(torch.tensor(0.0))  # Log-probability is also 0
+                    debug(f"Zero action for flow {i}", args.debug)
 
             # Convert list of actions to a single tensor
             actions = torch.stack(actions).squeeze()  # Shape: (num_objects,)
@@ -324,29 +349,43 @@ def debug(msg, debug_flag):
         print(msg)
 
 
-def reorder_state(obs, obj_order, num_features):
-    """Reorders the state rows to match the obj_order and fills missing entries with zeros."""
-    # Reshape the observation to match the state shape
-    reshaped_obs = obs.reshape(int(len(obs) / num_features), num_features)
-    # Initialize the reordered state with zeros
-    reordered_state = np.zeros((obj_order.shape[0], num_features))
+def create_flow_map(flow_order):
+    """!
+    Creates a flow order map for mapping flow order to indices.
 
-    # Iterate over the obj_order and match it with the new state
-    for i, order in enumerate(obj_order):
-        # Find rows in the state that match the current obj_order entry
-        matching_row = None
-        for row in reshaped_obs:
-            if np.array_equal(row[0:2], order):  # Check if 1st and 2nd columns match the order
-                matching_row = row
-                break
-        # If a matching row is found, place it in the correct position
-        if matching_row is not None:
-            reordered_state[i] = matching_row
-        # If no matching row is found, the initialized zeros will remain
+    @param flow_order: A list of flow order tuples, where each tuple contains the flow ID and the UE ID.
+    @return MappingProxyType: An immutable mapping of flow order tuples to indices.
+    """
+    mutable_flow_order = {tuple(row): i for i, row in enumerate(flow_order)}
+    return MappingProxyType(mutable_flow_order)
+
+
+def reorder_state(reshaped_obs, flow_order, num_features):
+    """Reorders the state rows to match the obj_order and fills missing entries with zeros."""
+    # Initialize the reordered state with zeros
+    reordered_state = np.zeros((len(flow_order), num_features))
+
+    # Iterate over the flow_order and match it with the new state
+    for row in reshaped_obs:
+        key = tuple(row[0:2])
+        if key in flow_order:
+            reordered_state[flow_order[key]] = row
+    # If no matching row is found, the initialized zeros will remain
 
     mask = [0 if np.array_equal(row, np.zeros(num_features)) else 1 for row in reordered_state]
 
     return reordered_state, mask
+
+
+def reorder_action(action, reshaped_obs, flow_order):
+    reordered_action = []
+
+    for row in reshaped_obs:
+        key = tuple(row[0:2])
+        if key in flow_order:
+            reordered_action.append(action[flow_order[key]])
+
+    return reordered_action
 
 
 def main(args):
@@ -387,15 +426,19 @@ def main(args):
         obs = env.reset()
         reshaped_obs = obs.reshape(state_shape)
         sorted_obs = np.lexsort((reshaped_obs[:, 1], reshaped_obs[:, 0]))
-        flow_order = reshaped_obs[sorted_obs, 0:2]
+        flow_map = create_flow_map(reshaped_obs[sorted_obs, 0:2])
         while True:
-            state, mask = reorder_state(obs, flow_order, state_shape[1])
-            action = ppo.select_action(state, memory, mask)
+            debug(f"Observation: \n{reshaped_obs}", args.debug)
+            state, mask = reorder_state(reshaped_obs, flow_map, state_shape[1])
             debug(f"State: \n{state.reshape(state_shape)}", args.debug)
             debug(f"Mask: {mask}", args.debug)
+            action = ppo.select_action(state, memory, mask)
             debug(f"Selected action: {action}", args.debug)
+            reordered_action = reorder_action(action, reshaped_obs, flow_map)
+            debug(f"Reordered action: {reordered_action}", args.debug)
 
-            obs, reward, done, _ = env.step(action)
+            obs, reward, done, _ = env.step(reordered_action)
+            reshaped_obs = obs.reshape(int(len(obs) / state_shape[1]), state_shape[1])
             debug(f"Reward: {reward}", args.debug)
 
             memory.rewards.append(reward)
