@@ -523,6 +523,7 @@ main(int argc, char* argv[])
 
     //  Install the applications
     ApplicationContainer clientApps;
+    std::map<std::pair<Address, uint16_t>, std::string> flowMap;
 
     for (uint32_t i = 0; i < ue1flowContainer.GetN(); ++i)
     {
@@ -536,6 +537,11 @@ main(int argc, char* argv[])
 
         // Activate a dedicated bearer for the traffic type
         nrHelper->ActivateDedicatedEpsBearer(ueDevice, ue1flowBearer, ue1flowTft);
+
+        // Store the flow information
+        std::stringstream flowType;
+        flowType << "UE " << ueDevice->GetNode()->GetId() << " non-GBR";
+        flowMap.emplace(std::make_pair(ueAddress, dlPortUe1flow), flowType.str());
     }
 
     for (uint32_t i = 0; i < ue2flowsContainer.GetN(); ++i)
@@ -550,6 +556,11 @@ main(int argc, char* argv[])
 
         // Activate a dedicated bearer for the traffic type
         nrHelper->ActivateDedicatedEpsBearer(ueDevice, ue2flowsNgbrBearer, ue2flowsNgbrTft);
+
+        // Store the flow information]
+        std::stringstream flowType;
+        flowType << "UE " << ueDevice->GetNode()->GetId() << " non-GBR";
+        flowMap.emplace(std::make_pair(ueAddress, dlPortUe2flowsNgbr), flowType.str());
     }
 
     for (uint32_t i = 0; i < ue2flowsContainer.GetN(); ++i)
@@ -564,6 +575,11 @@ main(int argc, char* argv[])
 
         // Activate a dedicated bearer for the traffic type
         nrHelper->ActivateDedicatedEpsBearer(ueDevice, ue2flowsDcGbrBearer, ue2FlowsDcGbrTft);
+
+        // Store the flow information
+        std::stringstream flowType;
+        flowType << "UE " << ueDevice->GetNode()->GetId() << " DC-GBR";
+        flowMap.emplace(std::make_pair(ueAddress, dlPortUe2flowsDcGbr), flowType.str());
     }
 
     // start UDP server and client apps
@@ -631,9 +647,12 @@ main(int argc, char* argv[])
         {
             protoStream.str("UDP");
         }
+        std::pair<Address, uint16_t> flowAddressPort =
+            std::make_pair(t.destinationAddress, t.destinationPort);
         outFile << "Flow " << i->first << " (" << t.sourceAddress << ":" << t.sourcePort << " -> "
                 << t.destinationAddress << ":" << t.destinationPort << ") proto "
                 << protoStream.str() << "\n";
+        outFile << "  Flow Type: " << flowMap.at(flowAddressPort) << "\n";
         outFile << "  Tx Packets: " << i->second.txPackets << "\n";
         outFile << "  Tx Bytes:   " << i->second.txBytes << "\n";
         outFile << "  TxOffered:  " << i->second.txBytes * 8.0 / flowDuration / 1000.0 / 1000.0
