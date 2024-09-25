@@ -44,7 +44,7 @@ class PPO:
         self.eps_clip = eps_clip
         self.k_epochs = k_epochs
 
-        action_dim = state_shape[0]  # 각 row에 대한 action 수는 state_shape[0]와 동일
+        action_dim = state_shape[0]  # The number of actions per row is the same as state_shape[0]
         self.policy = self.ActorCritic(state_shape, action_dim, hidden_dim)
         self.optimizer = optim.Adam(self.policy.parameters(), lr=lr)
         self.policy_old = self.ActorCritic(state_shape, action_dim, hidden_dim)
@@ -111,13 +111,13 @@ class PPO:
                 if mask[i]:  # If the row is active
                     actor_output = self.actor(state[:, i, :])  # Shape: (batch_size, 2)
 
-                    # Tanh 활성화 후 스케일링하여 mean 값 조정
+                    # Scaling after Tanh activation to adjust the mean value
                     mean, log_std = (
                         actor_output[:, 0] * (num_objects - 1) / 2 + (num_objects - 1) / 2,
                         actor_output[:, 1],
                     )
 
-                    # log_std 값 제한
+                    # Limit the log_std value
                     log_std = torch.clamp(
                         log_std, -2, 2
                     )  # Log standard deviation within a reasonable range
@@ -129,7 +129,7 @@ class PPO:
                     # Ensure action is within [0, num_objects - 1]
                     action = torch.clamp(
                         action, 0, num_objects - 1
-                    )  # 범위를 num_objects - 1로 조정
+                    )  # Adjust the range to `num_objects - 1`
 
                     actions.append(action)
                     action_log_probs.append(dist.log_prob(action))  # Save log probability
