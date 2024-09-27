@@ -141,7 +141,7 @@ class PPO:
                     )
                 else:  # Inactive row
                     actions.append(torch.tensor([0.0]))  # Set action to 0
-                    action_log_probs.append(torch.tensor(0.0))  # Log-probability is also 0
+                    action_log_probs.append(torch.tensor([0.0]))  # Log-probability is also 0
                     debug(f"Zero action for flow {i}", args.debug)
 
             # Convert list of actions to a single tensor
