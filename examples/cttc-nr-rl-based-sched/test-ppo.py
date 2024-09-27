@@ -44,10 +44,17 @@ class PPO:
         self.eps_clip = eps_clip
         self.k_epochs = k_epochs
 
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() and args.enableCuda else "cpu"
+        )  # GPU or CPU
+        if args.enableCuda and not torch.cuda.is_available():
+            print("CUDA is not available. Using CPU instead.")
+        print(f"Using Device: {str(self.device).upper()}")
+
         action_dim = state_shape[0]  # The number of actions per row is the same as state_shape[0]
-        self.policy = self.ActorCritic(state_shape, action_dim, hidden_dim)
+        self.policy = self.ActorCritic(state_shape, action_dim, hidden_dim).to(self.device)
         self.optimizer = optim.Adam(self.policy.parameters(), lr=lr)
-        self.policy_old = self.ActorCritic(state_shape, action_dim, hidden_dim)
+        self.policy_old = self.ActorCritic(state_shape, action_dim, hidden_dim).to(self.device)
         self.policy_old.load_state_dict(self.policy.state_dict())
 
         self.mse_loss = nn.MSELoss()
@@ -90,7 +97,7 @@ class PPO:
         def forward(self):
             raise NotImplementedError
 
-        def act(self, state, mask):
+        def act(self, state, mask, device):
             """!
             Takes in the current state of the environment and outputs a continuous action based on the policy.
 
@@ -101,7 +108,7 @@ class PPO:
             if len(state.shape) == 2:  # If state is (3, 4), add batch dimension
                 state = state[np.newaxis, :]  # Shape: (1, 3, 4)
 
-            state = torch.from_numpy(state).float()  # Convert state to tensor
+            state = torch.from_numpy(state).float().to(device)  # Convert state to tensor
             batch_size, num_objects, _ = state.size()
 
             actions = []
@@ -140,15 +147,17 @@ class PPO:
                         args.debug,
                     )
                 else:  # Inactive row
-                    actions.append(torch.tensor([0.0]))  # Set action to 0
-                    action_log_probs.append(torch.tensor([0.0]))  # Log-probability is also 0
+                    actions.append(torch.tensor([0.0]).to(device))  # Set action to 0
+                    action_log_probs.append(
+                        torch.tensor([0.0]).to(device)
+                    )  # Log-probability is also 0
                     debug(f"Zero action for flow {i}", args.debug)
 
             # Convert list of actions to a single tensor
             actions = torch.stack(actions).squeeze()  # Shape: (num_objects,)
             action_log_probs = torch.stack(action_log_probs).squeeze()  # Shape: (num_objects,)
 
-            return actions.detach().numpy(), action_log_probs
+            return actions.detach().cpu().numpy(), action_log_probs
 
         def evaluate(self, state, action, mask):
             """!
@@ -227,7 +236,7 @@ class PPO:
         @param mask: Boolean mask indicating which rows are active.
         @return action: The action selected by the policy.
         """
-        action, action_logprob = self.policy_old.act(state, mask)
+        action, action_logprob = self.policy_old.act(state, mask, self.device)
         memory.states.append(state)
         memory.actions.append(action)
         memory.logprobs.append(action_logprob)
@@ -249,7 +258,7 @@ class PPO:
             discounted_reward = reward + (self.gamma * discounted_reward)
             rewards.insert(0, discounted_reward)
 
-        rewards = torch.tensor(rewards, dtype=torch.float32)
+        rewards = torch.tensor(rewards, dtype=torch.float32).to(self.device)
         rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
 
         old_states = memory.states
@@ -257,17 +266,19 @@ class PPO:
 
         # Convert old_states and old_actions to tensors if they are not already
         if not isinstance(old_states, torch.Tensor):
-            old_states = torch.tensor(np.array(old_states), dtype=torch.float32)
+            old_states = torch.tensor(np.array(old_states), dtype=torch.float32).to(self.device)
         if not isinstance(old_actions, torch.Tensor):
-            old_actions = torch.tensor(np.array(old_actions), dtype=torch.float32)
+            old_actions = torch.tensor(np.array(old_actions), dtype=torch.float32).to(self.device)
 
         # Convert logprobs more efficiently to avoid warnings
         if isinstance(memory.logprobs[0], torch.Tensor):
-            old_logprobs = torch.stack(
-                [lp.detach() for lp in memory.logprobs]
+            old_logprobs = torch.stack([lp.detach() for lp in memory.logprobs]).to(
+                self.device
             )  # Stack tensors directly
         else:
-            old_logprobs = torch.tensor(np.array(memory.logprobs), dtype=torch.float32)
+            old_logprobs = torch.tensor(np.array(memory.logprobs), dtype=torch.float32).to(
+                self.device
+            )
 
         # Adjust the size of old_logprobs to match the size of logprobs from evaluate function
         old_logprobs = old_logprobs.view(-1, 3)  # Adjust the shape to match logprobs from evaluate
@@ -467,6 +478,7 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=5552, help="Port number")
     parser.add_argument("--simSeed", type=int, default=3002, help="Seed number")
     parser.add_argument("--debug", type=bool, default=False, help="Debug mode")
+    parser.add_argument("--enableCuda", type=int, default=0, help="Enable CUDA")
     # Arguments used for the ns3 simulation (simArgs)
     parser.add_argument(
         "--ueNum", type=int, default=2, help="Number of UEs (User Equipment) in the simulation"
