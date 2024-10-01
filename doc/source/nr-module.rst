@@ -2433,7 +2433,7 @@ To enable the RL-based scheduler, the ns3-gym module must be installed and the e
 parameter must be set to true.
 
 The complete details of the simulation script are provided in
-https://cttc-lena.gitlab.io/nr/html/cttc-nr-rl-based-sched_8cc.html.
+https://cttc-lena.gitlab.io/nr/html/gsoc-nr-rl-based-sched_8cc.html.
 
 .. _Validation:
 
