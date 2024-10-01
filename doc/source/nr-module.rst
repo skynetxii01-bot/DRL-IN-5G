@@ -2544,6 +2544,13 @@ load saturates the system, i.e.:
 Let us point out that the test for the case of DC-GBR flows is envisioned to be
 included in the short-term future.
 
+Test for NR RL-based schedulers
+===============================
+To verify the correct functionality of the callback used for invoking the ns3-gym module
+during the resource assignment process, we have implemented a unit test called ``nr-test-scheduler-ai``.
+This test checks whether the callback is properly invoked during the resource assignment process
+by comparing the passed observation with the details of the UEs and the installed flows in the UEs.
+
 Test for NR error model
 =======================
 Test case called ``nr-test-l2sm-eesm`` validates specific functions of the NR
