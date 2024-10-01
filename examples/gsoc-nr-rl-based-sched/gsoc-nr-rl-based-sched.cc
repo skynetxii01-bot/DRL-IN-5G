@@ -7,7 +7,7 @@
 
 /**
  * \ingroup examples
- * \file cttc-nr-rl-based-sched.cc
+ * \file gsoc-nr-rl-based-sched.cc
  * \brief A example for RL based scheduler (nr-mac-scheduler-ofdma/tdma-ai)
  *
  * This example describes how to setup a simulation using the AI scheduler and
@@ -40,10 +40,13 @@
  * The example will print the end-to-end result of three different QoS flows
  * with different resource types on-screen, as well as writing them on a file.
  *
- * \todo Apply the configuration of the RL based scheduler
+ * \note This example was created during the Google Summer of Code 2024 program.
+ * The main author is Hyerin Kim, under the supervision of Katerina Koutlia, Amir Ashtari,
+ * Bijana Bojovic, and Gabriel Ferreira for the project "Enhancement of RL Approach Accessibility in
+ * NR."
  *
  * \code{.unparsed}
-$ ./ns3 run "cttc-nr-rl-based-sched --PrintHelp"
+$ ./ns3 run "gsoc-nr-rl-based-sched --PrintHelp"
     \endcode
  *
  */
@@ -65,7 +68,7 @@ $ ./ns3 run "cttc-nr-rl-based-sched --PrintHelp"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("CttcNrRlBasedSched");
+NS_LOG_COMPONENT_DEFINE("GsocNrRlBasedSched");
 
 int
 main(int argc, char* argv[])

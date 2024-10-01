@@ -117,9 +117,9 @@ endif()
 
 if(${libopengym})
   build_lib_example(
-    NAME cttc-nr-rl-based-sched
-    SOURCE_FILES cttc-nr-rl-based-sched/cttc-nr-rl-based-sched.cc
-                 cttc-nr-rl-based-sched/mygym.cc
+    NAME gsoc-nr-rl-based-sched
+    SOURCE_FILES gsoc-nr-rl-based-sched/gsoc-nr-rl-based-sched.cc
+                 gsoc-nr-rl-based-sched/mygym.cc
     LIBRARIES_TO_LINK
       ${libnr}
       ${libopengym}
@@ -127,8 +127,8 @@ if(${libopengym})
   )
 else()
   build_lib_example(
-    NAME cttc-nr-rl-based-sched
-    SOURCE_FILES cttc-nr-rl-based-sched/cttc-nr-rl-based-sched.cc
+    NAME gsoc-nr-rl-based-sched
+    SOURCE_FILES gsoc-nr-rl-based-sched/gsoc-nr-rl-based-sched.cc
     LIBRARIES_TO_LINK ${libnr}
                       ${libflow-monitor}
   )
