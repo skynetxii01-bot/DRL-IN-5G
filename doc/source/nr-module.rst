@@ -2416,18 +2416,18 @@ the QCI of which can be set as desired.
 The complete details of the simulation script are provided in
 https://cttc-lena.gitlab.io/nr/html/cttc-nr-multi-flow-qos-sched_8cc.html.
 
-cttc-nr-rl-based-sched.cc
+gsoc-nr-rl-based-sched.cc
 =========================
 
-The program ``examples/cttc-nr-rl-based-sched`` is an example that allows testing
-the performance of the RL-based schedulers (see :ref:`RLScheduler`). The example
-has been designed to test the E2E delay and throughput in a single-cell scenario
-with 3 UEs, where one UE has a NON-GBR flow (5QI=80), the second UE has a GBR flow
-(5QI=1) and the third UE has a delay critical GBR flow (5QI=87).
+The program ``examples/gsoc-nr-rl-based-sched`` provides a test case for evaluating
+the performance of RL-based schedulers (see :ref:`RLScheduler`). It is designed to assess
+E2E delay and throughput in a single-cell scenario with two UEs.
+One UE has a single flow with NON-GBR traffic (5QI=80), while the second UE has multiple flows
+with NON-GBR traffic (5QI=80) and delay-critical (DC)-GBR traffic (5QI=87).
 
-Users can configure the number of UEs, and the number of types of flows (2 or 3).
-If the number of types of flows is set to 2, the GBR flow is not considered.
-UEs are divided into groups, where each group has a different type of flow.
+Using this program, users can compare the performance of RL-based schedulers with other schedulers,
+such as the QoS schedulers (see :ref:`QosSchedulers`) set up with either LC QoS Assignment (see :ref:`LcAssignment`)
+or LC RR assignment, by configuring the ``schedulerType`` parameter.
 
 To enable the RL-based scheduler, the ns3-gym module must be installed and the enableAi
 parameter must be set to true.
