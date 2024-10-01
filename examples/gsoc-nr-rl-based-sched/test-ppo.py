@@ -40,6 +40,8 @@ class PPO:
         eps_clip=0.2,
         k_epochs=4,
     ):
+        self.num_flows = state_shape[0]  # Number of flows in the environment
+
         self.gamma = gamma
         self.eps_clip = eps_clip
         self.k_epochs = k_epochs
@@ -109,19 +111,19 @@ class PPO:
                 state = state[np.newaxis, :]  # Shape: (1, 3, 4)
 
             state = torch.from_numpy(state).float().to(device)  # Convert state to tensor
-            batch_size, num_objects, _ = state.size()
+            batch_size, num_flows, _ = state.size()
 
             actions = []
             action_log_probs = []
             eps = 1e-6  # Small value to prevent log(0) errors
 
-            for i in range(num_objects):
+            for i in range(num_flows):
                 if mask[i]:  # If the row is active
                     actor_output = self.actor(state[:, i, :])  # Shape: (batch_size, 2)
 
                     # Scaling after Tanh activation to adjust the mean value
                     mean, log_std = (
-                        actor_output[:, 0] * (num_objects - 1) / 2 + (num_objects - 1) / 2,
+                        actor_output[:, 0] * (num_flows - 1) / 2 + (num_flows - 1) / 2,
                         actor_output[:, 1],
                     )
 
@@ -134,10 +136,10 @@ class PPO:
                     dist = torch.distributions.Normal(mean, std)
                     action = dist.sample()  # Sample action from the distribution
 
-                    # Ensure action is within (0, num_objects - 1]
+                    # Ensure action is within (0, num_flows - 1]
                     action = torch.clamp(
-                        action, eps, num_objects - 1
-                    )  # Adjust the range to `num_objects - 1`
+                        action, eps, num_flows - 1
+                    )  # Adjust the range to `num_flows - 1`
 
                     actions.append(action)
                     action_log_probs.append(dist.log_prob(action))  # Save log probability
@@ -155,8 +157,8 @@ class PPO:
                     debug(f"Zero action for flow {i}", args.debug)
 
             # Convert list of actions to a single tensor
-            actions = torch.stack(actions).squeeze()  # Shape: (num_objects,)
-            action_log_probs = torch.stack(action_log_probs).squeeze()  # Shape: (num_objects,)
+            actions = torch.stack(actions).squeeze()  # Shape: (num_flows,)
+            action_log_probs = torch.stack(action_log_probs).squeeze()  # Shape: (num_flows,)
 
             return actions.detach().cpu().numpy(), action_log_probs
 
@@ -180,11 +182,11 @@ class PPO:
             if len(action.shape) == 1:  # If action is (3,), add batch dimension
                 action = action[np.newaxis, :]  # Shape: (1, 3)
 
-            batch_size, num_objects, _ = state.size()
+            batch_size, num_flows, _ = state.size()
             action_log_probs = []
             entropies = []
 
-            for i in range(num_objects):
+            for i in range(num_flows):
                 if mask[i]:  # If the row is active
                     actor_output = self.actor(state[:, i, :])  # Shape: (batch_size, 2)
                     mean, log_std = actor_output[:, 0], actor_output[:, 1]
@@ -219,7 +221,7 @@ class PPO:
             # Stack tensors along new dimension
             action_log_probs = torch.stack(
                 action_log_probs, dim=1
-            )  # Shape: (batch_size, num_objects)
+            )  # Shape: (batch_size, num_flows)
             dist_entropy = torch.stack(entropies, dim=1).mean()  # Average over all objects
 
             # Flatten state for critic input
@@ -282,7 +284,9 @@ class PPO:
             )
 
         # Adjust the size of old_logprobs to match the size of logprobs from evaluate function
-        old_logprobs = old_logprobs.view(-1, 3)  # Adjust the shape to match logprobs from evaluate
+        old_logprobs = old_logprobs.view(
+            -1, self.num_flows
+        )  # Adjust the shape to match logprobs from evaluate
 
         for _ in range(self.k_epochs):
             logprobs, state_values, dist_entropy = self.policy.evaluate(
@@ -290,7 +294,7 @@ class PPO:
             )
 
             # Adjust size of logprobs to match old_logprobs if needed
-            logprobs = logprobs.view(-1, 3)  # Adjust the shape to match old_logprobs
+            logprobs = logprobs.view(-1, self.num_flows)  # Adjust the shape to match old_logprobs
 
             ratios = torch.exp(logprobs - old_logprobs.detach())
 
