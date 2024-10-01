@@ -113,6 +113,7 @@ class PPO:
 
             actions = []
             action_log_probs = []
+            eps = 1e-6  # Small value to prevent log(0) errors
 
             for i in range(num_objects):
                 if mask[i]:  # If the row is active
@@ -133,9 +134,9 @@ class PPO:
                     dist = torch.distributions.Normal(mean, std)
                     action = dist.sample()  # Sample action from the distribution
 
-                    # Ensure action is within [0, num_objects - 1]
+                    # Ensure action is within (0, num_objects - 1]
                     action = torch.clamp(
-                        action, 0, num_objects - 1
+                        action, eps, num_objects - 1
                     )  # Adjust the range to `num_objects - 1`
 
                     actions.append(action)
