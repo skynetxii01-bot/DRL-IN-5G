@@ -416,10 +416,6 @@ main(int argc, char* argv[])
     remoteHostStaticRouting->AddNetworkRouteTo(Ipv4Address("7.0.0.0"), Ipv4Mask("255.0.0.0"), 1);
     internet.Install(gridScenario.GetUserTerminals());
 
-    Ipv4InterfaceContainer ueVoiceIpIface;
-    Ipv4InterfaceContainer ueLowLatIpIface;
-    Ipv4InterfaceContainer ueMoTracIpIface;
-
     Ipv4InterfaceContainer ue1FlowIpIface;
     Ipv4InterfaceContainer ue2FlowsIpIface;
     ue1FlowIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(ue1flowNetDev));
