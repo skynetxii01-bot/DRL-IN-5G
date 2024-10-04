@@ -89,6 +89,8 @@ set(source_files
     model/nr-mac-scheduler-ue-info-qos.cc
     model/nr-mac-scheduler-ue-info.cc
     model/nr-mac-scheduler-ue-info-pf.cc
+    model/nr-mac-scheduler-ue-info-ai.cc
+    model/nr-mac-scheduler-ai-ns3-gym-env.cc
     model/nr-mac-scheduler-lc-alg.cc
     model/nr-mac-scheduler-lc-rr.cc
     model/nr-mac-scheduler-lc-qos.cc
@@ -213,6 +215,8 @@ set(header_files
     model/nr-mac-scheduler-ue-info-rr.h
     model/nr-mac-scheduler-ue-info-pf.h
     model/nr-mac-scheduler-ue-info-qos.h
+    model/nr-mac-scheduler-ue-info-ai.h
+    model/nr-mac-scheduler-ai-ns3-gym-env.h
     model/nr-mac-scheduler-lc-alg.h
     model/nr-mac-scheduler-lc-rr.h
     model/nr-mac-scheduler-lc-qos.h
@@ -299,5 +303,6 @@ build_lib(
     ${liblte}
     ${libinternet-apps}
     ${libflow-monitor}
+    ${libopengym}
   TEST_SOURCES ${test_sources}
 )

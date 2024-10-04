@@ -29,12 +29,13 @@
  *
  * When the ns3-gym module is available and the schedulerType is set to "Ai",
  * the example will use the AI scheduler to schedule the UEs. The AI scheduler will
- * send observations to the custom MyGymEnv class inheriting from OpenGymEnv, which
+ * send observations to the custom NrMacSchedulerAiNs3GymEnv class inheriting from OpenGymEnv, which
  * will be used to train the AI model. The AI model will send back the weights for
  * all flows of all UEs, which will be used to schedule the UEs. The AI scheduler
- * will also send rewards to the MyGymEnv class, which will be used to train the AI
+ * will also send rewards to the NrMacSchedulerAiNs3GymEnv class, which will be used to train the AI
  * model. All information needed by the gym is sent once through the NotifyCb callback
- * function. The NotifyCb function is defined in the MyGymEnv class and is set in the
+ * function. The NotifyCb function is defined in the NrMacSchedulerAiNs3GymEnv class and is set in
+the
  * AI scheduler as the attribute `m_notifyCbDl` for the downlink.
  *
  * The example will print the end-to-end result of three different QoS flows
@@ -51,8 +52,6 @@ $ ./ns3 run "gsoc-nr-rl-based-sched --PrintHelp"
  *
  */
 
-#include "mygym.h"
-
 #include "ns3/antenna-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/buildings-module.h"
@@ -63,6 +62,7 @@ $ ./ns3 run "gsoc-nr-rl-based-sched --PrintHelp"
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/network-module.h"
+#include "ns3/nr-mac-scheduler-ai-ns3-gym-env.h"
 #include "ns3/nr-module.h"
 #include "ns3/point-to-point-module.h"
 
@@ -260,14 +260,15 @@ main(int argc, char* argv[])
 #ifdef HAVE_OPENGYM
     // Setup the OpenGym interface
     Ptr<OpenGymInterface> openGymInterface = CreateObject<OpenGymInterface>(openGymPort);
-    Ptr<MyGymEnv> myGymEnv =
-        CreateObject<MyGymEnv>(ue1flowContainer.GetN() + ue2flowsContainer.GetN() * 2);
+    Ptr<NrMacSchedulerAiNs3GymEnv> myGymEnv = CreateObject<NrMacSchedulerAiNs3GymEnv>(
+        ue1flowContainer.GetN() + ue2flowsContainer.GetN() * 2);
     myGymEnv->SetOpenGymInterface(openGymInterface);
     if (schedulerType == "Ai")
     {
         nrHelper->SetSchedulerAttribute(
             "NotifyCbDl",
-            CallbackValue(MakeCallback(&MyGymEnv::NotifyCurrentIteration, myGymEnv)));
+            CallbackValue(
+                MakeCallback(&NrMacSchedulerAiNs3GymEnv::NotifyCurrentIteration, myGymEnv)));
         nrHelper->SetSchedulerAttribute(
             "ActiveDlAi",
             BooleanValue(true)); // Activate the AI model for the downlink

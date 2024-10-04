@@ -5,59 +5,59 @@
 //
 // SPDX-License-Identifier: GPL-2.0-only
 
-#include "mygym.h"
+#include "nr-mac-scheduler-ai-ns3-gym-env.h"
+
+#ifdef HAVE_OPENGYM
 
 namespace ns3
 {
-NS_LOG_COMPONENT_DEFINE("MyGymEnv");
+NS_LOG_COMPONENT_DEFINE("NrMacSchedulerAiNs3GymEnv");
+NS_OBJECT_ENSURE_REGISTERED(NrMacSchedulerAiNs3GymEnv);
 
-NS_OBJECT_ENSURE_REGISTERED(MyGymEnv);
-
-MyGymEnv::MyGymEnv()
+NrMacSchedulerAiNs3GymEnv::NrMacSchedulerAiNs3GymEnv()
 {
     NS_LOG_FUNCTION(this);
 }
 
-MyGymEnv::MyGymEnv(uint32_t numUes)
+NrMacSchedulerAiNs3GymEnv::NrMacSchedulerAiNs3GymEnv(uint32_t numFlows)
 {
     NS_LOG_FUNCTION(this);
-    m_numFlows = numUes;
+    m_numFlows = numFlows;
 }
 
-MyGymEnv::~MyGymEnv()
+NrMacSchedulerAiNs3GymEnv::~NrMacSchedulerAiNs3GymEnv()
 {
     NS_LOG_FUNCTION(this);
 }
 
 TypeId
-MyGymEnv::GetTypeId()
+NrMacSchedulerAiNs3GymEnv::GetTypeId()
 {
-    static TypeId tid = TypeId("MyGymEnv")
+    static TypeId tid = TypeId("NrMacSchedulerAiNs3GymEnv")
                             .SetParent<OpenGymEnv>()
-                            .SetGroupName("OpenGym")
-                            .AddConstructor<MyGymEnv>();
+                            .AddConstructor<NrMacSchedulerAiNs3GymEnv>();
     return tid;
 }
 
 void
-MyGymEnv::DoDispose()
+NrMacSchedulerAiNs3GymEnv::DoDispose()
 {
     NS_LOG_FUNCTION(this);
 }
 
 Ptr<OpenGymSpace>
-MyGymEnv::GetActionSpace()
+NrMacSchedulerAiNs3GymEnv::GetActionSpace()
 {
     NS_LOG_FUNCTION(this);
     float low = 0.0;
-    float high = 1.0;
+    float high = m_numFlows;
     std::vector<uint32_t> shape = {m_numFlows};
     std::string dtype = TypeNameGet<float>();
     return Create<OpenGymBoxSpace>(low, high, shape, dtype);
 }
 
 Ptr<OpenGymSpace>
-MyGymEnv::GetObservationSpace()
+NrMacSchedulerAiNs3GymEnv::GetObservationSpace()
 {
     NS_LOG_FUNCTION(this);
     float low = 0.0;
@@ -71,14 +71,14 @@ MyGymEnv::GetObservationSpace()
 }
 
 bool
-MyGymEnv::GetGameOver()
+NrMacSchedulerAiNs3GymEnv::GetGameOver()
 {
     NS_LOG_FUNCTION(this);
     return m_gameOver;
 }
 
 Ptr<OpenGymDataContainer>
-MyGymEnv::GetObservation()
+NrMacSchedulerAiNs3GymEnv::GetObservation()
 {
     NS_LOG_FUNCTION(this);
     std::vector<uint32_t> shape = {
@@ -98,21 +98,21 @@ MyGymEnv::GetObservation()
 }
 
 float
-MyGymEnv::GetReward()
+NrMacSchedulerAiNs3GymEnv::GetReward()
 {
     NS_LOG_FUNCTION(this);
     return m_reward;
 }
 
 std::string
-MyGymEnv::GetExtraInfo()
+NrMacSchedulerAiNs3GymEnv::GetExtraInfo()
 {
     NS_LOG_FUNCTION(this);
     return m_extraInfo;
 }
 
 bool
-MyGymEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
+NrMacSchedulerAiNs3GymEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
 {
     NS_LOG_FUNCTION(this);
     Ptr<OpenGymBoxContainer<float>> actionBox = DynamicCast<OpenGymBoxContainer<float>>(action);
@@ -131,7 +131,7 @@ MyGymEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
 }
 
 void
-MyGymEnv::NotifyCurrentIteration(
+NrMacSchedulerAiNs3GymEnv::NotifyCurrentIteration(
     const std::vector<NrMacSchedulerUeInfoAi::LcObservation>& observations,
     bool isGameOver,
     float reward,
@@ -148,3 +148,5 @@ MyGymEnv::NotifyCurrentIteration(
 }
 
 } // namespace ns3
+
+#endif // HAVE_OPENGYM

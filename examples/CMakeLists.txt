@@ -115,21 +115,9 @@ else()
   )
 endif()
 
-if(${libopengym})
-  build_lib_example(
-    NAME gsoc-nr-rl-based-sched
-    SOURCE_FILES gsoc-nr-rl-based-sched/gsoc-nr-rl-based-sched.cc
-                 gsoc-nr-rl-based-sched/mygym.cc
-    LIBRARIES_TO_LINK
-      ${libnr}
-      ${libopengym}
-      ${libflow-monitor}
-  )
-else()
-  build_lib_example(
-    NAME gsoc-nr-rl-based-sched
-    SOURCE_FILES gsoc-nr-rl-based-sched/gsoc-nr-rl-based-sched.cc
-    LIBRARIES_TO_LINK ${libnr}
-                      ${libflow-monitor}
-  )
-endif()
+build_lib_example(
+  NAME gsoc-nr-rl-based-sched
+  SOURCE_FILES gsoc-nr-rl-based-sched/gsoc-nr-rl-based-sched.cc
+  LIBRARIES_TO_LINK ${libnr}
+                    ${libflow-monitor}
+)
