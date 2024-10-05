@@ -500,7 +500,9 @@ if __name__ == "__main__":
         default=0,
         help="The traffic scenario for the case of priority. Can be 0: saturation or 1: medium-load",
     )
-    parser.add_argument("--simTime", type=float, default=1.0, help="Total simulation time in seconds")
+    parser.add_argument(
+        "--simTime", type=float, default=1.0, help="Total simulation time in seconds"
+    )
     parser.add_argument(
         "--numerology", type=int, default=0, help="Numerology parameter for the simulation"
     )
