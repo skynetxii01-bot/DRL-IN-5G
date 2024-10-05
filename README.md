@@ -148,8 +148,15 @@ You can find the installation guide for `ns3-gym` here: [ns3-gym Github](https:/
 
 For managing Python packages in a virtual environment, install `./model/ns3gym` without using the `--user` option.
 
+```
+python3 -m venv ./myenv
+source ./myenv/bin/activate
+pip install ns3-gym/model/ns3gym
+``
+
 To run `test-ppo.py`, install the following additional Python packages:
-```bash
+
+```
 pip install numpy torch
 ```
 
