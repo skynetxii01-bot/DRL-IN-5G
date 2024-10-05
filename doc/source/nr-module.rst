@@ -2416,10 +2416,10 @@ the QCI of which can be set as desired.
 The complete details of the simulation script are provided in
 https://cttc-lena.gitlab.io/nr/html/cttc-nr-multi-flow-qos-sched_8cc.html.
 
-gsoc-nr-rl-based-sched.cc
+gsoc-nr-rl-based-sched
 =========================
 
-The program ``examples/gsoc-nr-rl-based-sched`` provides a test case for evaluating
+The program ``examples/gsoc-nr-rl-based-sched`` provides a example for evaluating
 the performance of RL-based schedulers (see :ref:`RLScheduler`). It is designed to assess
 E2E delay and throughput in a single-cell scenario with two UEs.
 One UE has a single flow with NON-GBR traffic (5QI=80), while the second UE has multiple flows
@@ -2434,6 +2434,22 @@ parameter must be set to true.
 
 The complete details of the simulation script are provided in
 https://cttc-lena.gitlab.io/nr/html/gsoc-nr-rl-based-sched_8cc.html.
+
+simple-test.py
+##############
+
+Simple script for testing ``gsoc-nr-rl-based-sched`` example. The script runs the example
+with the default ``Ns3Env`` environment without any specific RL model. In the script, the
+action is sampled using the ``sample`` method of the action space, and the selected action
+is sent to the simulator through the ``Ns3Env`` environment.
+
+test-ppo.py
+##############
+
+Proximal Policy Optimization (PPO) script for testing ``gsoc-nr-rl-based-sched`` example.
+The script runs the example with the PPO model under the ``Ns3Env`` environment. For each
+iteration, the model is trained with the collected data from the simulation and send the
+selected actions to the simulator through the ``Ns3Env`` environment.
 
 .. _Validation:
 
