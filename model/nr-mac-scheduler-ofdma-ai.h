@@ -1,13 +1,13 @@
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 
-// Copyright (c) 2024 Seoul National University (SNU)
 // Copyright (c) 2024 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
 //
 // SPDX-License-Identifier: GPL-2.0-only
 
 #pragma once
 
-#include "nr-mac-scheduler-ofdma-qos.h"
+#include "nr-mac-scheduler-ofdma-rr.h"
+
 #include "nr-mac-scheduler-ue-info-ai.h"
 
 #include <ns3/traced-value.h>
@@ -18,27 +18,9 @@ namespace ns3
 /**
  * \ingroup scheduler
  * \brief The OFDMA scheduler with AI implementation
- *
- * This class extends the NrMacSchedulerOfdmaQos class and implements the AI
- * scheduler for the downlink and uplink. If the AI model is activated, the scheduler
- * uses the AI model to schedule the UEs. If the AI model is not activated, the scheduler
- * works in a similar manner as the QoS scheduler.
- *
- * When the AI model is activated, the scheduler sends observations to the OpenGymEnv
- * class in the ns3-gym module, which are used to train the AI model. The AI model then
- * sends back the weights for all flows of all UEs. The AI scheduler uses these weights
- * to schedule the UEs.
- *
- * The AI scheduler also sends rewards to the OpenGymEnv class, which are used
- * to train the AI model. All information needed by the gym is sent once through
- * the NotifyCb callback function for each iteration.
- *
- * Details in the class NrMacSchedulerUeInfoAI.
  */
-class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
+class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaRR
 {
-    friend class NrTestSchedulerAiCase;
-
   public:
     /**
      * \brief GetTypeId
@@ -47,138 +29,124 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
     static TypeId GetTypeId();
 
     /**
-     * \brief NrMacSchedulerOfdmaAi constructor
+     * \brief NrMacSchedulerOfdmaAI constructor
      */
-    NrMacSchedulerOfdmaAi();
+    NrMacSchedulerOfdmaAI();
+
+    /**
+     * \brief Deconstructor
+     */
+    ~NrMacSchedulerOfdmaAI() override
+    {
+    }
 
   protected:
+    BeamSymbolMap AssignDLRBG(uint32_t symAvail, const ActiveUeMap& activeDl) const override;
+    BeamSymbolMap AssignULRBG(uint32_t symAvail, const ActiveUeMap& activeUl) const override;
+
     /**
-     * \brief Create an UE representation of the type NrMacSchedulerUeInfoAi
+     * \brief Create an UE representation of the type NrMacSchedulerUeInfoQos
      * \param params parameters
      * \return NrMacSchedulerUeInfo instance
      */
     std::shared_ptr<NrMacSchedulerUeInfo> CreateUeRepresentation(
         const NrMacCschedSapProvider::CschedUeConfigReqParameters& params) const override;
-
+    
     /**
-     * \brief Return the comparison function to sort DL UEs according to the scheduler policy
-     * \return A pointer to NrMacSchedulerUeInfoAi::CompareUeWeightsDl if the AI model is activated,
-     * otherwise, a pointer to NrMacSchedulerUeInfoQos::CompareUeWeightsDl
+     * \brief Provide the comparison function to order the UE when scheduling DL
+     * \return a function that should order two UEs based on their priority: if
+     * UE a is less than UE b, it will have an higher priority.
      */
     std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                        const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
     GetUeCompareDlFn() const override;
 
     /**
-     * \brief Return the comparison function to sort UL UEs according to the scheduler policy
-     * \return A pointer to NrMacSchedulerUeInfoAi::CompareUeWeightsUl if the AI model is activated,
-     * otherwise, a pointer to NrMacSchedulerUeInfoQos::CompareUeWeightsUl
+     * \brief Provide the comparison function to order the UE when scheduling UL
+     * \return a function that should order two UEs based on their priority: if
+     * UE a is less than UE b, it will have an higher priority.
      */
     std::function<bool(const NrMacSchedulerNs3::UePtrAndBufferReq& lhs,
                        const NrMacSchedulerNs3::UePtrAndBufferReq& rhs)>
     GetUeCompareUlFn() const override;
 
     /**
-     * \brief Set the notify callback function for downlink
-     * \param notifyCb The callback function to be set
+     * \brief Update the UE representation after a symbol (DL) has been assigned to it
+     * \param ue UE to which a symbol has been assigned
+     * \param assigned the amount of resources assigned
+     * \param totalAssigned the amount of total resources assigned until now
+     *
+     * After an UE is selected to be eligible for a symbol assignment, its representation
+     * should be updated. The subclasses, by implementing this method, update
+     * the representation by updating some custom values that reflect the assignment
+     * done. These values are the one that, hopefully, are checked by the
+     * comparison function returned by GetUeCompareDlFn().
      */
-    void SetNotifyCbDl(NrMacSchedulerUeInfoAi::NotifyCb notifyCb);
+    void AssignedDlResources(const UePtrAndBufferReq& ue,
+                             const FTResources& assigned,
+                             const FTResources& totalAssigned) const override;
 
     /**
-     * \brief Set the notify callback function for uplink
-     * \param notifyCb The callback function to be set
+     * \brief Update the UE representation after a symbol (DL) has been assigned to it
+     * \param ue UE to which a symbol has been assigned
+     * \param assigned the amount of resources assigned
+     * \param totalAssigned the amount of total resources assigned until now
+     *
+     * After an UE is selected to be eligible for a symbol assignment, its representation
+     * should be updated. The subclasses, by implementing this method, update
+     * the representation by updating some custom values that reflect the assignment
+     * done. These values are the one that, hopefully, are checked by the
+     * comparison function returned by GetUeCompareUelFn().
      */
-    void SetNotifyCbUl(NrMacSchedulerUeInfoAi::NotifyCb notifyCb);
+    void AssignedUlResources(const UePtrAndBufferReq& ue,
+                             const FTResources& assigned,
+                             const FTResources& totalAssigned) const override;
 
     /**
-     * \brief Get UE observations for downlink
-     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
-     * requests
-     * \return An Observation object representing the observations for all UEs
+     * \brief Update the UE representation after a symbol (DL) has been assigned to other UE
+     * \param ue UE to which a symbol has not been assigned
+     * \param notAssigned the amount of resources not assigned
+     * \param totalAssigned the amount of total resources assigned until now
      */
-    std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetUeObservationsDl(
-        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
+    void NotAssignedDlResources(const UePtrAndBufferReq& ue,
+                                const FTResources& notAssigned,
+                                const FTResources& totalAssigned) const override;
 
     /**
-     * \brief Get UE observations for uplink
-     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
-     * requests
-     * \return An Observation object representing the observations for all UEs
+     * \brief Update the UE representation after a symbol (UL) has been assigned to other UE
+     * \param ue UE to which a symbol has not been assigned
+     * \param notAssigned the amount of resources not assigned
+     * \param totalAssigned the amount of total resources assigned until now
      */
-    std::vector<NrMacSchedulerUeInfoAi::LcObservation> GetUeObservationsUl(
-        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
-
+    void NotAssignedUlResources(const UePtrAndBufferReq& ue,
+                                const FTResources& notAssigned,
+                                const FTResources& totalAssigned) const override;
+    
+    
+    typedef Callback<void, std::vector< std::vector<double>>, bool, float, std::string, const NrMacSchedulerOfdmaAI*>
+      NotifyCb;
+      
+    void SetNotifyCb(NotifyCb notifyCb);
+    
     /**
-     * \brief Check if the downlink game is over
-     * \return A boolean value indicating whether the downlink game is over (true) or not (false)
+     * \brief Get a UE observation
+     * \param ue UE to which a rgb has been assigned
      */
-    bool GetIsGameOverDl() const;
+    std::vector<std::vector<double>> GetObservation(std::vector<UePtrAndBufferReq>& ueVector) const;
 
-    /**
-     * \brief Check if the uplink game is over
-     * \return A boolean value indicating whether the downlink game is over (true) or not (false)
-     */
-    bool GetIsGameOverUl() const;
+    bool IsGameOver() const;
+    
+    float UpdateReward() const;
 
-    /**
-     * \brief Get rewards for downlink
-     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
-     * requests
-     * \return A float value representing the calculated rewards
-     */
-    float GetUeRewardsDl(const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
+    void CallNotifyFn(std::vector<UePtrAndBufferReq>& ueVector) const;
 
-    /**
-     * \brief Get rewards for uplink
-     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
-     * requests
-     * \return A float value representing the calculated rewards
-     */
-    float GetUeRewardsUl(const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
-
-    /**
-     * \brief Call the notify callback function in the OpenGymEnv class
-     * in the ns3-gym module for downlink
-     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
-     * requests
-     */
-    void CallNotifyDlFn(
-        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
-
-    /**
-     * \brief Call the notify callback function in the OpenGymEnv class
-     * in the ns3-gym module for uplink
-     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
-     * requests
-     */
-    void CallNotifyUlFn(
-        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const override;
-
-    /**
-     * \brief Update weights of all UEs for downlink
-     * \param ueWeights An unordered map where the key is the UE's RNTI (Radio Network Temporary
-     * Identifier) and the value is the UE's weights for all flows
-     * \param ueVector A vector
-     * containing pointers to active UEs and their corresponding buffer requests
-     */
-    void UpdateAllUeWeightsDl(
-        const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
-
-    /**
-     * \brief Update weights of all UEs for uplink
-     * \param ueWeights An unordered map where the key is the UE's RNTI (Radio Network Temporary
-     * Identifier) and the value is the UE's weights for all flows
-     * \param ueVector A vector
-     * containing pointers to active UEs and their corresponding buffer requests
-     */
-    void UpdateAllUeWeightsUl(
-        const NrMacSchedulerUeInfoAi::UeWeightsMap& ueWeights,
-        const std::vector<NrMacSchedulerNs3::UePtrAndBufferReq>& ueVector) const;
+    void UpdateAllUeWeightsDl(std::unordered_map<uint8_t, Weights>& ueWeights, std::vector<UePtrAndBufferReq>& ueVector);
 
   private:
-    float m_alpha{0.0};                            //!< PF Fairness index
-    NrMacSchedulerUeInfoAi::NotifyCb m_notifyCbDl; //!< Notify callback function for downlink
-    NrMacSchedulerUeInfoAi::NotifyCb m_notifyCbUl; //!< Notify callback function for uplink
+    double m_timeWindow{
+        99.0}; //!< Time window to calculate the throughput. Better to make it an attribute.
+    TracedValue<uint32_t> m_tracedValueSymPerBeam;
+    NotifyCb m_notifyCb;
+
 };
 } // namespace ns3
