@@ -22,7 +22,15 @@ struct pair_hash
 };
 
 typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
-typedef std::vector<std::vector<double>> Observation;
+
+typedef struct LcObservation
+{
+    uint16_t rnti;
+    uint8_t lcId;
+    uint8_t qci;
+    uint8_t priority;
+    uint16_t holDelay;
+};
 
 /**
  * \ingroup scheduler
@@ -101,14 +109,14 @@ class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
      * \param ue the UE
      * \return a vector of double with the current observation
      */
-    Observation GetDlObservation();
+    std::vector<LcObservation> GetDlObservation();
 
     /**
      * \brief Get the current observation for uplink
      * \param ue the UE
      * \return a vector of double with the current observation
      */
-    Observation GetUlObservation();
+    std::vector<LcObservation> GetUlObservation();
 
     /**
      * \brief Update the weights for downlink

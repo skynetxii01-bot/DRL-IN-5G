@@ -13,11 +13,11 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE("NrMacSchedulerUeInfoAi");
 
-Observation
+std::vector<LcObservation>
 NrMacSchedulerUeInfoAi::GetDlObservation()
 {
     NS_LOG_FUNCTION(this);
-    std::vector<std::vector<double>> observations;
+    std::vector<LcObservation> observations;
     for (const auto& ueLcg : m_dlLCG)
     {
         std::vector<uint8_t> ueActiveLCs = ueLcg.second->GetActiveLCIds();
@@ -26,13 +26,11 @@ NrMacSchedulerUeInfoAi::GetDlObservation()
         {
             std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
 
-            std::vector<double> lcObservation;
-            lcObservation.push_back(m_rnti);
-            lcObservation.push_back(ueLcg.first);
-            lcObservation.push_back(lcId);
-            lcObservation.push_back(LCPtr->m_qci);
-            lcObservation.push_back(LCPtr->m_priority);
-            lcObservation.push_back(LCPtr->m_rlcTransmissionQueueHolDelay);
+            LcObservation lcObservation = {m_rnti,
+                                           lcId,
+                                           LCPtr->m_qci,
+                                           LCPtr->m_priority,
+                                           LCPtr->m_rlcTransmissionQueueHolDelay};
 
             observations.push_back(lcObservation);
         }
@@ -40,11 +38,11 @@ NrMacSchedulerUeInfoAi::GetDlObservation()
     return observations;
 }
 
-Observation
+std::vector<LcObservation>
 NrMacSchedulerUeInfoAi::GetUlObservation()
 {
     NS_LOG_FUNCTION(this);
-    std::vector<std::vector<double>> observations;
+    std::vector<LcObservation> observations;
     for (const auto& ueLcg : m_ulLCG)
     {
         std::vector<uint8_t> ueActiveLCs = ueLcg.second->GetActiveLCIds();
@@ -53,13 +51,11 @@ NrMacSchedulerUeInfoAi::GetUlObservation()
         {
             std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
 
-            std::vector<double> lcObservation;
-            lcObservation.push_back(m_rnti);
-            lcObservation.push_back(ueLcg.first);
-            lcObservation.push_back(lcId);
-            lcObservation.push_back(LCPtr->m_qci);
-            lcObservation.push_back(LCPtr->m_priority);
-            lcObservation.push_back(LCPtr->m_rlcTransmissionQueueHolDelay);
+            LcObservation lcObservation = {m_rnti,
+                                           lcId,
+                                           LCPtr->m_qci,
+                                           LCPtr->m_priority,
+                                           LCPtr->m_rlcTransmissionQueueHolDelay};
 
             observations.push_back(lcObservation);
         }

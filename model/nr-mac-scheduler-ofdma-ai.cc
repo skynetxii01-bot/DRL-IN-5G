@@ -104,29 +104,29 @@ NrMacSchedulerOfdmaAi::SetNotifyCb(NotifyCb notifyCb)
     m_notifyCb = notifyCb;
 }
 
-Observation
+std::vector<LcObservation>
 NrMacSchedulerOfdmaAi::GetUeObservationsDl(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
-    Observation observations;
+    std::vector<LcObservation> observations;
     for (const auto& ue : ueVector)
     {
         auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
-        Observation ueObservation = uePtr->GetDlObservation();
+        std::vector<LcObservation> ueObservation = uePtr->GetDlObservation();
         observations.insert(observations.end(), ueObservation.begin(), ueObservation.end());
     }
     return observations;
 }
 
-Observation
+std::vector<LcObservation>
 NrMacSchedulerOfdmaAi::GetUeObservationsUl(std::vector<UePtrAndBufferReq>& ueVector) const
 {
     NS_LOG_FUNCTION(this);
-    Observation observations;
+    std::vector<LcObservation> observations;
     for (const auto& ue : ueVector)
     {
         auto uePtr = std::dynamic_pointer_cast<NrMacSchedulerUeInfoAi>(ue.first);
-        Observation ueObservation = uePtr->GetUlObservation();
+        std::vector<LcObservation> ueObservation = uePtr->GetUlObservation();
         observations.insert(observations.end(), ueObservation.begin(), ueObservation.end());
     }
     return observations;

@@ -129,7 +129,12 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * - A string value representing extra information
      * - A pointer to a const NrMacSchedulerOfdmaAi instance
      */
-    typedef Callback<void, Observation, bool, float, std::string, const NrMacSchedulerOfdmaAi*>
+    typedef Callback<void,
+                     std::vector<LcObservation>,
+                     bool,
+                     float,
+                     std::string,
+                     const NrMacSchedulerOfdmaAi*>
         NotifyCb;
     /**
      * \brief Set the notify callback function.
@@ -142,14 +147,14 @@ class NrMacSchedulerOfdmaAi : public NrMacSchedulerOfdmaQos
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests \return An Observation object representing the observations for all UEs
      */
-    Observation GetUeObservationsDl(std::vector<UePtrAndBufferReq>& ueVector) const;
+    std::vector<LcObservation> GetUeObservationsDl(std::vector<UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Get UE observations for uplink
      * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
      * requests \return An Observation object representing the observations for all UEs
      */
-    Observation GetUeObservationsUl(std::vector<UePtrAndBufferReq>& ueVector) const;
+    std::vector<LcObservation> GetUeObservationsUl(std::vector<UePtrAndBufferReq>& ueVector) const;
 
     /**
      * \brief Check if the downlink game is over
