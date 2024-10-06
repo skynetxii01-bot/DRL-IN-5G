@@ -41,9 +41,6 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaRR
     }
 
   protected:
-    BeamSymbolMap AssignDLRBG(uint32_t symAvail, const ActiveUeMap& activeDl) const override;
-    BeamSymbolMap AssignULRBG(uint32_t symAvail, const ActiveUeMap& activeUl) const override;
-
     /**
      * \brief Create an UE representation of the type NrMacSchedulerUeInfoQos
      * \param params parameters
@@ -122,27 +119,97 @@ class NrMacSchedulerOfdmaAI : public NrMacSchedulerOfdmaRR
                                 const FTResources& notAssigned,
                                 const FTResources& totalAssigned) const override;
     
-    
-    typedef Callback<void, std::vector< std::vector<double>>, bool, float, std::string, const NrMacSchedulerOfdmaAI*>
+    /**
+     * \typedef NotifyCb
+     * \brief A callback type for notifying with specific parameters.
+     * 
+     * This callback takes the following parameters:
+     * - An Observation object representing the observations
+     * - A boolean value indicating whether the game is over (true) or not (false)
+     * - A float value representing the reward
+     * - A string value representing extra information
+     * - A pointer to a const NrMacSchedulerOfdmaAI instance
+     */
+    typedef Callback<void, Observation, bool, float, std::string, const NrMacSchedulerOfdmaAI*>
       NotifyCb;
-      
+    /**
+     * \brief Set the notify callback function.
+     * \param notifyCb The callback function to be set
+     */  
     void SetNotifyCb(NotifyCb notifyCb);
     
     /**
-     * \brief Get a UE observation
-     * \param ue UE to which a rgb has been assigned
+     * \brief Get UE observations for downlink
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     * \return An Observation object representing the observations for all UEs
      */
-    std::vector<std::vector<double>> GetObservation(std::vector<UePtrAndBufferReq>& ueVector) const;
+    Observation GetUeObservationsDl(std::vector<UePtrAndBufferReq>& ueVector) const;
 
-    bool IsGameOver() const;
+    /**
+     * \brief Get UE observations for uplink
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     * \return An Observation object representing the observations for all UEs 
+     */
+    Observation GetUeObservationsUl(std::vector<UePtrAndBufferReq>& ueVector) const;
+
+    /**
+     * \brief Check if the downlink game is over
+     * \return A boolean value indicating whether the downlink game is over (true) or not (false)
+     */
+    bool GetIsGameOverDl() const;
+
+    /**
+     * \brief Check if the uplink game is over
+     * \return A boolean value indicating whether the downlink game is over (true) or not (false)
+     */
+    bool GetIsGameOverUl() const;
     
-    float UpdateReward() const;
+    /**
+     * \brief Get rewards for downlink
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     * \return A float value representing the calculated rewards
+     */
+    float GetUeRewardsDl(std::vector<UePtrAndBufferReq>& ueVector) const;
 
-    void CallNotifyFn(std::vector<UePtrAndBufferReq>& ueVector) const;
+    /**
+     * \brief Get rewards for uplink
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     * \return A float value representing the calculated rewards
+     */
+    float GetUeRewardsUl(std::vector<UePtrAndBufferReq>& ueVector) const;
 
+    /**
+     * \brief Call the notify callback function in the OpenGymEnv class
+     * in the ns3-gym module for downlink
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     */
+    void CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const;
+
+    /**
+     * \brief Call the notify callback function in the OpenGymEnv class
+     * in the ns3-gym module for uplink
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     */
+    void CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const;
+
+    /**
+     * \brief Update weights of all UE for downlink
+     * \param ueWeights An unordered map where the key is the UE's RNTI (Radio Network Temporary Identifier) 
+     * and the value is the UE's weights for all flows
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     */
     void UpdateAllUeWeightsDl(std::unordered_map<uint8_t, Weights>& ueWeights, std::vector<UePtrAndBufferReq>& ueVector);
 
+    /**
+     * \brief Update weights of all UE for uplink
+     * \param ueWeights An unordered map where the key is the UE's RNTI (Radio Network Temporary Identifier)
+     * and the value is the UE's weights for all flows
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     */
+    void UpdateAllUeWeightsUl(std::unordered_map<uint8_t, Weights>& ueWeights, std::vector<UePtrAndBufferReq>& ueVector);
+
   private:
+    float m_alpha{0.0}; //!< PF Fairness index
     double m_timeWindow{
         99.0}; //!< Time window to calculate the throughput. Better to make it an attribute.
     TracedValue<uint32_t> m_tracedValueSymPerBeam;
