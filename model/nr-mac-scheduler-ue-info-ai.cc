@@ -11,76 +11,76 @@
 namespace ns3
 {
 
-NS_LOG_COMPONENT_DEFINE("NrMacSchedulerUeInfoAI");
+NS_LOG_COMPONENT_DEFINE("NrMacSchedulerUeInfoAi");
 
 Observation
-NrMacSchedulerUeInfoAI::GetDlObservation()
+NrMacSchedulerUeInfoAi::GetDlObservation()
 {
     NS_LOG_FUNCTION(this);
     std::vector<std::vector<double>> observations;
     for (const auto& ueLcg : m_dlLCG)
+    {
+        std::vector<uint8_t> ueActiveLCs = ueLcg.second->GetActiveLCIds();
+
+        for (const auto lcId : ueActiveLCs)
         {
-            std::vector<uint8_t> ueActiveLCs = ueLcg.second->GetActiveLCIds();
+            std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
 
-            for (const auto lcId : ueActiveLCs)
-            {
-                std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
+            std::vector<double> lcObservation;
+            lcObservation.push_back(m_rnti);
+            lcObservation.push_back(ueLcg.first);
+            lcObservation.push_back(lcId);
+            lcObservation.push_back(LCPtr->m_qci);
+            lcObservation.push_back(LCPtr->m_priority);
+            lcObservation.push_back(LCPtr->m_rlcTransmissionQueueHolDelay);
 
-                std::vector<double> lcObservation;
-                lcObservation.push_back(m_rnti);
-                lcObservation.push_back(ueLcg.first);
-                lcObservation.push_back(lcId);
-                lcObservation.push_back(LCPtr->m_qci);
-                lcObservation.push_back(LCPtr->m_priority);
-                lcObservation.push_back(LCPtr->m_rlcTransmissionQueueHolDelay);
-
-                observations.push_back(lcObservation);
-            }
+            observations.push_back(lcObservation);
         }
+    }
     return observations;
 }
 
 Observation
-NrMacSchedulerUeInfoAI::GetUlObservation()
+NrMacSchedulerUeInfoAi::GetUlObservation()
 {
     NS_LOG_FUNCTION(this);
     std::vector<std::vector<double>> observations;
     for (const auto& ueLcg : m_ulLCG)
+    {
+        std::vector<uint8_t> ueActiveLCs = ueLcg.second->GetActiveLCIds();
+
+        for (const auto lcId : ueActiveLCs)
         {
-            std::vector<uint8_t> ueActiveLCs = ueLcg.second->GetActiveLCIds();
+            std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
 
-            for (const auto lcId : ueActiveLCs)
-            {
-                std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
+            std::vector<double> lcObservation;
+            lcObservation.push_back(m_rnti);
+            lcObservation.push_back(ueLcg.first);
+            lcObservation.push_back(lcId);
+            lcObservation.push_back(LCPtr->m_qci);
+            lcObservation.push_back(LCPtr->m_priority);
+            lcObservation.push_back(LCPtr->m_rlcTransmissionQueueHolDelay);
 
-                std::vector<double> lcObservation;
-                lcObservation.push_back(m_rnti);
-                lcObservation.push_back(ueLcg.first);
-                lcObservation.push_back(lcId);
-                lcObservation.push_back(LCPtr->m_qci);
-                lcObservation.push_back(LCPtr->m_priority);
-                lcObservation.push_back(LCPtr->m_rlcTransmissionQueueHolDelay);
-
-                observations.push_back(lcObservation);
-            }
+            observations.push_back(lcObservation);
         }
+    }
     return observations;
 }
 
 void
-NrMacSchedulerUeInfoAI::UpdateDlWeights(Weights& weights)
+NrMacSchedulerUeInfoAi::UpdateDlWeights(Weights& weights)
 {
-  m_weightsDl = weights;
+    m_weightsDl = weights;
 }
 
 void
-NrMacSchedulerUeInfoAI::UpdateUlWeights(Weights& weights)
+NrMacSchedulerUeInfoAi::UpdateUlWeights(Weights& weights)
 {
-  m_weightsUl = weights;
+    m_weightsUl = weights;
 }
 
 float
-NrMacSchedulerUeInfoAI::GetDlReward()
+NrMacSchedulerUeInfoAi::GetDlReward()
 {
     float reward = 0.0;
     for (const auto& ueLcg : m_dlLCG)
@@ -91,9 +91,8 @@ NrMacSchedulerUeInfoAI::GetDlReward()
         {
             std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
             reward += std::pow(m_potentialTputDl, m_alpha) /
-                      (std::max(1E-9, m_avgTputDl) *
-                      LCPtr->m_priority * 
-                      LCPtr->m_rlcTransmissionQueueHolDelay);
+                      (std::max(1E-9, m_avgTputDl) * LCPtr->m_priority *
+                       LCPtr->m_rlcTransmissionQueueHolDelay);
         }
     }
 
@@ -101,7 +100,7 @@ NrMacSchedulerUeInfoAI::GetDlReward()
 }
 
 float
-NrMacSchedulerUeInfoAI::GetUlReward()
+NrMacSchedulerUeInfoAi::GetUlReward()
 {
     float reward = 0.0;
     for (const auto& ueLcg : m_ulLCG)
@@ -112,9 +111,8 @@ NrMacSchedulerUeInfoAI::GetUlReward()
         {
             std::unique_ptr<NrMacSchedulerLC>& LCPtr = ueLcg.second->GetLC(lcId);
             reward += std::pow(m_potentialTputUl, m_alpha) /
-                      (std::max(1E-9, m_avgTputUl) *
-                      LCPtr->m_priority * 
-                      LCPtr->m_rlcTransmissionQueueHolDelay);
+                      (std::max(1E-9, m_avgTputUl) * LCPtr->m_priority *
+                       LCPtr->m_rlcTransmissionQueueHolDelay);
         }
     }
 
@@ -122,7 +120,7 @@ NrMacSchedulerUeInfoAI::GetUlReward()
 }
 
 void
-NrMacSchedulerUeInfoAI::UpdateDlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
+NrMacSchedulerUeInfoAi::UpdateDlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                                          double timeWindow,
                                          const Ptr<const NrAmc>& amc)
 {
@@ -131,7 +129,7 @@ NrMacSchedulerUeInfoAI::UpdateDlAIMetric(const NrMacSchedulerNs3::FTResources& t
 }
 
 void
-NrMacSchedulerUeInfoAI::UpdateUlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
+NrMacSchedulerUeInfoAi::UpdateUlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                                          double timeWindow,
                                          const Ptr<const NrAmc>& amc)
 {

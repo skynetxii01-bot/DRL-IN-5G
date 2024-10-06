@@ -10,32 +10,34 @@
 
 namespace ns3
 {
-  struct pair_hash {
+struct pair_hash
+{
     template <class T1, class T2>
-    std::size_t operator()(const std::pair<T1, T2>& p) const {
-      auto hash1 = std::hash<T1>{}(p.first);
-      auto hash2 = std::hash<T2>{}(p.second);
-      return hash1 ^ (hash2 << 1); // 비트 시프트와 XOR을 사용하여 두 해시 값을 결합
+    std::size_t operator()(const std::pair<T1, T2>& p) const
+    {
+        auto hash1 = std::hash<T1>{}(p.first);
+        auto hash2 = std::hash<T2>{}(p.second);
+        return hash1 ^ (hash2 << 1); // 비트 시프트와 XOR을 사용하여 두 해시 값을 결합
     }
-  };
+};
 
-  typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
-  typedef std::vector<std::vector<double>> Observation;
+typedef std::unordered_map<std::pair<uint8_t, uint8_t>, double, pair_hash> Weights;
+typedef std::vector<std::vector<double>> Observation;
 
 /**
  * \ingroup scheduler
  * \brief UE representation of a scheduler with AI implementation
  */
-class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
+class NrMacSchedulerUeInfoAi : public NrMacSchedulerUeInfoQos
 {
   public:
     /**
-     * \brief NrMacSchedulerUeInfoAI constructor
+     * \brief NrMacSchedulerUeInfoAi constructor
      * \param rnti RNTI of the UE
      * \param beamId BeamId of the UE
      * \param fn A function that tells how many RB per RBG
      */
-    NrMacSchedulerUeInfoAI(float alpha, uint16_t rnti, BeamId beamId, const GetRbPerRbgFn& fn)
+    NrMacSchedulerUeInfoAi(float alpha, uint16_t rnti, BeamId beamId, const GetRbPerRbgFn& fn)
         : NrMacSchedulerUeInfoQos(alpha, rnti, beamId, fn)
     {
     }
@@ -46,7 +48,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * Set the last average throughput to the current average throughput,
      * and zeroes the average throughput as well as the current throughput.
      *
-     * It calls also NrMacSchedulerUeInfoAI::ResetDlSchedInfo.
+     * It calls also NrMacSchedulerUeInfoAi::ResetDlSchedInfo.
      */
     void ResetDlSchedInfo() override
     {
@@ -64,7 +66,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * Set the last average throughput to the current average throughput,
      * and zeroes the average throughput as well as the current throughput.
      *
-     * It also calls NrMacSchedulerUeInfoAI::ResetUlSchedInfo.
+     * It also calls NrMacSchedulerUeInfoAi::ResetUlSchedInfo.
      */
     void ResetUlSchedInfo() override
     {
@@ -94,11 +96,11 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
         m_avgTputUl = m_lastAvgTputUl;
     }
 
-    /** 
+    /**
      * \brief Get the current observation for downlink
      * \param ue the UE
      * \return a vector of double with the current observation
-    */
+     */
     Observation GetDlObservation();
 
     /**
@@ -107,7 +109,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * \return a vector of double with the current observation
      */
     Observation GetUlObservation();
-    
+
     /**
      * \brief Update the weights for downlink
      * \param weights the weights assigned to the UEs
@@ -148,7 +150,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * the assigned resources (in form of TBS) and the time window.
      * It gets the tbSize by calling NrMacSchedulerUeInfo::UpdateDlMetric.
      */
-    void UpdateDlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
+    void UpdateDlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                           double timeWindow,
                           const Ptr<const NrAmc>& amc);
 
@@ -162,10 +164,9 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
      * the assigned resources (in form of TBS) and the time window.
      * It gets the tbSize by calling NrMacSchedulerUeInfo::UpdateUlMetric.
      */
-    void UpdateUlAIMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
+    void UpdateUlAiMetric(const NrMacSchedulerNs3::FTResources& totAssigned,
                           double timeWindow,
                           const Ptr<const NrAmc>& amc);
-
 
     /**
      * \brief comparison function object (i.e. an object that satisfies the
@@ -180,13 +181,13 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
     static bool CompareUeWeightsDl(const NrMacSchedulerNs3::UePtrAndBufferReq& lue,
                                    const NrMacSchedulerNs3::UePtrAndBufferReq& rue)
     {
-        double lAIMetric = CalculateDlWeight(lue);
-        double rAIMetric = CalculateDlWeight(rue);
+        double lAiMetric = CalculateDlWeight(lue);
+        double rAiMetric = CalculateDlWeight(rue);
 
-        NS_ASSERT_MSG(lAIMetric > 0, "Weight must be greater than zero");
-        NS_ASSERT_MSG(rAIMetric > 0, "Weight must be greater than zero");
+        NS_ASSERT_MSG(lAiMetric > 0, "Weight must be greater than zero");
+        NS_ASSERT_MSG(rAiMetric > 0, "Weight must be greater than zero");
 
-        return (lAIMetric > rAIMetric);
+        return (lAiMetric > rAiMetric);
     }
 
     /**
@@ -197,7 +198,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
     static double CalculateDlWeight(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
     {
         double weight = 0;
-        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAI*>(ue.first.get());
+        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAi*>(ue.first.get());
 
         for (const auto& ueLcg : ue.first->m_dlLCG)
         {
@@ -210,7 +211,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
 
                 NS_ASSERT_MSG(it != uePtr->m_weightsDl.end(), "Weight not found");
                 weight += it->second;
-                
+
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
             }
         }
@@ -231,10 +232,10 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
     static bool CompareUeWeightsUl(const NrMacSchedulerNs3::UePtrAndBufferReq& lue,
                                    const NrMacSchedulerNs3::UePtrAndBufferReq& rue)
     {
-        double lAIMetric = CalculateUlWeight(lue);
-        double rAIMetric = CalculateUlWeight(rue);
+        double lAiMetric = CalculateUlWeight(lue);
+        double rAiMetric = CalculateUlWeight(rue);
 
-        return (lAIMetric > rAIMetric);
+        return (lAiMetric > rAiMetric);
     }
 
     /**
@@ -245,7 +246,7 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
     static double CalculateUlWeight(const NrMacSchedulerNs3::UePtrAndBufferReq& ue)
     {
         double weight = 0;
-        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAI*>(ue.first.get());
+        auto uePtr = dynamic_cast<NrMacSchedulerUeInfoAi*>(ue.first.get());
 
         for (const auto& ueLcg : ue.first->m_ulLCG)
         {
@@ -258,15 +259,15 @@ class NrMacSchedulerUeInfoAI : public NrMacSchedulerUeInfoQos
 
                 NS_ASSERT_MSG(it != uePtr->m_weightsUl.end(), "Weight not found");
                 weight += it->second;
-                
+
                 NS_ASSERT_MSG(weight > 0, "Weight must be greater than zero");
             }
         }
         return weight;
     }
 
-    Weights m_weightsDl;           //!< Weights assigned to the UEs in downlink
-    Weights m_weightsUl;           //!< Weights assigned to the UEs in uplink
+    Weights m_weightsDl; //!< Weights assigned to the UEs in downlink
+    Weights m_weightsUl; //!< Weights assigned to the UEs in uplink
 };
 
 } // namespace ns3

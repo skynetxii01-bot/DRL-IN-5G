@@ -213,14 +213,16 @@ class NrMacSchedulerTdma : public NrMacSchedulerNs3
     /**
      * \brief Call the notify callback function in the OpenGymEnv class
      * in the ns3-gym module for downlink
-     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
+     * requests
      */
     virtual void CallNotifyDlFn(std::vector<UePtrAndBufferReq>& ueVector) const = 0;
 
     /**
      * \brief Call the notify callback function in the OpenGymEnv class
      * in the ns3-gym module for uplink
-     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer requests
+     * \param ueVector A vector containing pointers to active UEs and their corresponding buffer
+     * requests
      */
     virtual void CallNotifyUlFn(std::vector<UePtrAndBufferReq>& ueVector) const = 0;
 
@@ -256,18 +258,17 @@ class NrMacSchedulerTdma : public NrMacSchedulerNs3
         CompareUeFn;
     typedef std::function<CompareUeFn()> GetCompareUeFn;
 
-    BeamSymbolMap AssignRBGTDMA(
-        uint32_t symAvail,
-        const ActiveUeMap& activeUe,
-        const std::string& type,
-        const BeforeSchedFn& BeforeSchedFn,
-        const GetCompareUeFn& GetCompareFn,
-        const GetTBSFn& GetTBSFn,
-        const GetRBGFn& GetRBGFn,
-        const GetSymFn& GetSymFn,
-        const AfterSuccessfulAssignmentFn& SuccessfulAssignmentFn,
-        const AfterUnsuccessfulAssignmentFn& UnSuccessfulAssignmentFn,
-        const CallNotifyFn& callNotifyFn) const;
+    BeamSymbolMap AssignRBGTDMA(uint32_t symAvail,
+                                const ActiveUeMap& activeUe,
+                                const std::string& type,
+                                const BeforeSchedFn& BeforeSchedFn,
+                                const GetCompareUeFn& GetCompareFn,
+                                const GetTBSFn& GetTBSFn,
+                                const GetRBGFn& GetRBGFn,
+                                const GetSymFn& GetSymFn,
+                                const AfterSuccessfulAssignmentFn& SuccessfulAssignmentFn,
+                                const AfterUnsuccessfulAssignmentFn& UnSuccessfulAssignmentFn,
+                                const CallNotifyFn& callNotifyFn) const;
 
     std::shared_ptr<DciInfoElementTdma> CreateDci(
         PointInFTPlane* spoint,
