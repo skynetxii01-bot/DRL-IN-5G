@@ -235,6 +235,7 @@ set(source_files
     utils/traffic-generators/model/traffic-generator.cc
     utils/wraparound-model/hexagonal-wraparound-model.cc
     utils/wraparound-three-gpp-spectrum-propagation-loss-model.cc
+    ${opengym_sources}
 )
 
 set(header_files
@@ -450,6 +451,7 @@ set(header_files
     utils/traffic-generators/model/traffic-generator.h
     utils/wraparound-model/hexagonal-wraparound-model.h
     utils/wraparound-three-gpp-spectrum-propagation-loss-model.h
+    ${opengym_headers}
 )
 
 set(test_sources
@@ -511,6 +513,7 @@ set(test_sources
     test/ul-scheduling-test.cc
     utils/traffic-generators/test/traffic-generator-test.cc
     utils/wraparound-model/wraparound-model-test.cc
+    ${opengym_tests}
     # cmake-format: off
     # todo:
     # test/nr-test-x2-handover.cc               \
