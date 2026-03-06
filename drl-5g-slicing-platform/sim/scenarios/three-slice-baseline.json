@@ -1,0 +1,18 @@
+{
+  "name": "three-slice-baseline",
+  "duration_s": 20,
+  "agent": "dqn",
+  "slice_targets": {
+    "embb": {
+      "throughput_mbps": 50,
+      "latency_ms": 20
+    },
+    "urllc": {
+      "throughput_mbps": 10,
+      "latency_ms": 5
+    },
+    "mmtc": {
+      "devices": 200
+    }
+  }
+}
