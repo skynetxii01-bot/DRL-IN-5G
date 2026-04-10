@@ -1,0 +1,6 @@
+gym==0.26.2
+numpy>=1.24
+pyyaml>=6.0
+torch>=2.0
+matplotlib>=3.7
+ns3gym
