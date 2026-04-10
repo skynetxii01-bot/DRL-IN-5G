@@ -1,0 +1,29 @@
+env:
+  max_thr_mbps:
+    eMBB: 100.0
+    URLLC: 10.0
+    mMTC: 2.0
+  min_thr_mbps:
+    eMBB: 10.0
+    URLLC: 1.0
+    mMTC: 0.1
+  max_lat_ms:
+    eMBB: 50.0
+    URLLC: 1.0
+    mMTC: 500.0
+
+train:
+  episodes: 500
+  max_steps: 1000
+  save_every: 100
+
+dqn:
+  lr: 0.001
+  gamma: 0.99
+  batch_size: 64
+  buffer_size: 50000
+  tau: 0.005
+  eps_start: 1.0
+  eps_end: 0.01
+  eps_decay_steps: 20000
+  grad_clip: 10.0
