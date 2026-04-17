@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - NS3_ROOT=${NS3_ROOT:-/opt/ns3/ns-3.45}
+      - SIM_TIMEOUT_S=${SIM_TIMEOUT_S:-300}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./sim:/app/sim:ro
+
+  frontend:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
